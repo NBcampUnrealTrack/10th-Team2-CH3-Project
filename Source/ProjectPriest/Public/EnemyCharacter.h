@@ -7,6 +7,7 @@
 #include "EnemyCharacter.generated.h"
 
 class APlayerCharacter;
+class USphereComponent;
 
 UCLASS()
 class PROJECTPRIEST_API AEnemyCharacter : public ACharacter
@@ -16,7 +17,13 @@ class PROJECTPRIEST_API AEnemyCharacter : public ACharacter
 public:
 	AEnemyCharacter();
 
+
 protected:
+
+	//스피어 컴퍼넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USphereComponent* SphereComponent;
+
 	//몬스터 체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")
 	float Health;

@@ -14,4 +14,11 @@ class PROJECTPRIEST_API ARangedEnemyCharacter : public AEnemyCharacter
 {
 	GENERATED_BODY()
 	
+public:
+	ARangedEnemyCharacter();
+
+protected:
+	//몬스터 공격
+	virtual void Attack(ACharacter* PlayerCharacter) override;
+
 };

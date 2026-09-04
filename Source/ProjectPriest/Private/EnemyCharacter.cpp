@@ -4,11 +4,17 @@
 #include "EnemyCharacter.h"
 //추후 플레이어 캐릭터 인클루드  
 //#include "PlayerCharacter.h"
+#include "MonsterAIController.h"
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
+
+	//AI 컨트롤러 class 설정
+	AIControllerClass = AMonsterAIController::StaticClass();
+	//생성시 AI Possess 설정
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	//스탯 초기화
 	Health = 100.0f;

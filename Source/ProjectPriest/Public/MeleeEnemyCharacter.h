@@ -13,5 +13,13 @@ UCLASS()
 class PROJECTPRIEST_API AMeleeEnemyCharacter : public AEnemyCharacter
 {
 	GENERATED_BODY()
-	
+
+public:
+	AMeleeEnemyCharacter();
+
+protected:
+	//몬스터 공격
+	virtual void Attack(ACharacter* PlayerCharacter) override;
+
+
 };
