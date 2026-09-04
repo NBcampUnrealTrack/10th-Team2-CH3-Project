@@ -19,6 +19,9 @@ public:
 	UInputMappingContext* InputMappingContext;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* FireAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* ThrowAction;
+
 
 protected:
 	virtual void BeginPlay();
