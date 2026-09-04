@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "EnemyCharacter.generated.h"
 
+class APlayerCharacter;
+
 UCLASS()
 class PROJECTPRIEST_API AEnemyCharacter : public ACharacter
 {
@@ -14,38 +16,38 @@ class PROJECTPRIEST_API AEnemyCharacter : public ACharacter
 public:
 	AEnemyCharacter();
 
-	
-
 protected:
+	//몬스터 체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")
 	float Health;
+	//몬스터 공격력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")
 	float Damage;
 
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")
-	float Defense;*/
+	//몬스터 최소 피해량
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	float MinimumDamage = 0.0f;
 
+	//몬스터 방어력
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")
+	float Defense;
 
+	//몬스터 공격
 	UFUNCTION(BlueprintCallable)
-	virtual void Attack();
+	virtual void Attack(ACharacter* PlayerCharacter);
 
+	//몬스터 피격
 	UFUNCTION(BlueprintCallable)
 	virtual void TakeDamage(float DamageAmount);
 	
+	//몬스터 사망
 	UFUNCTION(BlueprintCallable)
 	virtual void Die();
 
-
-
-	virtual void Destroyed() override;
 
 	virtual void BeginPlay() override;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 };
