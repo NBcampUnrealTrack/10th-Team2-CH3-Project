@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "State.h"
-#include "ClearState.h"
+#include "ClearState.generated.h"
 
 UCLASS()
-class PROJECTPRIEST_API ClearState : public UState
+class PROJECTPRIEST_API UClearState : public UState
 {
     GENERATED_BODY()
 public:

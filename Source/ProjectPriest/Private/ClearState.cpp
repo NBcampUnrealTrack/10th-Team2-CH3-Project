@@ -1,13 +1,13 @@
-#include "ClearState.h"
+﻿#include "ClearState.h"
 
-void ClearState::OnEnter()
+void UClearState::OnEnter()
 {
 }
 
-void ClearState::OnTick(float DeltaSeconds)
+void UClearState::OnTick(float DeltaSeconds)
 {
 }
 
-void ClearState::OnExit()
+void UClearState::OnExit()
 {
 }

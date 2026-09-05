@@ -1,4 +1,4 @@
-#include "State.h"
+﻿#include "State.h"
 #include "../../JUtility.h"
 
 void UState::OnEnter()
@@ -20,7 +20,7 @@ const FString& UState::GetDisplayName() const
     return DisplayName;
 }
 
-void UState::SetDisplayName(const FString& DisplayName)
+void UState::SetDisplayName(const FString& NewDisplayName)
 {
-    this->DisplayName = DisplayName;
+    DisplayName = NewDisplayName;
 }

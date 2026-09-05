@@ -1,10 +1,10 @@
-#include "PlayState.h"
+﻿#include "PlayState.h"
 
 void UPlayState::OnEnter()
 {
 }
 
-void UPlayState::OnTick(int DeltaSeconds)
+void UPlayState::OnTick(float DeltaSeconds)
 {
 }
 

@@ -1,4 +1,4 @@
-#include "IngameGameMode.h"
+ï»¿#include "IngameGameMode.h"
 #include "IngameGameState.h"
 #include "../../JUtility.h"
 
@@ -14,7 +14,7 @@ void AIngameGameMode::BeginPlay()
 
 void AIngameGameMode::OnPlayerDead()
 {
-    JError("ÇÃ·¹ÀÌ¾î »ç¸Á È­¸éÀ» ±¸ÇöÇÏ¼¼¿ä");
+    JError("í”Œë ˆì´ì–´ ì‚¬ë§ í™”ë©´ì„ êµ¬í˜„í•˜ì„¸ìš”");
 }
 
 void AIngameGameMode::OnOpenBossRoomDoor()
@@ -25,5 +25,5 @@ void AIngameGameMode::OnOpenBossRoomDoor()
     float NowTime = GetWorld()->GetTimeSeconds();
     float ElapsedTime = NowTime - StartTime;
 
-    JError("Å¬¸®¾î È­¸éÀ» ±¸ÇöÇÏ¼¼¿ä Å¬¸®¾î ½Ã°£Àº %f", ElapsedTime);
+    JError("í´ë¦¬ì–´ í™”ë©´ì„ êµ¬í˜„í•˜ì„¸ìš” í´ë¦¬ì–´ ì‹œê°„ì€ %f", ElapsedTime);
 }

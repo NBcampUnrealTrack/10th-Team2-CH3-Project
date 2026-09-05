@@ -20,7 +20,6 @@ if(GEngine) { \
     GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, FString::Printf(TEXT(Format), ##__VA_ARGS__)); \
 }
  
-
 #define JASSERT(Condition, Format, ...) \
 if(!(Condition)) { \
     JError(Format, ##__VA_ARGS__); \
