@@ -1,7 +1,7 @@
-#pragma once
+Ôªø#pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameStateBase.h" // FIX: ø√πŸ∏• «Ï¥ı ∆˜«‘
+#include "GameFramework/GameStateBase.h" // FIX: Ïò¨Î∞îÎ•∏ Ìó§Îçî Ìè¨Ìï®
 
 class PROJECTPRIEST_API AIngameGameState : public AGameStateBase
 {
@@ -12,8 +12,8 @@ public:
     float GetStartTime();
     float GetElapsedTime();
 
-    float SetStartTime(float StartTime);
-    float SetElapsedTime(float ElapsedTime);
+    void SetStartTime(float NewStartTime);
+    void SetElapsedTime(float NewElapsedTime);
 
 protected:
     float StartTime;

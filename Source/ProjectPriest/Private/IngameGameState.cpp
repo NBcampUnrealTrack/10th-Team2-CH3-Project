@@ -1,4 +1,4 @@
-#include "IngameGameState.h"
+﻿#include "IngameGameState.h"
 
 AIngameGameState::AIngameGameState()
 {
@@ -17,12 +17,12 @@ float AIngameGameState::GetElapsedTime()
     return ElapsedTime;
 }
 
-float AIngameGameState::SetStartTime(float StartTime)
+void AIngameGameState::SetStartTime(float NewStartTime)
 {
-    StartTime = StartTime;
+    StartTime = NewStartTime;
 }
 
-float AIngameGameState::SetElapsedTime(float ElapsedTime)
+void AIngameGameState::SetElapsedTime(float NewElapsedTime)
 {
-    ElapsedTime = ElapsedTime;
+    ElapsedTime = NewElapsedTime;
 }       
