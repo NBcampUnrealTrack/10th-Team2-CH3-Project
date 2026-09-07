@@ -1,10 +1,10 @@
-#include "PlayerCharacter.h"
+ï»¿#include "PlayerCharacter.h"
 #include "IngamePlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
-#include "IngamePlayerController.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -98,7 +98,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     );
 
     EnhancedInput->BindAction(
-        PlayerController->GetLookAction(),
+        PlayerController->GetThrowAction(),
         ETriggerEvent::Started,
         this,
         &APlayerCharacter::OnThrowInputted
@@ -110,7 +110,7 @@ void APlayerCharacter::OnMoveInputted(const FInputActionInstance& InputValue)
     //GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Move"));
 
     FVector2D Input = InputValue.GetValue().Get<FVector2D>();
-    //TODO: CameraÀÇ Forward·Î ÇÒÁö ActorÀÇ FOrawrd·Î ÇÒÁö Å×½ºÆ®ÇØº¸°í Á¤ÇØ¾ßÇÔ
+    //TODO: Cameraì˜ Forwardë¡œ í• ì§€ Actorì˜ FOrawrdë¡œ í• ì§€ í…ŒìŠ¤íŠ¸í•´ë³´ê³  ì •í•´ì•¼í•¨
     FVector Forward = GetActorForwardVector();
     FVector Right = GetActorRightVector();
     FVector Direction = (Forward * Input.Y) + (Right * Input.X);
@@ -140,6 +140,39 @@ void APlayerCharacter::OnJumpInputted(const FInputActionInstance& InputValue)
 void APlayerCharacter::OnAttackInputted(const FInputActionValue& value)
 {
     //GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Attack"));
+
+    const FName SocketName = TEXT("gun_pinSocket");
+
+    if (!GetMesh()->DoesSocketExist(SocketName))
+    {
+        //UE_LOG(LogTemp, Warning, TEXT("ì´êµ¬ Socketì´ ì—†ìŠµë‹ˆë‹¤."));
+        return;
+    }
+
+    const FVector Start = GetMesh()->GetSocketLocation(SocketName);
+    const FVector Forward = GetMesh()->GetSocketRotation(SocketName).Vector();
+
+    const FVector End = Start + Forward * 10000.0f;
+
+    FHitResult Hit;
+
+    GetWorld()->LineTraceSingleByChannel(
+        Hit,
+        Start,
+        End,
+        ECC_Visibility
+    );
+
+    if (Hit.bBlockingHit)
+    {
+        UGameplayStatics::ApplyDamage(
+            Hit.GetActor(),
+            BaseDamage,
+            GetController(),
+            this,
+            UDamageType::StaticClass()
+        );
+    }
 }
 
 void APlayerCharacter::OnThrowInputted(const FInputActionValue& value)
