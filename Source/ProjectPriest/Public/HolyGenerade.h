@@ -27,7 +27,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "===Item===|Components")
 	USphereComponent* Collision;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Components")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Item===|Components")
 	USphereComponent* ExplosionCollision;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "===Item===|Components")
