@@ -1,6 +1,6 @@
 ﻿#include "IngameGameMode.h"
 #include "IngameGameState.h"
-#include "../../JUtility.h"
+#include "JUtility.h"
 
 void AIngameGameMode::BeginPlay()
 {
