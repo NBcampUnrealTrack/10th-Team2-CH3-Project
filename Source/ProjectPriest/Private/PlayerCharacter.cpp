@@ -1,4 +1,5 @@
 #include "PlayerCharacter.h"
+#include "IngamePlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "IngamePlayerController.h"
@@ -24,8 +25,23 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
-    
+
+    ChangeWalkingMode(EWalkingMode::Normal);
+}
+
+void APlayerCharacter::ChangeWalkingMode(EWalkingMode WalkingMode)
+{
+    //
+    FSpeedConfig* Config = MovementConfigMap.Find(WalkingMode);
+    if (nullptr == Config)
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("Map.Find Faield"));
+        return;
+    }
+
+    Mode = WalkingMode;
+    GetCharacterMovement()->MaxWalkSpeed = Config->Speed;
+    GetCharacterMovement()->MaxAcceleration = Config->Accel;
 }
 
 // Called every frame
@@ -49,35 +65,49 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         PlayerController->GetFireAction(),
         ETriggerEvent::Started,
         this,
-        &APlayerCharacter::Attack
+        &APlayerCharacter::OnAttackInputted
 
     );
 
     EnhancedInput->BindAction(
         PlayerController->GetMoveAction(),
+        ETriggerEvent::Triggered,
+        this,
+        &APlayerCharacter::OnMoveInputted
+    );
+
+    EnhancedInput->BindAction(
+        PlayerController->GetLookAction(),
+        ETriggerEvent::Triggered,
+        this,
+        &APlayerCharacter::OnLookInputted
+    );
+
+    EnhancedInput->BindAction(
+        PlayerController->GetSprintAction(),
         ETriggerEvent::Started,
         this,
-        &APlayerCharacter::Move
+        &APlayerCharacter::OnSprintInputted
+    );
+
+    EnhancedInput->BindAction(
+        PlayerController->GetJumpAction(),
+        ETriggerEvent::Triggered,
+        this,
+        &APlayerCharacter::OnJumpInputted
     );
 
     EnhancedInput->BindAction(
         PlayerController->GetLookAction(),
         ETriggerEvent::Started,
         this,
-        &APlayerCharacter::Look
-    );
-
-    EnhancedInput->BindAction(
-        PlayerController->GetLookAction(),
-        ETriggerEvent::Started,
-        this,
-        &APlayerCharacter::Throw
+        &APlayerCharacter::OnThrowInputted
     );
 }
 
-void APlayerCharacter::Move(const FInputActionInstance& InputValue)
+void APlayerCharacter::OnMoveInputted(const FInputActionInstance& InputValue)
 {
-    GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Move"));
+    //GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Move"));
 
     FVector2D Input = InputValue.GetValue().Get<FVector2D>();
     //TODO: Camera의 Forward로 할지 Actor의 FOrawrd로 할지 테스트해보고 정해야함
@@ -89,24 +119,45 @@ void APlayerCharacter::Move(const FInputActionInstance& InputValue)
     GetCharacterMovement()->AddInputVector(Direction);
 }
 
-void APlayerCharacter::Look(const FInputActionInstance& InputValue)
+void APlayerCharacter::OnLookInputted(const FInputActionInstance& InputValue)
 {
-    GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Look"));
+    //GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Look"));
 
     FVector2D Input = InputValue.GetValue().Get<FVector2d>();
-    Input.X = bShouldInvertX ? -Input.X : Input.X;
-    Input.Y = bShouldInvertY ? -Input.Y : Input.Y;
 
     AddControllerPitchInput(Input.Y * RotationSpeed);
     AddControllerYawInput(Input.X * RotationSpeed);
 }
 
-void APlayerCharacter::Attack(const FInputActionValue& value)
+void APlayerCharacter::OnJumpInputted(const FInputActionInstance& InputValue)
 {
-    GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Attack"));
+    if (CanJump())
+    {
+        Super::Jump();
+    }
 }
 
-void APlayerCharacter::Throw(const FInputActionValue& value)
+void APlayerCharacter::OnAttackInputted(const FInputActionValue& value)
 {
-    GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Throw"));
+    //GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Attack"));
+}
+
+void APlayerCharacter::OnThrowInputted(const FInputActionValue& value)
+{
+    //GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Throw"));
+}
+
+void APlayerCharacter::OnSprintInputted(const FInputActionInstance& InputValue)
+{
+    switch (Mode)
+    {
+    case EWalkingMode::Normal:
+        ChangeWalkingMode(EWalkingMode::Sprint);
+        break;
+    case EWalkingMode::Sprint:
+        ChangeWalkingMode(EWalkingMode::Normal);
+        break;
+    default:
+        break;
+    }
 }

@@ -35,7 +35,17 @@ TObjectPtr<UInputAction> AIngamePlayerController::GetFireAction()
     return FireAction;
 }
 
-TObjectPtr<UInputAction> AIngamePlayerController::GetThrowction()
+TObjectPtr<UInputAction> AIngamePlayerController::GetThrowAction()
 {
     return ThrowAction;
+}
+
+TObjectPtr<UInputAction> AIngamePlayerController::GetSprintAction()
+{
+    return SprintAction;
+}
+
+TObjectPtr<UInputAction> AIngamePlayerController::GetJumpAction()
+{
+    return JumpAction;
 }

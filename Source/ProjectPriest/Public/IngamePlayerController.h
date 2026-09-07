@@ -21,8 +21,9 @@ public:
     TObjectPtr<UInputAction> GetMoveAction();
     TObjectPtr<UInputAction> GetLookAction();
     TObjectPtr<UInputAction> GetFireAction();
-    TObjectPtr<UInputAction> GetThrowction();
-
+    TObjectPtr<UInputAction> GetThrowAction();
+    TObjectPtr<UInputAction> GetSprintAction();
+    TObjectPtr<UInputAction> GetJumpAction();
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Enhanced Inputs")
     UInputMappingContext* InputMappingContext;
@@ -32,6 +33,12 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Enhanced Inputs")
     TObjectPtr<UInputAction> LookAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Enhanced Inputs")
+    TObjectPtr<UInputAction> SprintAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Enhanced Inputs")
+    TObjectPtr<UInputAction> JumpAction;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Enhanced Inputs")
     TObjectPtr<UInputAction> FireAction;

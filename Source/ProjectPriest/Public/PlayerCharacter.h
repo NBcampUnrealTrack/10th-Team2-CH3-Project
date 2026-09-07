@@ -10,6 +10,24 @@ class UInputAction;
 struct FInputActionInstance;
 struct FInputActionValue;
 
+USTRUCT(BlueprintType) struct  FSpeedConfig
+{
+    GENERATED_BODY()
+public:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float Speed;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float Accel;
+};
+
+UENUM(BlueprintType)
+enum class EWalkingMode : uint8
+{
+    Normal UMETA(DisplayName = "Normal"),
+    Sprint UMETA(DisplayName = "Srpint"),
+};
+
+
 UCLASS()
 class PROJECTPRIEST_API APlayerCharacter : public ACharacter
 {
@@ -26,21 +44,29 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
     UFUNCTION()
-    void Move(const FInputActionInstance& InputValue);
+    void OnMoveInputted(const FInputActionInstance& InputValue);
     
     UFUNCTION()
-    void Look(const FInputActionInstance& InputValue);
+    void OnLookInputted(const FInputActionInstance& InputValue);
+    
+    UFUNCTION()
+    void OnJumpInputted(const FInputActionInstance& InputValue);
 
     UFUNCTION()
-    void Attack(const FInputActionValue& value);
+    void OnSprintInputted(const FInputActionInstance& InputValue);    
 
     UFUNCTION()
-    void Throw(const FInputActionValue& value);
+    void OnAttackInputted(const FInputActionValue& value);
+
+    UFUNCTION()
+    void OnThrowInputted(const FInputActionValue& value);
+
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+    void ChangeWalkingMode(EWalkingMode WalkingMode);
 
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Components")
@@ -55,10 +81,9 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Properties")
     float RotationSpeed = 90.0f;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Properties")
+    EWalkingMode Mode = EWalkingMode::Normal;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Inputs")
-    bool bShouldInvertX;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Inputs")
-    bool bShouldInvertY;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Properties")
+    TMap<EWalkingMode, FSpeedConfig> MovementConfigMap;
 };
