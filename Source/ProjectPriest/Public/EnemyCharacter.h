@@ -9,6 +9,7 @@
 class APlayerCharacter;
 class USphereComponent;
 
+//TODO: 몬스터 스탯을 테이블로 해야한다
 UCLASS()
 class PROJECTPRIEST_API AEnemyCharacter : public ACharacter
 {
