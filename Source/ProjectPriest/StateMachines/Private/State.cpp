@@ -1,5 +1,5 @@
 ﻿#include "State.h"
-#include "../../JUtility.h"
+#include "JUtility.h"
 
 void UState::OnEnter()
 {

@@ -1,7 +1,7 @@
-#include "StateMachine.h"
+﻿#include "StateMachine.h"
 #include "State.h"
 #include "Transition.h"
-#include "../../JUtility.h"
+#include "JUtility.h"
 
 void UStateMachine::OnEnter()
 {
