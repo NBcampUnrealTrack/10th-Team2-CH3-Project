@@ -65,7 +65,10 @@ void AHolyGenerade::OnItemEndOverlap(
 
 void AHolyGenerade::ActivateItem(AActor* Activator)
 {
-	if (bHasExploded) return;
+	if (bHasExploded)
+	{
+		return;
+	}
 
 	GetWorld()->GetTimerManager().SetTimer(
 		ExplosionTimerHandle,
@@ -81,7 +84,8 @@ void AHolyGenerade::Explode() {
 	TArray<AActor*> OverlappingActors;
 	ExplosionCollision->GetOverlappingActors(OverlappingActors);
 
-	for (AActor* Actor : OverlappingActors) {
+	for (AActor* Actor : OverlappingActors)
+	{
 		if (Actor && Actor->ActorHasTag("Monster")) {
 			UGameplayStatics::ApplyDamage(
 				Actor,
