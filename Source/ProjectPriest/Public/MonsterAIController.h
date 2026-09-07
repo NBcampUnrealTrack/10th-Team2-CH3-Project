@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "Perception/AIPerceptionTypes.h"
+#include "BehaviorTree/BehaviorTree.h"
 #include "MonsterAIController.generated.h"
 
 /**
@@ -17,18 +19,16 @@ class PROJECTPRIEST_API AMonsterAIController : public AAIController
 public:
 	AMonsterAIController();
 
+	//BT를 시작하는 함수
+	void StartBehaviorTree();
+
 protected:
+	//BT 포인터
+	UPROPERTY(EditAnywhere, Category = "AI")
+	class UBehaviorTree* BehaviorTree;
+
 	virtual void BeginPlay() override;
-	//폰을 소유할 때 호출되는 함수
-	virtual void OnPossess(APawn* InPawn) override;
 
 private:
-	void MoveToRandomLocation();
-
-	FTimerHandle RandomMoveTimer;
-
-	// 몬스터가 이동할 반경
-	UPROPERTY(EditAnywhere, Category = "AI")
-	float MoveRadius = 1000.0f;
 
 };
