@@ -30,7 +30,8 @@ void AHolyGenerade::SetIsThrown(bool bThrown)
 	bIsThrown = bThrown;
 }
 
-FName AHolyGenerade::GetItemType() const {
+FName AHolyGenerade::GetItemType() const
+{
 	return ItemType;
 }
 
@@ -80,7 +81,8 @@ void AHolyGenerade::ActivateItem(AActor* Activator)
 	bHasExploded = true;
 }
 
-void AHolyGenerade::Explode() {
+void AHolyGenerade::Explode()
+{
 	TArray<AActor*> OverlappingActors;
 	ExplosionCollision->GetOverlappingActors(OverlappingActors);
 
@@ -100,6 +102,7 @@ void AHolyGenerade::Explode() {
 	DestroyItem();
 }
 
-void AHolyGenerade::DestroyItem() {
+void AHolyGenerade::DestroyItem()
+{
 	Destroy();
 }
