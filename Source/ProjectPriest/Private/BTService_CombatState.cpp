@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "MonsterAIController.h"
 #include "GameFramework/Pawn.h"
+#include "GameFramework/Character.h"
 
 UBTService_CombatState::UBTService_CombatState()
 {
@@ -20,17 +21,21 @@ void UBTService_CombatState::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
 
 	APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 
+	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
+
+	BlackboardComp -> SetValueAsObject(TEXT("Player"), Cast<ACharacter>(playerPawn));
+
 	AMonsterAIController* AIController = Cast<AMonsterAIController>(AICon);
 
 	if (!AIController)
-		return OwnerComp.GetBlackboardComponent()->SetValueAsBool(TEXT("IsCombat"), false);
+		return BlackboardComp->SetValueAsBool(TEXT("IsCombat"), false);
 
 	if (playerPawn != AIController->GetDetectedPlayer())
-		return OwnerComp.GetBlackboardComponent()->SetValueAsBool(TEXT("IsCombat"), false);
+		return BlackboardComp->SetValueAsBool(TEXT("IsCombat"), false);
 
 	FVector DetectedPlayerLocation = AIController->GetDetectedPlayerLocation();
 	if (FVector::ZeroVector == DetectedPlayerLocation)
-		return OwnerComp.GetBlackboardComponent()->SetValueAsBool(TEXT("IsCombat"), false);
+		return BlackboardComp->SetValueAsBool(TEXT("IsCombat"), false);
 
-	OwnerComp.GetBlackboardComponent()->SetValueAsBool(TEXT("IsCombat"), true);
+	BlackboardComp->SetValueAsBool(TEXT("IsCombat"), true);
 }
