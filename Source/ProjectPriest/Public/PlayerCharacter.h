@@ -44,6 +44,13 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+    virtual float TakeDamage(
+        float DamageAmount,
+        FDamageEvent const& DamageEvent,
+        AController* EventInstigator,
+        AActor* DamageCauser
+    ) override;
+
     UFUNCTION()
     void OnMoveInputted(const FInputActionInstance& InputValue);
     
@@ -90,6 +97,12 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Properties")
     float BaseDamage = 20.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Properties")
+    float MaxHealth = 100.0f;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "===PlayerCharacter===|Properties")
+    float CurrentHealth = 100.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Throw")
     TSubclassOf<AHolyGenerade> HolyGrenadeClass;

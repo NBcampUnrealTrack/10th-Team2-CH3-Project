@@ -27,6 +27,8 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+    CurrentHealth = MaxHealth;
+
     ChangeWalkingMode(EWalkingMode::Normal);
 }
 
@@ -104,6 +106,31 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         this,
         &APlayerCharacter::OnThrowInputted
     );
+}
+
+float APlayerCharacter::TakeDamage(
+    float DamageAmount,
+    FDamageEvent const& DamageEvent,
+    AController* EventInstigator,
+    AActor* DamageCauser)
+{
+    const float ActualDamage = Super::TakeDamage(
+        DamageAmount,
+        DamageEvent,
+        EventInstigator,
+        DamageCauser
+    );
+
+    CurrentHealth = FMath::Clamp(CurrentHealth - ActualDamage, 0.0f, MaxHealth);
+
+    //UE_LOG(LogTemp, Warning, TEXT("플레이어 데미지: %.1f / 현재 HP: %.1f"), ActualDamage, CurrentHealth);
+
+    if (CurrentHealth <= 0.0f)
+    {
+        // 사망 함수 호출
+    }
+
+    return ActualDamage;
 }
 
 void APlayerCharacter::OnMoveInputted(const FInputActionInstance& InputValue)
