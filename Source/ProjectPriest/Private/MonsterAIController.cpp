@@ -28,9 +28,4 @@ void AMonsterAIController::BeginPlay()
 	Super::BeginPlay();
 
 	StartBehaviorTree();
-
-
-
-
-
 }	
