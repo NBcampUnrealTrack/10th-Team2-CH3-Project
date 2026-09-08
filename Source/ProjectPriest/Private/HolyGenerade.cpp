@@ -20,6 +20,8 @@ AHolyGenerade::AHolyGenerade()
 
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
 	StaticMesh->SetupAttachment(Collision);
+	StaticMesh->SetSimulatePhysics(true);
+	StaticMesh->SetEnableGravity(true);
 
 	Collision->OnComponentBeginOverlap.AddDynamic(this, &AHolyGenerade::OnItemOverlap);
 	Collision->OnComponentEndOverlap.AddDynamic(this, &AHolyGenerade::OnItemEndOverlap);
@@ -33,6 +35,20 @@ void AHolyGenerade::SetIsThrown(bool bThrown)
 FName AHolyGenerade::GetItemType() const
 {
 	return ItemType;
+}
+
+void AHolyGenerade::Throw(const FVector& Direction, float Force)
+{
+	bIsThrown = true;
+
+	StaticMesh->SetSimulatePhysics(true);
+	StaticMesh->SetEnableGravity(true);
+
+	StaticMesh->AddImpulse(
+		Direction * Force,
+		NAME_None,
+		true
+	);
 }
 
 void AHolyGenerade::OnItemOverlap(

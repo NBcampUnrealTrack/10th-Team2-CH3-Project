@@ -19,6 +19,9 @@ public:
 
 	FName GetItemType() const;
 
+	// 외부에서 수류탄을 투척할 때 사용
+	void Throw(const FVector& Direction, float Force);
+
 protected:
 	// Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "===Item===|Components")
