@@ -24,8 +24,9 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Attack==")
     TObjectPtr<UAnimMontage> MontageToPlaying;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Attacks==")
+    FName TargetValueName;    
+
     TObjectPtr<UAnimInstance> CachedAnimInstance;
     TObjectPtr<UBehaviorTreeComponent> CachedOwnerComponent;
-
-
 };

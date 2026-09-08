@@ -66,6 +66,9 @@ public:
 
     UFUNCTION(BlueprintPure)
     virtual bool HitThisFrame();
+
+    float GetDamage();
+
 protected:
 
 	////스피어 컴퍼넌트

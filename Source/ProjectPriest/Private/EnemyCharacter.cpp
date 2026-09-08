@@ -63,7 +63,7 @@ void AEnemyCharacter::OnNotifyApplyDamage()
     if (!IsValid(GEngine))
         return;
 
-    GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, FString(TEXT("OnNotifyApplyDamage")));
+    
 }
 
 bool AEnemyCharacter::GetIsDead()
@@ -79,6 +79,11 @@ bool AEnemyCharacter::GetShouldAttack()
 bool AEnemyCharacter::HitThisFrame()
 { 
     return bHitThisFrame;
+}
+
+float AEnemyCharacter::GetDamage()
+{
+    return Damage;
 }
 
 void AEnemyCharacter::Tick(float DeltaTime)

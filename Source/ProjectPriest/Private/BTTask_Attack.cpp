@@ -2,6 +2,8 @@
 #include "AIController.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "GameFramework/Character.h"
+#include "EnemyCharacter.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 UBTTask_Attack::UBTTask_Attack()
 {
@@ -59,6 +61,13 @@ void UBTTask_Attack::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
         return;
     }
 
+    AEnemyCharacter* MyCharacter = Cast<AEnemyCharacter>(CachedOwnerComponent->GetOwner());
+    UBlackboardComponent* Blackboard = CachedOwnerComponent->GetBlackboardComponent();
+    UObject* TempTarget = Blackboard->GetValueAsObject(TargetValueName);
+    ACharacter* EnemyCharacter = Cast<ACharacter>(TempTarget);
+    MyCharacter->Attack(EnemyCharacter);
+
+    //TODO: 이곳에 데미지 주는 것을 구현하기
     FinishLatentTask(*CachedOwnerComponent,
         bInterrupted ?
         EBTNodeResult::Failed : 
