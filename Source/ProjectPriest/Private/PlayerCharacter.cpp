@@ -5,6 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "HolyGenerade.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -158,7 +159,7 @@ void APlayerCharacter::OnAttackInputted(const FInputActionValue& value)
 
     GetWorld()->LineTraceSingleByChannel(
         Hit,
-        Start,
+        Start,  
         End,
         ECC_Visibility
     );
@@ -178,6 +179,53 @@ void APlayerCharacter::OnAttackInputted(const FInputActionValue& value)
 void APlayerCharacter::OnThrowInputted(const FInputActionValue& value)
 {
     //GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Throw"));
+
+    if (!HolyGrenadeClass)
+    {
+        return;
+    }
+
+    const FName SocketName = RightHandSocketName;
+
+    if (!GetMesh()->DoesSocketExist(SocketName))
+    {
+        //UE_LOG(LogTemp, Warning, TEXT("오른손 Socket이 없습니다."));
+        return;
+    }
+
+    // 오른손 위치
+    const FVector HandLocation = GetMesh()->GetSocketLocation(SocketName);
+
+    // 캐릭터가 바라보는 방향
+    const FVector Forward = GetActorForwardVector();
+    // 카메라가 바라보는 방향
+    // const FVector Forward = Camera->GetForwardVector();
+
+    // 캐릭터의 오른손보다 조금 앞에서 생성
+    const FVector SpawnLocation = HandLocation + Forward * ThrowDistance;
+
+    FRotator SpawnRotation = GetActorRotation();
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.Owner = this;
+    SpawnParams.Instigator = this;
+
+    // 스폰
+    AHolyGenerade* HolyGrenade =
+        GetWorld()->SpawnActor<AHolyGenerade>(
+            HolyGrenadeClass,
+            SpawnLocation,
+            SpawnRotation,
+            SpawnParams
+        );
+
+    if (!HolyGrenade)
+    {
+        return;
+    }
+
+    // 투척
+    HolyGrenade->Throw(Forward, ThrowForce);
 }
 
 void APlayerCharacter::OnSprintInputted(const FInputActionInstance& InputValue)

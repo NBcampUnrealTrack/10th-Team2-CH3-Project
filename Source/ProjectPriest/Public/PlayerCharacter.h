@@ -7,6 +7,7 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
+class AHolyGenerade;
 struct FInputActionInstance;
 struct FInputActionValue;
 
@@ -89,4 +90,16 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Properties")
     float BaseDamage = 20.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Throw")
+    TSubclassOf<AHolyGenerade> HolyGrenadeClass;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Throw")
+    FName RightHandSocketName = TEXT("hand_r");
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Throw")
+    float ThrowDistance = 100.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Throw")
+    float ThrowForce = 1000.0f;
 };
