@@ -28,6 +28,10 @@ void AEnemyCharacter::Attack(ACharacter* PlayerCharacter)
 {
 	//추후 포인터를 플레이어캐릭터로 변경 예정
 	//공통 공격 로직
+
+    //Play Attack animation
+    //-> DamageEven (데미지 주기)
+    //-> 애니메이션 종료 대기(Abort or Finished)
 }
 
 void AEnemyCharacter::TakeDamage(float DamageAmount)
@@ -54,9 +58,35 @@ void AEnemyCharacter::BeginPlay()
 	
 }
 
+void AEnemyCharacter::PlayAttackAnimation()
+{
+    
+}
+
+void AEnemyCharacter::OnApplyDamage(int SequenceNumber)
+{
+}
+
+void AEnemyCharacter::OnAttackAnimationFinished(const int Reson)
+{
+}
+
+bool AEnemyCharacter::GetIsDead()
+{
+    return bIsDead;
+}
+
+bool AEnemyCharacter::GetShouldAttack()
+{
+    return bShouldAttack;
+}
+
+bool AEnemyCharacter::HitThisFrame()
+{ 
+    return bHitThisFrame;
+}
+
 void AEnemyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
-
