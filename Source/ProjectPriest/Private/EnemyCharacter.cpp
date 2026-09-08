@@ -20,7 +20,9 @@ AEnemyCharacter::AEnemyCharacter()
 	Health = 100.0f;
 	Damage = 10.0f;
 	Defense = 5.0f;
-	MinimumDamage = 1.0f;
+	MinimumDamage = 1.0f;//몬스터가 받는 최소피해
+
+	PatrolRadius = 1000.0f;
 }
 
 
@@ -49,13 +51,11 @@ void AEnemyCharacter::Die()
 	Destroy();
 }
 
-
-
-
 void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	PatrolOrigin = this->GetActorLocation();
 }
 
 void AEnemyCharacter::PlayAttackAnimation()
@@ -89,4 +89,15 @@ bool AEnemyCharacter::HitThisFrame()
 void AEnemyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+}
+
+FVector AEnemyCharacter::GetPatrolOrigin()
+{
+	return PatrolOrigin;
+}
+
+float AEnemyCharacter::GetPatrolRadius()
+{
+	return PatrolRadius;
 }

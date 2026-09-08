@@ -26,6 +26,13 @@ class PROJECTPRIEST_API AEnemyCharacter : public ACharacter
 public:
 	AEnemyCharacter();
 
+	//몬스터의 기준위치
+	UFUNCTION(BlueprintCallable)
+	FVector GetPatrolOrigin();
+
+	//몬스터의 순찰반경
+	UFUNCTION(BlueprintCallable)
+	float GetPatrolRadius();
 protected:
 	virtual void BeginPlay() override;
 
@@ -61,20 +68,30 @@ public:
     UFUNCTION(BlueprintPure)
     virtual bool HitThisFrame();
 protected:
-    //스피어 컴퍼넌트
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    USphereComponent* SphereComponent;
 
-    //몬스터 체력
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-    float Health;
-    //몬스터 공격력
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-    float Damage;
+	////스피어 컴퍼넌트
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	//USphereComponent* SphereComponent;
 
-    //몬스터 최소 피해량
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-    float MinimumDamage = 0.0f;
+	//몬스터의 기준위치
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI|Patrol")
+	FVector PatrolOrigin;
+
+	//몬스터의 순찰반경
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Patrol")
+	float PatrolRadius;
+
+	//몬스터 체력
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")
+	float Health;
+
+	//몬스터 공격력
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")
+	float Damage;
+
+	//몬스터 최소 피해량
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	float MinimumDamage;
 
     //몬스터 방어력
     //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")

@@ -11,7 +11,6 @@
 UBTTask_FindPlayer::UBTTask_FindPlayer()
 {
 	NodeName = TEXT("Find Player");
-
 }
 
 EBTNodeResult::Type UBTTask_FindPlayer::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
