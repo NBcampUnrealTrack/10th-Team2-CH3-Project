@@ -4,8 +4,9 @@
 #include "BTService_CombatState.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "AIController.h"
+#include "MonsterAIController.h"
 #include "GameFramework/Pawn.h"
+#include "GameFramework/Character.h"
 
 UBTService_CombatState::UBTService_CombatState()
 {
@@ -16,31 +17,25 @@ void UBTService_CombatState::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
-	AAIController* Aicom = OwnerComp.GetAIOwner();
-
-	APawn* AIPawn = Aicom->GetPawn();
+	AAIController* AICon = OwnerComp.GetAIOwner();
 
 	APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 
-	if (!AIPawn || !playerPawn)
-		return;
+	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 
-	//시야를 만들기
-	float Distance = FVector::Distance(//두 값의 차이
-		AIPawn->GetActorLocation(),//몬스터의 위치
-		playerPawn->GetActorLocation()//플레이어의 위치
-	);
+	BlackboardComp -> SetValueAsObject(TEXT("Player"), Cast<ACharacter>(playerPawn));
 
-	//에디터 상 조절 할수있도록 몬스터 변수 지정해서 불러오기
-	float CombatDistance = 500;
+	AMonsterAIController* AIController = Cast<AMonsterAIController>(AICon);
 
-	//시야를 만들면 시야 + 거리? 아니면 시야 자체의 거리를 설정 할수있나?
-	if (Distance <= CombatDistance)
-	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsBool(TEXT("IsCombat"), true);
-	}
-	else
-	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsBool(TEXT("IsCombat"), false);
-	}
+	if (!AIController)
+		return BlackboardComp->SetValueAsBool(TEXT("IsCombat"), false);
+
+	if (playerPawn != AIController->GetDetectedPlayer())
+		return BlackboardComp->SetValueAsBool(TEXT("IsCombat"), false);
+
+	FVector DetectedPlayerLocation = AIController->GetDetectedPlayerLocation();
+	if (FVector::ZeroVector == DetectedPlayerLocation)
+		return BlackboardComp->SetValueAsBool(TEXT("IsCombat"), false);
+
+	BlackboardComp->SetValueAsBool(TEXT("IsCombat"), true);
 }
