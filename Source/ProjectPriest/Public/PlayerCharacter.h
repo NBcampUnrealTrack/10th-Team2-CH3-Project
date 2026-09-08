@@ -37,6 +37,7 @@ class PROJECTPRIEST_API APlayerCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -75,6 +76,8 @@ protected:
 	virtual void BeginPlay() override;
 
     void ChangeWalkingMode(EWalkingMode WalkingMode);
+
+    void ResetThrowCoolTime();
 
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Components")
@@ -115,4 +118,12 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Throw")
     float ThrowForce = 1000.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Throw")
+    float ThrowCoolTime = 5.0f;
+
+protected:
+    bool bCanThrow = true;
+
+    FTimerHandle ThrowCoolTimeTimerHandle;
 };

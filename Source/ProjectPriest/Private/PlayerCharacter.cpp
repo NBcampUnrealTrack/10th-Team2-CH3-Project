@@ -47,6 +47,11 @@ void APlayerCharacter::ChangeWalkingMode(EWalkingMode WalkingMode)
     GetCharacterMovement()->MaxAcceleration = Config->Accel;
 }
 
+void APlayerCharacter::ResetThrowCoolTime()
+{
+    bCanThrow = true;
+}
+
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
@@ -207,6 +212,13 @@ void APlayerCharacter::OnThrowInputted(const FInputActionValue& value)
 {
     //GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Throw"));
 
+    if (!bCanThrow)
+    {
+        return;
+    }
+
+    bCanThrow = false;
+
     if (!HolyGrenadeClass)
     {
         return;
@@ -253,6 +265,14 @@ void APlayerCharacter::OnThrowInputted(const FInputActionValue& value)
 
     // 투척
     HolyGrenade->Throw(Forward, ThrowForce);
+
+    GetWorld()->GetTimerManager().SetTimer(
+        ThrowCoolTimeTimerHandle,
+        this,
+        &APlayerCharacter::ResetThrowCoolTime,
+        ThrowCoolTime,
+        false
+    );
 }
 
 void APlayerCharacter::OnSprintInputted(const FInputActionInstance& InputValue)
