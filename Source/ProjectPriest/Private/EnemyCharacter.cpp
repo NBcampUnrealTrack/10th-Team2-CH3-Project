@@ -58,17 +58,12 @@ void AEnemyCharacter::BeginPlay()
 	PatrolOrigin = this->GetActorLocation();
 }
 
-void AEnemyCharacter::PlayAttackAnimation()
+void AEnemyCharacter::OnNotifyApplyDamage()
 {
-    
-}
+    if (!IsValid(GEngine))
+        return;
 
-void AEnemyCharacter::OnApplyDamage(int SequenceNumber)
-{
-}
-
-void AEnemyCharacter::OnAttackAnimationFinished(const int Reson)
-{
+    GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, FString(TEXT("OnNotifyApplyDamage")));
 }
 
 bool AEnemyCharacter::GetIsDead()

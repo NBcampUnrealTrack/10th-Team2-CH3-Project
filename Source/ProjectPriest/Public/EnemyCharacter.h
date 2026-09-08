@@ -40,9 +40,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-    virtual void PlayAttackAnimation();
-    virtual void OnApplyDamage(int SequenceNumber);
-    virtual void OnAttackAnimationFinished(const int Reson);
+    UFUNCTION(BlueprintCallable)
+    virtual void OnNotifyApplyDamage();
 
     //몬스터 공격
     UFUNCTION(BlueprintCallable)
