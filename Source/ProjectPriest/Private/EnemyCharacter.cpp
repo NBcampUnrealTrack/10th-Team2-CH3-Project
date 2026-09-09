@@ -1,9 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "EnemyCharacter.h"
-//ÃßÈÄ ÇÃ·¹ÀÌ¾î Ä³¸¯ÅÍ ÀÎÅ¬·çµå  
-//#include "PlayerCharacter.h"
+#include "PlayerCharacter.h"
 #include "MonsterAIController.h"
 
 // Sets default values
@@ -11,16 +10,16 @@ AEnemyCharacter::AEnemyCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	//AI ÄÁÆ®·Ñ·¯ class ¼³Á¤
+	//AI ì»¨íŠ¸ë¡¤ëŸ¬ class ì„¤ì •
 	AIControllerClass = AMonsterAIController::StaticClass();
-	//»ý¼º½Ã AI Possess ¼³Á¤
+	//ìƒì„±ì‹œ AI Possess ì„¤ì •
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	//½ºÅÈ ÃÊ±âÈ­
+	//ìŠ¤íƒ¯ ì´ˆê¸°í™”
 	Health = 100.0f;
 	Damage = 10.0f;
 	Defense = 5.0f;
-	MinimumDamage = 1.0f;//¸ó½ºÅÍ°¡ ¹Þ´Â ÃÖ¼ÒÇÇÇØ
+	MinimumDamage = 1.0f;//ëª¬ìŠ¤í„°ê°€ ë°›ëŠ” ìµœì†Œí”¼í•´
 
 	PatrolRadius = 1000.0f;
 }
@@ -78,7 +77,7 @@ void AEnemyCharacter::BeginPlay()
     AnimInstance = GetMesh()->GetAnimInstance();
 }
 
-//TODO: ¾Æ ¸¾¿¡ ¾Èµé¾î °Ì³ª È­³ª´Â ±×·± ±¸Á¶³×...
+//TODO: ì•„ ë§˜ì— ì•ˆë“¤ì–´ ê²ë‚˜ í™”ë‚˜ëŠ” ê·¸ëŸ° êµ¬ì¡°ë„¤...
 // BT_Attack 
 // -> AEnemyCharacter::Attack() 
 // -> Play Montage 
