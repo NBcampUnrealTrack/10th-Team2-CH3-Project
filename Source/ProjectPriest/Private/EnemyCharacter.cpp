@@ -2,8 +2,7 @@
 
 
 #include "EnemyCharacter.h"
-//추후 플레이어 캐릭터 인클루드  
-//#include "PlayerCharacter.h"
+#include "PlayerCharacter.h"
 #include "MonsterAIController.h"
 #include "Engine/DamageEvents.h"
 
