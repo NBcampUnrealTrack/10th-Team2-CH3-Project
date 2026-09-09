@@ -35,12 +35,14 @@ void UBTService_CombatState::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
 	if (playerPawn != AIController->GetDetectedPlayer())
 		return BlackboardComp->SetValueAsBool(TEXT("IsCombat"), false);
 
-	FVector DetectedPlayerLocation = AIController->GetDetectedPlayerLocation();
+	//FVector DetectedPlayerLocation = AIController->GetDetectedPlayerLocation();
 
-	if (FVector::ZeroVector == DetectedPlayerLocation)
-		return BlackboardComp->SetValueAsBool(TEXT("IsCombat"), false);
+	//if (FVector::ZeroVector == DetectedPlayerLocation)
+	//	return BlackboardComp->SetValueAsBool(TEXT("IsCombat"), false);
 
-	BlackboardComp->SetValueAsVector(TEXT("PlayerVector"), DetectedPlayerLocation);
+	//BlackboardComp->SetValueAsVector(TEXT("PlayerVector"), DetectedPlayerLocation);
+
+	BlackboardComp->SetValueAsInt(TEXT("SearchCount"), 3);
 
 	BlackboardComp->SetValueAsBool(TEXT("IsCombat"), true);
 }

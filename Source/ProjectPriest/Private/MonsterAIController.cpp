@@ -71,13 +71,12 @@ void AMonsterAIController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimul
 	{
 		//감지된 정보 저장
 		DetectedPlayer = Actor;
-		DetectedPlayerLocation = Stimulus.StimulusLocation;
+		//DetectedPlayerLocation = Stimulus.StimulusLocation;
 	}
 	else
 	{
-		//시간 종료시 지울건가 지우는 테이블을 따로 만들건가
 		DetectedPlayer = nullptr;
-		DetectedPlayerLocation = FVector::ZeroVector;
+		//DetectedPlayerLocation = FVector::ZeroVector;
 	}
 }
 
@@ -86,7 +85,7 @@ AActor* AMonsterAIController::GetDetectedPlayer()
 	return DetectedPlayer;
 }
 
-FVector AMonsterAIController::GetDetectedPlayerLocation()
-{
-	return DetectedPlayerLocation;
-}
+//FVector AMonsterAIController::GetDetectedPlayerLocation()
+//{
+//	return DetectedPlayerLocation;
+//}
