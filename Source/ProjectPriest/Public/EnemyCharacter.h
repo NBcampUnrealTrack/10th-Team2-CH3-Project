@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -14,7 +14,7 @@ class USphereComponent;
 //{
 //    Finshed     UMETA(DisplayName = "Finished"),
 //    Abort       UMETA(DisplayName = "Abort")
-//    //TODO: ¹¹... ³ªÁß¿¡ ´õ Ãß°¡ÇÒ¼öµµ?
+//    //TODO: ë­... ë‚˜ì¤‘ì— ë” ì¶”ê°€í• ìˆ˜ë„?
 //};
 
 UENUM(Blueprinttype)
@@ -28,7 +28,7 @@ enum class EAttackMontageState : uint8
 
 DECLARE_DELEGATE(FApplyAttackDelegte);
 
-//TODO: ¸ó½ºÅÍ ½ºÅÈÀ» Å×ÀÌºí·Î ÇØ¾ßÇÑ´Ù
+//TODO: ëª¬ìŠ¤í„° ìŠ¤íƒ¯ì„ í…Œì´ë¸”ë¡œ í•´ì•¼í•œë‹¤
 UCLASS()
 class PROJECTPRIEST_API AEnemyCharacter : public ACharacter
 {
@@ -37,32 +37,26 @@ class PROJECTPRIEST_API AEnemyCharacter : public ACharacter
 public:
 	AEnemyCharacter();
 
-	//¸ó½ºÅÍÀÇ ±âÁØÀ§Ä¡
+	//ëª¬ìŠ¤í„°ì˜ ê¸°ì¤€ìœ„ì¹˜
 	UFUNCTION(BlueprintCallable)
 	FVector GetPatrolOrigin();
 
-	//¸ó½ºÅÍÀÇ ¼øÂû¹İ°æ
+	//ëª¬ìŠ¤í„°ì˜ ìˆœì°°ë°˜ê²½
 	UFUNCTION(BlueprintCallable)
 	float GetPatrolRadius();
-protected:
-	virtual void BeginPlay() override;
-
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
     UFUNCTION(BlueprintCallable)
     virtual void OnNotifyApplyDamage();
 
-    //¸ó½ºÅÍ °ø°İ
+    //ëª¬ìŠ¤í„° ê³µê²©
     UFUNCTION(BlueprintCallable)
     virtual void Attack(ACharacter* PlayerCharacter);
 
-    //¸ó½ºÅÍ ÇÇ°İ
+    //ëª¬ìŠ¤í„° í”¼ê²©
     UFUNCTION(BlueprintCallable)
     virtual void TakeDamage(float DamageAmount);
 
-    //¸ó½ºÅÍ »ç¸Á
+    //ëª¬ìŠ¤í„° ì‚¬ë§
     UFUNCTION(BlueprintCallable)
     virtual void Die();
 
@@ -89,31 +83,27 @@ public:
 
 protected:
 
-	////½ºÇÇ¾î ÄÄÆÛ³ÍÆ®
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	//USphereComponent* SphereComponent;
-
-	//¸ó½ºÅÍÀÇ ±âÁØÀ§Ä¡
+	//ëª¬ìŠ¤í„°ì˜ ê¸°ì¤€ìœ„ì¹˜
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI|Patrol")
 	FVector PatrolOrigin;
 
-	//¸ó½ºÅÍÀÇ ¼øÂû¹İ°æ
+	//ëª¬ìŠ¤í„°ì˜ ìˆœì°°ë°˜ê²½
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Patrol")
 	float PatrolRadius;
 
-	//¸ó½ºÅÍ Ã¼·Â
+	//ëª¬ìŠ¤í„° ì²´ë ¥
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")
 	float Health;
 
-	//¸ó½ºÅÍ °ø°İ·Â
+	//ëª¬ìŠ¤í„° ê³µê²©ë ¥
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")
 	float Damage;
 
-	//¸ó½ºÅÍ ÃÖ¼Ò ÇÇÇØ·®
+	//ëª¬ìŠ¤í„° ìµœì†Œ í”¼í•´ëŸ‰
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
 	float MinimumDamage;
 
-    //¸ó½ºÅÍ ¹æ¾î·Â
+    //ëª¬ìŠ¤í„° ë°©ì–´ë ¥
     //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")
     float Defense;
 
@@ -137,4 +127,10 @@ protected:
 
     EAttackMontageState AttackMontageState;
     FApplyAttackDelegte ApplyAttackDelegate;
+
+    virtual void BeginPlay() override;
+
+    // Called every frame
+    virtual void Tick(float DeltaTime) override;
+
 };
