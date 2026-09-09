@@ -30,7 +30,7 @@ void AEnemyCharacter::Attack(ACharacter* PlayerCharacter)
 {
 }
 
-void AEnemyCharacter::TakeDamage(float DamageAmount)
+float AEnemyCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
 	float ActualDamage = FMath::Max(DamageAmount - Defense, MinimumDamage);
 	Health -= ActualDamage;
@@ -38,6 +38,7 @@ void AEnemyCharacter::TakeDamage(float DamageAmount)
 	{
 		Die();
 	}
+	return 0.0f;
 }
 
 void AEnemyCharacter::Die()

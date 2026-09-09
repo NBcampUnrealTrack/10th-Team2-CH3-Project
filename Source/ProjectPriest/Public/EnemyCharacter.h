@@ -44,7 +44,7 @@ public:
 
     //몬스터 피격
     UFUNCTION(BlueprintCallable)
-    virtual void TakeDamage(float DamageAmount);
+    virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
     //몬스터 사망
     UFUNCTION(BlueprintCallable)
