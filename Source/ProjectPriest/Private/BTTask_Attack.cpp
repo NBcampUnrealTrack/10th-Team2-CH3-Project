@@ -29,6 +29,7 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
         FApplyAttackDelegte Delegate;
         Delegate.BindUObject(this, &UBTTask_Attack::OnApplyAttack);
 
+        CachedEnemyCharacter->SetApplyAttackDelegate(Delegate);
         CachedEnemyCharacter->Attack(nullptr);
 
         return EBTNodeResult::InProgress;
@@ -83,6 +84,11 @@ void UBTTask_Attack::OnApplyAttack()
     }
 
     UObject* TargetObject = Blackboard->GetValueAsObject(TargetValueName);
+    if (!TargetObject)
+    {
+        return;
+    }
+
     ACharacter* TargetCharacter = Cast<ACharacter>(TargetObject);
 
     FDamageEvent DamageEvent;
