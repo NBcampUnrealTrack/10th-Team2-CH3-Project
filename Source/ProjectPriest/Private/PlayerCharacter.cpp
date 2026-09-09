@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "HolyGenerade.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -183,8 +184,7 @@ void APlayerCharacter::OnAttackInputted(const FInputActionValue& value)
     }
 
     const FVector Start = GetMesh()->GetSocketLocation(SocketName);
-    const FVector Forward = GetMesh()->GetSocketRotation(SocketName).Vector();
-
+    const FVector Forward = GetActorForwardVector();
     const FVector End = Start + Forward * 10000.0f;
 
     FHitResult Hit;
@@ -198,12 +198,38 @@ void APlayerCharacter::OnAttackInputted(const FInputActionValue& value)
 
     if (Hit.bBlockingHit)
     {
+        // 총구부터 Hit 지점까지 디버그 라인 생성
+        DrawDebugLine(
+            GetWorld(),
+            Start,
+            Hit.ImpactPoint,
+            FColor::Green,
+            false,
+            1.0f,
+            0,
+            2.0f
+        );
+
         UGameplayStatics::ApplyDamage(
             Hit.GetActor(),
             BaseDamage,
             GetController(),
             this,
             UDamageType::StaticClass()
+        );
+    }
+    else
+    {
+        // 총구부터 끝점까지 디버그 라인 생성
+        DrawDebugLine(
+            GetWorld(),
+            Start,
+            End,
+            FColor::Green,
+            false,
+            1.0f,
+            0,
+            2.0f
         );
     }
 }
