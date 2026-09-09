@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "BTTask_FindPlayer.h"
@@ -15,19 +15,21 @@ UBTTask_FindPlayer::UBTTask_FindPlayer()
 
 EBTNodeResult::Type UBTTask_FindPlayer::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	//ºí·¢º¸µå ÄÄÆ÷³ÍÆ® °¡Á®¿À±â
+	//ë¸”ëž™ë³´ë“œ ì»´í¬ë„ŒíŠ¸ ê°€ì ¸ì˜¤ê¸°
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 
 	if (!BlackboardComp)
 		return EBTNodeResult::Failed;
 
-	APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);//ºÒ·¯¿Ã °÷, ºÒ·¯¿Ã ÇÃ·¹ÀÌ¾îÀÇ ¹øÈ£
+	APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);//ë¶ˆëŸ¬ì˜¬ ê³³, ë¶ˆëŸ¬ì˜¬ í”Œë ˆì´ì–´ì˜ ë²ˆí˜¸
 
 	if (!playerPawn) 
 		return EBTNodeResult::Failed;
 
 	BlackboardComp->SetValueAsVector(TEXT("PlayerVector"), playerPawn->GetActorLocation());
 
-	return EBTNodeResult::Succeeded;
-	
+    //TODO REMOVE BY Joo jung yeol
+    BlackboardComp->SetValueAsObject(TEXT("Player"), playerPawn);
+
+	return EBTNodeResult::Succeeded;	
 }

@@ -1,6 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
@@ -9,16 +7,8 @@
 class APlayerCharacter;
 class USphereComponent;
 
-//UENUM(BlueprintType)
-//enum class EAnimationFinishedReason : uint8
-//{
-//    Finshed     UMETA(DisplayName = "Finished"),
-//    Abort       UMETA(DisplayName = "Abort")
-//    //TODO: 뭐... 나중에 더 추가할수도?
-//};
-
 UENUM(Blueprinttype)
-enum class EAttackMontageState : uint8
+enum class EAttackAnimationState : uint8
 {
     InProgress      UMETA(DisplayName = "InProgress"),
     Finished        UMETA(DisplayName = "Finished"),
@@ -72,14 +62,18 @@ public:
     UFUNCTION(BlueprintPure)
     virtual bool HitThisFrame();
 
-    UFUNCTION(BlueprintCallable)
-    void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-
-    EAttackMontageState GetAttackMontageState() const;
+  
     float GetDamage();
 
-    void SetApplyAttackDelegate(FApplyAttackDelegte& Delegate);
-    void UnbindApplyAttackDelegate();
+    void SetAttackTarget(ACharacter* Target);
+
+    EAttackAnimationState GetAttackAnimationeState();
+
+protected:
+    virtual void BeginPlay() override;
+
+    // Called every frame
+    virtual void Tick(float DeltaTime) override;
 
 protected:
 
@@ -117,20 +111,9 @@ protected:
     bool bShouldAttack;
     
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Enemy Character ===|For anim blueprint")
-    TObjectPtr<UAnimMontage> MontageToPlaying;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Enemy Character ===|For anim blueprint")
     TObjectPtr<UAnimInstance> AnimInstance;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Enemy Character ===|For BT")
-    FName TargetValueName;    
+    TObjectPtr<ACharacter> AttackTarget;
 
-    EAttackMontageState AttackMontageState;
-    FApplyAttackDelegte ApplyAttackDelegate;
-
-    virtual void BeginPlay() override;
-
-    // Called every frame
-    virtual void Tick(float DeltaTime) override;
-
+    EAttackAnimationState AttackAnimationeState;
 };

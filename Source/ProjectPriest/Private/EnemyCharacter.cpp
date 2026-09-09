@@ -1,26 +1,27 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "EnemyCharacter.h"
-//ÃßÈÄ ÇÃ·¹ÀÌ¾î Ä³¸¯ÅÍ ÀÎÅ¬·çµå  
+//ì¶”í›„ í”Œë ˆì´ì–´ ìºë¦­í„° ì¸í´ë£¨ë“œ  
 //#include "PlayerCharacter.h"
 #include "MonsterAIController.h"
+#include "Engine/DamageEvents.h"
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	//AI ÄÁÆ®·Ñ·¯ class ¼³Á¤
+	//AI ì»¨íŠ¸ë¡¤ëŸ¬ class ì„¤ì •
 	AIControllerClass = AMonsterAIController::StaticClass();
-	//»ý¼º½Ã AI Possess ¼³Á¤
+	//ìƒì„±ì‹œ AI Possess ì„¤ì •
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	//½ºÅÈ ÃÊ±âÈ­
+	//ìŠ¤íƒ¯ ì´ˆê¸°í™”
 	Health = 100.0f;
 	Damage = 10.0f;
 	Defense = 5.0f;
-	MinimumDamage = 1.0f;//¸ó½ºÅÍ°¡ ¹Þ´Â ÃÖ¼ÒÇÇÇØ
+	MinimumDamage = 1.0f;//ëª¬ìŠ¤í„°ê°€ ë°›ëŠ” ìµœì†Œí”¼í•´
 
 	PatrolRadius = 1000.0f;
 }
@@ -28,19 +29,6 @@ AEnemyCharacter::AEnemyCharacter()
 
 void AEnemyCharacter::Attack(ACharacter* PlayerCharacter)
 {
-    float MontagePlayResult = AnimInstance->Montage_Play(MontageToPlaying, 1.0f);
-    if (FMath::IsNearlyZero(MontagePlayResult))
-    {
-        //TODO: Error what to do
-        AttackMontageState = EAttackMontageState::Error;
-        return;
-    }
-
-    FOnMontageEnded EndDelegate;
-    EndDelegate.BindUObject(this, &AEnemyCharacter::OnMontageEnded);
-
-    AnimInstance->Montage_SetEndDelegate(EndDelegate, MontageToPlaying);
-    AttackMontageState = EAttackMontageState::InProgress;
 }
 
 void AEnemyCharacter::TakeDamage(float DamageAmount)
@@ -57,17 +45,6 @@ void AEnemyCharacter::Die()
 {
 	Destroy();
 }
-void AEnemyCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{
-    if (bInterrupted)
-    {
-        AttackMontageState = EAttackMontageState::Interrupted;
-    }
-    else
-    {
-        AttackMontageState = EAttackMontageState::Finished;
-    }
-}
 
 void AEnemyCharacter::BeginPlay()
 {
@@ -78,7 +55,7 @@ void AEnemyCharacter::BeginPlay()
     AnimInstance = GetMesh()->GetAnimInstance();
 }
 
-//TODO: ¾Æ ¸¾¿¡ ¾Èµé¾î °Ì³ª È­³ª´Â ±×·± ±¸Á¶³×...
+//TODO: ì•„ ë§˜ì— ì•ˆë“¤ì–´ ê²ë‚˜ í™”ë‚˜ëŠ” ê·¸ëŸ° êµ¬ì¡°ë„¤...
 // BT_Attack 
 // -> AEnemyCharacter::Attack() 
 // -> Play Montage 
@@ -88,7 +65,11 @@ void AEnemyCharacter::BeginPlay()
 
 void AEnemyCharacter::OnNotifyApplyDamage()
 {
-    ApplyAttackDelegate.ExecuteIfBound();
+    FDamageEvent DummyDelegate;
+    this->AttackTarget->TakeDamage(Damage
+        , DummyDelegate
+        , this->GetController()
+        , this);
 }
 
 bool AEnemyCharacter::GetIsDead()
@@ -106,24 +87,19 @@ bool AEnemyCharacter::HitThisFrame()
     return bHitThisFrame;
 }
 
-EAttackMontageState AEnemyCharacter::GetAttackMontageState() const
-{
-    return AttackMontageState;
-}
-
 float AEnemyCharacter::GetDamage()
 {
     return Damage;
 }
 
-void AEnemyCharacter::SetApplyAttackDelegate(FApplyAttackDelegte& Delegate)
+void AEnemyCharacter::SetAttackTarget(ACharacter* Target)
 {
-    ApplyAttackDelegate = Delegate;
+    AttackTarget = Target;
 }
 
-void AEnemyCharacter::UnbindApplyAttackDelegate()
+EAttackAnimationState AEnemyCharacter::GetAttackAnimationeState()
 {
-    ApplyAttackDelegate.Unbind();
+    return AttackAnimationeState;
 }
 
 void AEnemyCharacter::Tick(float DeltaTime)

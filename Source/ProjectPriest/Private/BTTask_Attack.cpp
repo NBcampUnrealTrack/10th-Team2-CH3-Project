@@ -1,4 +1,4 @@
-#include "BTTask_Attack.h"
+﻿#include "BTTask_Attack.h"
 #include "AIController.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "GameFramework/Character.h"
@@ -6,6 +6,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "MonsterAIController.h"
 #include "Engine/DamageEvents.h"
+#include "JUtility.h"
 
 UBTTask_Attack::UBTTask_Attack()
 {
@@ -18,105 +19,21 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 {
     Super::ExecuteTask(OwnerComp, NodeMemory);
 
-    CachedOwnerComponent = &OwnerComp;
-    
-    CachedEnemyCharacter = GetEnemyCharacterFromOwnerComp(OwnerComp);
+    AMonsterAIController* MonsterController 
+        = Cast<AMonsterAIController>(OwnerComp.GetAIOwner());
 
-    if (!bStartFlag)
-    {
-        bStartFlag = true;
+    JASSERT_RETURN(IsValid(MonsterController)
+        , EBTNodeResult::Failed
+        , "It is not MonsterController");
 
-        FApplyAttackDelegte Delegate;
-        Delegate.BindUObject(this, &UBTTask_Attack::OnApplyAttack);
+    AEnemyCharacter* EnemyCharacter
+        = Cast<AEnemyCharacter>(MonsterController->GetPawn());
 
-        CachedEnemyCharacter->SetApplyAttackDelegate(Delegate);
-        CachedEnemyCharacter->Attack(nullptr);
+    JASSERT_RETURN(IsValid(EnemyCharacter)
+        , EBTNodeResult::Failed
+        , "It is not MonsterController");
 
-        return EBTNodeResult::InProgress;
-    }
-    else
-    {
-        switch (CachedEnemyCharacter->GetAttackMontageState())
-        {
-        case EAttackMontageState::Error:
-            return EBTNodeResult::Failed;
+    EnemyCharacter->Attack(nullptr);
 
-        case EAttackMontageState::InProgress:
-            return EBTNodeResult::InProgress;
-
-        case EAttackMontageState::Interrupted:
-            return EBTNodeResult::Aborted;
-
-        case EAttackMontageState::Finished:
-            return EBTNodeResult::Succeeded;
-
-        default:
-            //error
-            break;
-        }
-    }
-
-    return EBTNodeResult::Failed;
-}
-
-EBTNodeResult::Type UBTTask_Attack::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
-{
-    bStartFlag = false;
-
-    CachedEnemyCharacter->UnbindApplyAttackDelegate();
-    return Super::AbortTask(OwnerComp, NodeMemory);
-}
-
-void UBTTask_Attack::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
-{
-    bStartFlag = false;
-
-    CachedEnemyCharacter->UnbindApplyAttackDelegate();
-    Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
-}
-
-void UBTTask_Attack::OnApplyAttack()
-{
-    UBlackboardComponent* Blackboard = CachedOwnerComponent->GetBlackboardComponent();
-    if (!Blackboard)
-    {
-        return;
-    }
-
-    UObject* TargetObject = Blackboard->GetValueAsObject(TargetValueName);
-    if (!TargetObject)
-    {
-        return;
-    }
-
-    ACharacter* TargetCharacter = Cast<ACharacter>(TargetObject);
-
-    FDamageEvent DamageEvent;
-    TargetCharacter->TakeDamage(CachedEnemyCharacter->GetDamage()
-        , DamageEvent
-        , CachedOwnerComponent->GetAIOwner()
-        , CachedEnemyCharacter);
-}
-
-AEnemyCharacter* UBTTask_Attack::GetEnemyCharacterFromOwnerComp(UBehaviorTreeComponent& OwnerComp)
-{
-    AAIController* AiController = OwnerComp.GetAIOwner();
-    if (!AiController)
-    {
-        return nullptr;
-    }
-
-    ACharacter* AiCharacter = AiController->GetCharacter();
-    if (!AiCharacter)
-    {
-        return nullptr;
-    }
-
-    AEnemyCharacter* EnemyCharacter = Cast<AEnemyCharacter>(AiCharacter);
-    if (!EnemyCharacter)
-    {
-        return nullptr;
-    }
-
-    return EnemyCharacter;
+    return EBTNodeResult::Succeeded;
 }
