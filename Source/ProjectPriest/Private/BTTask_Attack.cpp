@@ -4,6 +4,8 @@
 #include "GameFramework/Character.h"
 #include "EnemyCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "MonsterAIController.h"
+#include "Engine/DamageEvents.h"
 
 UBTTask_Attack::UBTTask_Attack()
 {
@@ -14,63 +16,97 @@ UBTTask_Attack::UBTTask_Attack()
 
 EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+    Super::ExecuteTask(OwnerComp, NodeMemory);
+
+    CachedOwnerComponent = &OwnerComp;
+    
+    AEnemyCharacter* EnemyCharacter = GetEnemyCharacterFromOwnerComp(OwnerComp);
+
+    if (!bStartFlag)
+    {
+        bStartFlag = true;
+
+        FApplyAttackDelegte Delegate;
+        Delegate.BindUObject(this, &UBTTask_Attack::OnApplyAttack);
+
+        EnemyCharacter->Attack(nullptr);
+
+        return EBTNodeResult::InProgress;
+    }
+    else
+    {
+        switch (EnemyCharacter->GetAttackMontageState())
+        {
+        case EAttackMontageState::Error:
+            return EBTNodeResult::Failed;
+
+        case EAttackMontageState::InProgress:
+            return EBTNodeResult::InProgress;
+
+        case EAttackMontageState::Interrupted:
+            return EBTNodeResult::Aborted;
+
+        case EAttackMontageState::Finished:
+            return EBTNodeResult::Succeeded;
+
+        default:
+            //error
+            break;
+        }
+    }
+}
+
+EBTNodeResult::Type UBTTask_Attack::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+    bStartFlag = false;
+    return Super::AbortTask(OwnerComp, NodeMemory);
+}
+
+void UBTTask_Attack::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
+{
+    bStartFlag = false;
+    Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
+}
+
+void UBTTask_Attack::OnApplyAttack()
+{
+    UBlackboardComponent* Blackboard = CachedOwnerComponent->GetBlackboardComponent();
+    if (!Blackboard)
+    {
+        return;
+    }
+
+    UObject* TargetObject = Blackboard->GetValueAsObject(TargetValueName);
+    ACharacter* TargetCharacter = Cast<ACharacter>(TargetObject);
+
+    AEnemyCharacter* EnemyCharacter = GetEnemyCharacterFromOwnerComp(*CachedOwnerComponent);
+    
+    FDamageEvent DamageEvent;
+    TargetCharacter->TakeDamage(EnemyCharacter->GetDamage()
+        , DamageEvent
+        , CachedOwnerComponent->GetAIOwner()
+        , EnemyCharacter);
+}
+
+AEnemyCharacter* UBTTask_Attack::GetEnemyCharacterFromOwnerComp(UBehaviorTreeComponent& OwnerComp)
+{
     AAIController* AiController = OwnerComp.GetAIOwner();
     if (!AiController)
     {
-        return EBTNodeResult::Failed;
+        return nullptr;
     }
 
     ACharacter* AiCharacter = AiController->GetCharacter();
     if (!AiCharacter)
     {
-        return EBTNodeResult::Failed;
+        return nullptr;
     }
 
-    UAnimInstance* AiAnimInstance = AiCharacter->GetMesh()->GetAnimInstance();
-    if (!AiAnimInstance)
+    AEnemyCharacter* EnemyCharacter = Cast<AEnemyCharacter>(AiCharacter);
+    if (!EnemyCharacter)
     {
-        return EBTNodeResult::Failed;
+        return nullptr;
     }
 
-    if (!MontageToPlaying)
-    {
-        return EBTNodeResult::Failed;
-    }
-
-    CachedOwnerComponent = &OwnerComp;
-    CachedAnimInstance = AiAnimInstance;
-
-    float MontagePlayResult = CachedAnimInstance->Montage_Play(MontageToPlaying, 1.0f);
-    if (FMath::IsNearlyZero(MontagePlayResult))
-    {
-        return EBTNodeResult::Failed;
-    }
-
-    FOnMontageEnded EndDelegate;
-    EndDelegate.BindUObject(this, &UBTTask_Attack::OnMontageEnded);
-
-    CachedAnimInstance->Montage_SetEndDelegate(EndDelegate, MontageToPlaying);
-
-    return EBTNodeResult::InProgress;
-}
-
-void UBTTask_Attack::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{
-    if (!CachedAnimInstance)
-    {
-        return;
-    }
-
-    AEnemyCharacter* MyCharacter = Cast<AEnemyCharacter>(CachedOwnerComponent->GetOwner());
-    UBlackboardComponent* Blackboard = CachedOwnerComponent->GetBlackboardComponent();
-    UObject* TempTarget = Blackboard->GetValueAsObject(TargetValueName);
-    ACharacter* EnemyCharacter = Cast<ACharacter>(TempTarget);
-    MyCharacter->Attack(EnemyCharacter);
-
-    //TODO: 이곳에 데미지 주는 것을 구현하기
-    FinishLatentTask(*CachedOwnerComponent,
-        bInterrupted ?
-        EBTNodeResult::Failed : 
-        EBTNodeResult::Succeeded
-    );
+    return EnemyCharacter;
 }

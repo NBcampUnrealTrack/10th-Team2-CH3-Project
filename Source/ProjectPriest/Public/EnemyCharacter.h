@@ -17,6 +17,17 @@ class USphereComponent;
 //    //TODO: 뭐... 나중에 더 추가할수도?
 //};
 
+UENUM(Blueprinttype)
+enum class EAttackMontageState : uint8
+{
+    InProgress      UMETA(DisplayName = "InProgress"),
+    Finished        UMETA(DisplayName = "Finished"),
+    Interrupted     UMETA(DisplayName = "Abort"),
+    Error           UMETA(DisplayName = "Error")
+};
+
+DECLARE_DELEGATE(FApplyAttackDelegte);
+
 //TODO: 몬스터 스탯을 테이블로 해야한다
 UCLASS()
 class PROJECTPRIEST_API AEnemyCharacter : public ACharacter
@@ -67,7 +78,13 @@ public:
     UFUNCTION(BlueprintPure)
     virtual bool HitThisFrame();
 
+    UFUNCTION(BlueprintCallable)
+    void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+    EAttackMontageState GetAttackMontageState() const;
     float GetDamage();
+
+    void SetApplyAttackDelegate(FApplyAttackDelegte& Delegate);
 
 protected:
 
@@ -101,8 +118,22 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Enemy Character ===|For anim blueprint")
     bool bHitThisFrame;
+    
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Enemy Character ===|For anim blueprint")
     bool bIsDead;
+    
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Enemy Character ===|For anim blueprint")
     bool bShouldAttack;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Enemy Character ===|For anim blueprint")
+    TObjectPtr<UAnimMontage> MontageToPlaying;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Enemy Character ===|For anim blueprint")
+    TObjectPtr<UAnimInstance> AnimInstance;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Enemy Character ===|For BT")
+    FName TargetValueName;    
+
+    EAttackMontageState AttackMontageState;
+    FApplyAttackDelegte ApplyAttackDelegate;
 };

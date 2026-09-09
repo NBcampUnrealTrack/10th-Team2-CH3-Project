@@ -28,12 +28,19 @@ AEnemyCharacter::AEnemyCharacter()
 
 void AEnemyCharacter::Attack(ACharacter* PlayerCharacter)
 {
-	//추후 포인터를 플레이어캐릭터로 변경 예정
-	//공통 공격 로직
+    float MontagePlayResult = AnimInstance->Montage_Play(MontageToPlaying, 1.0f);
+    if (FMath::IsNearlyZero(MontagePlayResult))
+    {
+        //TODO: Error what to do
+        AttackMontageState = EAttackMontageState::Error;
+        return;
+    }
 
-    //Play Attack animation
-    //-> DamageEven (데미지 주기)
-    //-> 애니메이션 종료 대기(Abort or Finished)
+    FOnMontageEnded EndDelegate;
+    EndDelegate.BindUObject(this, &AEnemyCharacter::OnMontageEnded);
+
+    AnimInstance->Montage_SetEndDelegate(EndDelegate, MontageToPlaying);
+    AttackMontageState = EAttackMontageState::InProgress;
 }
 
 void AEnemyCharacter::TakeDamage(float DamageAmount)
@@ -50,20 +57,31 @@ void AEnemyCharacter::Die()
 {
 	Destroy();
 }
+void AEnemyCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+    if (bInterrupted)
+    {
+        AttackMontageState = EAttackMontageState::Interrupted;
+    }
+    else
+    {
+        AttackMontageState = EAttackMontageState::Finished;
+    }
+}
 
 void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
 	PatrolOrigin = this->GetActorLocation();
+
+    AnimInstance = GetMesh()->GetAnimInstance();
 }
 
 void AEnemyCharacter::OnNotifyApplyDamage()
 {
     if (!IsValid(GEngine))
         return;
-
-    
 }
 
 bool AEnemyCharacter::GetIsDead()
@@ -81,9 +99,19 @@ bool AEnemyCharacter::HitThisFrame()
     return bHitThisFrame;
 }
 
+EAttackMontageState AEnemyCharacter::GetAttackMontageState() const
+{
+    return AttackMontageState;
+}
+
 float AEnemyCharacter::GetDamage()
 {
     return Damage;
+}
+
+void AEnemyCharacter::SetApplyAttackDelegate(FApplyAttackDelegte& Delegate)
+{
+    ApplyAttackDelegate = Delegate;
 }
 
 void AEnemyCharacter::Tick(float DeltaTime)

@@ -6,6 +6,7 @@
 
 class UAnimInstance;
 class UBehaviorTreeComponent;
+class AEnemyCharacter;
 
 UCLASS()
 class PROJECTPRIEST_API UBTTask_Attack : public UBTTask_BlackboardBase
@@ -17,16 +18,19 @@ public:
 
     virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
-    UFUNCTION(BlueprintCallable)
-    void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+    void OnApplyAttack();
+    AEnemyCharacter* GetEnemyCharacterFromOwnerComp(UBehaviorTreeComponent& OwnerComp);
+protected:
+    virtual void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult) override;
+    virtual EBTNodeResult::Type AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+
 
 protected:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Attack==")
-    TObjectPtr<UAnimMontage> MontageToPlaying;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Attacks==")
     FName TargetValueName;    
 
-    TObjectPtr<UAnimInstance> CachedAnimInstance;
     TObjectPtr<UBehaviorTreeComponent> CachedOwnerComponent;
+
+    bool bStartFlag;
 };
