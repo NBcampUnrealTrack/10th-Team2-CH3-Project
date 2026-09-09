@@ -5,6 +5,8 @@
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "HolyGenerade.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -26,6 +28,8 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+    CurrentHealth = MaxHealth;
+
     ChangeWalkingMode(EWalkingMode::Normal);
 }
 
@@ -42,6 +46,11 @@ void APlayerCharacter::ChangeWalkingMode(EWalkingMode WalkingMode)
     Mode = WalkingMode;
     GetCharacterMovement()->MaxWalkSpeed = Config->Speed;
     GetCharacterMovement()->MaxAcceleration = Config->Accel;
+}
+
+void APlayerCharacter::ResetThrowCoolTime()
+{
+    bCanThrow = true;
 }
 
 // Called every frame
@@ -105,6 +114,31 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     );
 }
 
+float APlayerCharacter::TakeDamage(
+    float DamageAmount,
+    FDamageEvent const& DamageEvent,
+    AController* EventInstigator,
+    AActor* DamageCauser)
+{
+    const float ActualDamage = Super::TakeDamage(
+        DamageAmount,
+        DamageEvent,
+        EventInstigator,
+        DamageCauser
+    );
+
+    CurrentHealth = FMath::Clamp(CurrentHealth - ActualDamage, 0.0f, MaxHealth);
+
+    //UE_LOG(LogTemp, Warning, TEXT("플레이어 데미지: %.1f / 현재 HP: %.1f"), ActualDamage, CurrentHealth);
+
+    if (CurrentHealth <= 0.0f)
+    {
+        // 사망 함수 호출
+    }
+
+    return ActualDamage;
+}
+
 void APlayerCharacter::OnMoveInputted(const FInputActionInstance& InputValue)
 {
     //GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Move"));
@@ -150,21 +184,32 @@ void APlayerCharacter::OnAttackInputted(const FInputActionValue& value)
     }
 
     const FVector Start = GetMesh()->GetSocketLocation(SocketName);
-    const FVector Forward = GetMesh()->GetSocketRotation(SocketName).Vector();
-
+    const FVector Forward = GetActorForwardVector();
     const FVector End = Start + Forward * 10000.0f;
 
     FHitResult Hit;
 
     GetWorld()->LineTraceSingleByChannel(
         Hit,
-        Start,
+        Start,  
         End,
         ECC_Visibility
     );
 
     if (Hit.bBlockingHit)
     {
+        // 총구부터 Hit 지점까지 디버그 라인 생성
+        DrawDebugLine(
+            GetWorld(),
+            Start,
+            Hit.ImpactPoint,
+            FColor::Green,
+            false,
+            1.0f,
+            0,
+            2.0f
+        );
+
         UGameplayStatics::ApplyDamage(
             Hit.GetActor(),
             BaseDamage,
@@ -173,11 +218,87 @@ void APlayerCharacter::OnAttackInputted(const FInputActionValue& value)
             UDamageType::StaticClass()
         );
     }
+    else
+    {
+        // 총구부터 끝점까지 디버그 라인 생성
+        DrawDebugLine(
+            GetWorld(),
+            Start,
+            End,
+            FColor::Green,
+            false,
+            1.0f,
+            0,
+            2.0f
+        );
+    }
 }
 
 void APlayerCharacter::OnThrowInputted(const FInputActionValue& value)
 {
     //GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Throw"));
+
+    if (!bCanThrow)
+    {
+        return;
+    }
+
+    bCanThrow = false;
+
+    if (!HolyGrenadeClass)
+    {
+        return;
+    }
+
+    const FName SocketName = RightHandSocketName;
+
+    if (!GetMesh()->DoesSocketExist(SocketName))
+    {
+        //UE_LOG(LogTemp, Warning, TEXT("오른손 Socket이 없습니다."));
+        return;
+    }
+
+    // 오른손 위치
+    const FVector HandLocation = GetMesh()->GetSocketLocation(SocketName);
+
+    // 캐릭터가 바라보는 방향
+    const FVector Forward = GetActorForwardVector();
+    // 카메라가 바라보는 방향
+    // const FVector Forward = Camera->GetForwardVector();
+
+    // 캐릭터의 오른손보다 조금 앞에서 생성
+    const FVector SpawnLocation = HandLocation + Forward * ThrowDistance;
+
+    FRotator SpawnRotation = GetActorRotation();
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.Owner = this;
+    SpawnParams.Instigator = this;
+
+    // 스폰
+    AHolyGenerade* HolyGrenade =
+        GetWorld()->SpawnActor<AHolyGenerade>(
+            HolyGrenadeClass,
+            SpawnLocation,
+            SpawnRotation,
+            SpawnParams
+        );
+
+    if (!HolyGrenade)
+    {
+        return;
+    }
+
+    // 투척
+    HolyGrenade->Throw(Forward, ThrowForce);
+
+    GetWorld()->GetTimerManager().SetTimer(
+        ThrowCoolTimeTimerHandle,
+        this,
+        &APlayerCharacter::ResetThrowCoolTime,
+        ThrowCoolTime,
+        false
+    );
 }
 
 void APlayerCharacter::OnSprintInputted(const FInputActionInstance& InputValue)
