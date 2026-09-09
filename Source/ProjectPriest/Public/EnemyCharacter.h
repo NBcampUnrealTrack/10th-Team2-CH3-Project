@@ -85,6 +85,7 @@ public:
     float GetDamage();
 
     void SetApplyAttackDelegate(FApplyAttackDelegte& Delegate);
+    void UnbindApplyAttackDelegate();
 
 protected:
 

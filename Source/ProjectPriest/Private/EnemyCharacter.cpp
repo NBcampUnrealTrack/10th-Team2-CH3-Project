@@ -78,10 +78,17 @@ void AEnemyCharacter::BeginPlay()
     AnimInstance = GetMesh()->GetAnimInstance();
 }
 
+//TODO: 아 맘에 안들어 겁나 화나는 그런 구조네...
+// BT_Attack 
+// -> AEnemyCharacter::Attack() 
+// -> Play Montage 
+// -> Raise ApplyDamage 
+// -> AEnemyCharacter::OnNotifyApplyDamage
+// -> BT_Attack.OnApplyDamage;
+
 void AEnemyCharacter::OnNotifyApplyDamage()
 {
-    if (!IsValid(GEngine))
-        return;
+    ApplyAttackDelegate.ExecuteIfBound();
 }
 
 bool AEnemyCharacter::GetIsDead()
@@ -112,6 +119,11 @@ float AEnemyCharacter::GetDamage()
 void AEnemyCharacter::SetApplyAttackDelegate(FApplyAttackDelegte& Delegate)
 {
     ApplyAttackDelegate = Delegate;
+}
+
+void AEnemyCharacter::UnbindApplyAttackDelegate()
+{
+    ApplyAttackDelegate.Unbind();
 }
 
 void AEnemyCharacter::Tick(float DeltaTime)

@@ -31,6 +31,6 @@ protected:
     FName TargetValueName;    
 
     TObjectPtr<UBehaviorTreeComponent> CachedOwnerComponent;
-
+    TObjectPtr< AEnemyCharacter> CachedEnemyCharacter;
     bool bStartFlag;
 };

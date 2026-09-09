@@ -20,7 +20,7 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 
     CachedOwnerComponent = &OwnerComp;
     
-    AEnemyCharacter* EnemyCharacter = GetEnemyCharacterFromOwnerComp(OwnerComp);
+    CachedEnemyCharacter = GetEnemyCharacterFromOwnerComp(OwnerComp);
 
     if (!bStartFlag)
     {
@@ -29,13 +29,13 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
         FApplyAttackDelegte Delegate;
         Delegate.BindUObject(this, &UBTTask_Attack::OnApplyAttack);
 
-        EnemyCharacter->Attack(nullptr);
+        CachedEnemyCharacter->Attack(nullptr);
 
         return EBTNodeResult::InProgress;
     }
     else
     {
-        switch (EnemyCharacter->GetAttackMontageState())
+        switch (CachedEnemyCharacter->GetAttackMontageState())
         {
         case EAttackMontageState::Error:
             return EBTNodeResult::Failed;
@@ -54,17 +54,23 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
             break;
         }
     }
+
+    return EBTNodeResult::Failed;
 }
 
 EBTNodeResult::Type UBTTask_Attack::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
     bStartFlag = false;
+
+    CachedEnemyCharacter->UnbindApplyAttackDelegate();
     return Super::AbortTask(OwnerComp, NodeMemory);
 }
 
 void UBTTask_Attack::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
 {
     bStartFlag = false;
+
+    CachedEnemyCharacter->UnbindApplyAttackDelegate();
     Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 }
 
@@ -79,13 +85,11 @@ void UBTTask_Attack::OnApplyAttack()
     UObject* TargetObject = Blackboard->GetValueAsObject(TargetValueName);
     ACharacter* TargetCharacter = Cast<ACharacter>(TargetObject);
 
-    AEnemyCharacter* EnemyCharacter = GetEnemyCharacterFromOwnerComp(*CachedOwnerComponent);
-    
     FDamageEvent DamageEvent;
-    TargetCharacter->TakeDamage(EnemyCharacter->GetDamage()
+    TargetCharacter->TakeDamage(CachedEnemyCharacter->GetDamage()
         , DamageEvent
         , CachedOwnerComponent->GetAIOwner()
-        , EnemyCharacter);
+        , CachedEnemyCharacter);
 }
 
 AEnemyCharacter* UBTTask_Attack::GetEnemyCharacterFromOwnerComp(UBehaviorTreeComponent& OwnerComp)
