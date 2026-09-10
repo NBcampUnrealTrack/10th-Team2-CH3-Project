@@ -35,6 +35,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetPatrolRadius();
 
+    //사거리
+	UFUNCTION(BlueprintCallable)
+    float GetAttackRange();
+
     UFUNCTION(BlueprintCallable)
     virtual void OnNotifyApplyDamage();
 
@@ -61,7 +65,6 @@ public:
 
     UFUNCTION(BlueprintPure)
     virtual bool HitThisFrame();
-
   
     float GetDamage();
 
@@ -96,6 +99,10 @@ protected:
 	//몬스터 최소 피해량
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
 	float MinimumDamage;
+
+    //몬스터 사거리
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+    float AttackRange;
 
     //몬스터 방어력
     //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")

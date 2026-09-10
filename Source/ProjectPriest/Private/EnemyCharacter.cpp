@@ -20,6 +20,7 @@ AEnemyCharacter::AEnemyCharacter()
 	Health = 100.0f;
 	Damage = 10.0f;
 	Defense = 5.0f;
+	AttackRange = 150.0f; //공격 사거리
 	MinimumDamage = 1.0f;//몬스터가 받는 최소피해
 
 	PatrolRadius = 1000.0f;
@@ -62,6 +63,11 @@ void AEnemyCharacter::BeginPlay()
 // -> Raise ApplyDamage 
 // -> AEnemyCharacter::OnNotifyApplyDamage
 // -> BT_Attack.OnApplyDamage;
+
+float AEnemyCharacter::GetAttackRange()
+{
+	return AttackRange;
+}
 
 void AEnemyCharacter::OnNotifyApplyDamage()
 {

@@ -15,7 +15,7 @@ void AMeleeEnemyCharacter::Attack(ACharacter* PlayerCharacter)
     Super::Attack(PlayerCharacter);
 
     JASSERT(IsValid(MontageToPlaying), "Montage is null or not setted");
-    float MontagePlayResult = AnimInstance->Montage_Play(MontageToPlaying, 0.1f);
+    float MontagePlayResult = AnimInstance->Montage_Play(MontageToPlaying, 1.0f);
     AnimInstance->Montage_JumpToSection(GetRandomSessionName(), MontageToPlaying);
 
     if (MontagePlayResult <= 0.001f)
