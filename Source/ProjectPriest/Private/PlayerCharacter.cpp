@@ -183,48 +183,92 @@ void APlayerCharacter::OnAttackInputted(const FInputActionValue& value)
         return;
     }
 
-    const FVector Start = GetMesh()->GetSocketLocation(SocketName);
-    const FVector Forward = GetActorForwardVector();
-    const FVector End = Start + Forward * 10000.0f;
+    AIngamePlayerController* PlayerController = Cast<AIngamePlayerController>(GetController());
 
-    FHitResult Hit;
+    if (!PlayerController)
+    {
+        return;
+    }
+
+    // 카메라 기준으로 조준점 찾기
+    FVector CameraStart = PlayerController->PlayerCameraManager->GetCameraLocation();
+    FVector CameraForward = PlayerController->PlayerCameraManager->GetCameraRotation().Vector();
+    FVector CameraEnd = CameraStart + CameraForward * 10000.0f;
+
+    FHitResult CameraHitResult;
+
+    FCollisionQueryParams QueryParams;
+    QueryParams.AddIgnoredActor(this);
 
     GetWorld()->LineTraceSingleByChannel(
-        Hit,
-        Start,  
-        End,
-        ECC_Visibility
+        CameraHitResult,
+        CameraStart,
+        CameraEnd,
+        ECC_Visibility,
+        QueryParams
     );
 
-    if (Hit.bBlockingHit)
-    {
-        // 총구부터 Hit 지점까지 디버그 라인 생성
-        DrawDebugLine(
-            GetWorld(),
-            Start,
-            Hit.ImpactPoint,
-            FColor::Green,
-            false,
-            1.0f,
-            0,
-            2.0f
-        );
+    // 조준점
+    FVector AimPoint;
 
-        UGameplayStatics::ApplyDamage(
-            Hit.GetActor(),
-            BaseDamage,
-            GetController(),
-            this,
-            UDamageType::StaticClass()
-        );
+    if (CameraHitResult.bBlockingHit)
+    {
+        AimPoint = CameraHitResult.ImpactPoint;
     }
     else
     {
-        // 총구부터 끝점까지 디버그 라인 생성
+        AimPoint = CameraEnd;
+    }
+
+    const FVector MuzzleLocation = GetMesh()->GetSocketLocation(SocketName);
+    const FVector ShotDirection = (AimPoint - MuzzleLocation).GetSafeNormal();
+    const FVector ShotEnd = MuzzleLocation + ShotDirection * 10000.0f;
+
+    FHitResult ShotHitResult;
+
+    bool bHit = GetWorld()->LineTraceSingleByChannel(
+        ShotHitResult,
+        MuzzleLocation,
+        ShotEnd,
+        ECC_Visibility,
+        QueryParams
+    );
+
+    if (bHit)
+    {
+        AActor* HitActor = ShotHitResult.GetActor();
+
+        if (HitActor)
+        {
+            // 총구에서 피격 지점까지 디버그 라인 생성
+            DrawDebugLine(
+                GetWorld(),
+                MuzzleLocation,
+                ShotHitResult.ImpactPoint,
+                FColor::Green,
+                false,
+                1.0f,
+                0,
+                2.0f
+            );
+
+            // 데미지 적용
+            UGameplayStatics::ApplyDamage(
+                HitActor,
+                BaseDamage,
+                PlayerController,
+                this,
+                nullptr
+            );
+        }
+    }
+    else
+    {
+        // 총구에서 최대 사거리까지 디버그 라인 생성
         DrawDebugLine(
             GetWorld(),
-            Start,
-            End,
+            MuzzleLocation,
+            ShotEnd,
             FColor::Green,
             false,
             1.0f,
