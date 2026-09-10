@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "MvcEvents.h"
+#include "MvcModel.h"
 #include "PlayerCharacter.generated.h"
 
 class USpringArmComponent;
@@ -30,9 +32,17 @@ enum class EWalkingMode : uint8
 
 
 UCLASS()
-class PROJECTPRIEST_API APlayerCharacter : public ACharacter
+class PROJECTPRIEST_API APlayerCharacter
+    : public ACharacter
+    , public IMvcModel
 {
 	GENERATED_BODY()
+
+public:
+    enum class PropertyName {
+        CurrentHealth,
+        MaxHealth
+    };
 
 public:
 	// Sets default values for this character's properties
@@ -51,6 +61,20 @@ public:
         AController* EventInstigator,
         AActor* DamageCauser
     ) override;
+
+    virtual FDelegateHandle AddListener(UMvcControl* Control) override;
+    virtual void RemoveListener(FDelegateHandle Handle) override;
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="PropertyName">must be casted from enum type</param>
+    virtual void InvokePropertyChanged(uint8 PropertyName) override;
+
+    UFUNCTION(BlueprintCallable)
+    int GetCurrentHealth();
+
+    UFUNCTION(BlueprintCallable)
+    int GetMaxHealth();
 
     UFUNCTION()
     void OnMoveInputted(const FInputActionInstance& InputValue);
@@ -126,4 +150,6 @@ protected:
     bool bCanThrow = true;
 
     FTimerHandle ThrowCoolTimeTimerHandle;
+    
+    FModelChangedDelegate Listeners;
 };

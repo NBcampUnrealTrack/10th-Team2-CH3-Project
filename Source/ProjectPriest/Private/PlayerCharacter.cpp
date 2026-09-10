@@ -7,6 +7,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "HolyGenerade.h"
 #include "DrawDebugHelpers.h"
+#include "MvcControl.h"
+#include "JUtility.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -137,6 +139,31 @@ float APlayerCharacter::TakeDamage(
     }
 
     return ActualDamage;
+}
+
+FDelegateHandle APlayerCharacter::AddListener(UMvcControl* Control)
+{
+    return Listeners.AddUObject(Control, &UMvcControl::HandleModelChanged);
+}
+
+void APlayerCharacter::RemoveListener(FDelegateHandle Handle)
+{
+    Listeners.Remove(Handle);
+}
+
+void APlayerCharacter::InvokePropertyChanged(uint8 PropertyName)
+{
+    Listeners.Broadcast(this, PropertyName);
+}
+
+int APlayerCharacter::GetCurrentHealth()
+{
+    return CurrentHealth;
+}
+
+int APlayerCharacter::GetMaxHealth()
+{
+    return MaxHealth;
 }
 
 void APlayerCharacter::OnMoveInputted(const FInputActionInstance& InputValue)

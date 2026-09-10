@@ -1,7 +1,14 @@
-#include "PriestUIManager.h"
+﻿#include "PriestUIManager.h"
 #include "PriestHUDWidget.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
+
+//MVC
+//MVC
+//Model
+//View
+//Control
+//
 
 bool UPriestUIManager::ShowHUD(const FPriestHUDData& Data)
 {

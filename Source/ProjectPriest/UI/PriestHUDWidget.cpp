@@ -1,10 +1,12 @@
-#include "PriestHUDWidget.h"
+﻿#include "PriestHUDWidget.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "MvcControl.h"
+#include "JUtility.h"
 
 TSharedRef<SWidget> UPriestHUDWidget::RebuildWidget()
 {
@@ -71,6 +73,19 @@ void UPriestHUDWidget::SetHUDData(const FPriestHUDData& InData)
 	Refresh();
 }
 
+void UPriestHUDWidget::SetHealth(int CurrentHealth, int MaxHealth)
+{
+    JASSERT(MaxHealth == 0, "Can not divde by zero");
+
+    float FCurrentHealth = (float)CurrentHealth;
+    float FMaxHealth = (float)MaxHealth;
+    float Percent = FCurrentHealth / FMaxHealth;
+
+    HealthBar->SetPercent(Percent);
+
+    HealthText->SetText(FText::Format(NSLOCTEXT("PriestHUD", "Health", "HP {0} / {1}"), CurrentHealth, MaxHealth));
+}
+
 void UPriestHUDWidget::Refresh()
 {
 	// 데이터가 화면 생성보다 먼저 들어오면 보관만 하고, 생성 후 다시 반영한다.
@@ -83,4 +98,19 @@ void UPriestHUDWidget::Refresh()
 	WeaponText->SetText(FText::Format(NSLOCTEXT("PriestHUD", "Ammo", "{0}\n{1} / {2}"), Data.WeaponName, FText::AsNumber(FMath::Max(0, Data.MagazineAmmo)), FText::AsNumber(FMath::Max(0, Data.ReserveAmmo))));
 	MissionText->SetText(Data.MissionObjective);
 	// 경과 시간은 Data.ElapsedSeconds에 보관한다.
+}
+
+FDelegateHandle UPriestHUDWidget::AddListener(UMvcControl* Control)
+{
+    return Listener.AddUObject(Control, &UMvcControl::HandleViewEvent);
+}
+
+void UPriestHUDWidget::RemoveListener(FDelegateHandle DelegateHandle)
+{
+    Listener.Remove(DelegateHandle);
+}
+
+void UPriestHUDWidget::InvokeViewEvent(EViewEventType EventName, UEventParameterBase* Parameter)
+{
+    Listener.Broadcast(this, EventName, Parameter);
 }
