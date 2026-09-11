@@ -20,7 +20,7 @@ AEnemyCharacter::AEnemyCharacter()
 	Health = 100.0f;
 	Damage = 10.0f;
 	Defense = 5.0f;
-	AttackRange = 150.0f; //공격 사거리
+	AttackRange = 0; //공격 사거리
 	MinimumDamage = 1.0f;//몬스터가 받는 최소피해
 
 	PatrolRadius = 1000.0f;
@@ -35,6 +35,7 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const&
 {
 	float ActualDamage = FMath::Max(DamageAmount - Defense, MinimumDamage);
 	Health -= ActualDamage;
+	UE_LOG(LogTemp, Warning, TEXT("몬스터가 받은 데미지: %.1f / 몬스터 현재 HP: %.1f"), ActualDamage, Health);
 	if (Health <= 0)
 	{
 		Die();

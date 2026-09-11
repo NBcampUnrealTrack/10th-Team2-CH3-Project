@@ -35,5 +35,7 @@ protected:
     TObjectPtr<UAnimMontage> MontageToPlaying;
 
     TArray<FName> SessionNames;
+
+    FName RandomSessionName;
 };
  

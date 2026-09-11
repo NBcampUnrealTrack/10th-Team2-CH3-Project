@@ -2,6 +2,7 @@
 #include "JUtility.h"
 #include <system_error>
 #include "Components/SphereComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AMeleeEnemyCharacter::AMeleeEnemyCharacter()
     : SessionNames({
@@ -14,6 +15,9 @@ AMeleeEnemyCharacter::AMeleeEnemyCharacter()
 
     LeftHandCollision->SetupAttachment(GetMesh(), TEXT("hand_l"));
     RightHandCollision->SetupAttachment(GetMesh(), TEXT("hand_r"));
+
+    AttackRange = 200.f; //공격 사거리
+    Damage = 10.0f;
 }
 
 void AMeleeEnemyCharacter::Attack(ACharacter* PlayerCharacter)
@@ -54,11 +58,36 @@ void AMeleeEnemyCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupt
 
 void AMeleeEnemyCharacter::OnNotifyApplyDamage()
 {
-
+    TSet<AActor*> OverlappingActors;
+    LeftHandCollision->GetOverlappingActors(OverlappingActors);
+    RightHandCollision->GetOverlappingActors(OverlappingActors);
+    UE_LOG(
+        LogTemp,
+        Warning,
+        TEXT("=== OnNotifyApplyDamage ===")
+    );
+    for (AActor* Actor : OverlappingActors) {
+        if (Actor && Actor->ActorHasTag("Player")) {
+            UGameplayStatics::ApplyDamage(
+                Actor,
+                Damage,
+                nullptr,
+                this,
+                UDamageType::StaticClass()
+            );
+            UE_LOG(
+                LogTemp,
+                Warning,
+                TEXT("=== APPLY DAMAGE TO %s ==="),
+                *Actor->GetName()
+            );
+        }
+    }
 }
 
 const FName& AMeleeEnemyCharacter::GetRandomSessionName()
 {
     int32 RandomIndex = FMath::RandRange(0, SessionNames.Num() - 1 );
-    return SessionNames[RandomIndex];
+    RandomSessionName = SessionNames[RandomIndex];
+    return RandomSessionName;
 }
