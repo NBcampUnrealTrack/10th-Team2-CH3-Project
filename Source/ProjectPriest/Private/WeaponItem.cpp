@@ -2,6 +2,8 @@
 #include "IngamePlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/PlayerCameraManager.h"
+#include "PlayerCharacter.h"
+#include "JUtility.h"
 
 AWeaponItem::AWeaponItem()
 {
@@ -47,12 +49,12 @@ void AWeaponItem::Attack()
 	}
 
 	// FPS
-	PerformTraceFPS(PlayerController, OwnerActor);
+	//PerformTraceFPS(PlayerController, OwnerActor);
 
 	// TPS
-	// PerformTraceTPS(PlayerController, OwnerActor);
+	PerformTraceTPS(PlayerController, OwnerActor);
 
-	//UE_LOG(LogTemp, Warning, TEXT("현재 탄약: %d / %d"), CurrentAmmo, ReserveAmmo);
+	JLog("현재 탄약: %d / %d", CurrentAmmo, ReserveAmmo);
 }
 
 void AWeaponItem::Reload()
@@ -61,6 +63,8 @@ void AWeaponItem::Reload()
 	{
 		return;
 	}
+
+    JLog("재장전 시작");
 
 	// 재장전 시작
 	bIsReloading = true;
@@ -104,6 +108,11 @@ bool AWeaponItem::CanReload() const
 	return true;
 }
 
+int AWeaponItem::GetCurrentAmmo() const
+{
+    return CurrentAmmo;
+}
+
 void AWeaponItem::CompleteReload()
 {
 	// 재장전에 필요한 탄약 수
@@ -116,6 +125,8 @@ void AWeaponItem::CompleteReload()
 	ReserveAmmo -= ReloadAmount;
 
 	bIsReloading = false;
+
+    JLog("재장전 완료")
 }
 
 void AWeaponItem::ResetFire()
@@ -235,8 +246,10 @@ void AWeaponItem::PerformTraceTPS(
 	}
 
 	// 총구에서 조준점으로 발사
-	// 임시로 총구를 캐릭터의 위치로 잡음 -> 총구의 socket 위치를 시작점으로 잡도록 변경해야 함
-	FVector MuzzleLocation = GetActorLocation();
+	// 캐릭터 메시가 총을 가지고 있어서 이와 같은 모습이 됨...
+	//FVector MuzzleLocation = GetActorLocation();
+    APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OwnerActor);
+    FVector MuzzleLocation = PlayerCharacter->GetMuzzleLocation();
 	FVector ShotDirection = (AimPoint - MuzzleLocation).GetSafeNormal();
 	FVector ShotEnd = MuzzleLocation + ShotDirection * Range;
 
