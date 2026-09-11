@@ -267,7 +267,7 @@ void AWeaponItem::PerformTraceTPS(
 	{
 		AActor* HitActor = ShotHitResult.GetActor();
 
-		if (HitActor)
+		if (HitActor && HitActor->ActorHasTag("Monster"))
 		{
 			// 총구에서 피격 지점까지 디버그 라인 생성
 			DrawDebugLine(
