@@ -16,7 +16,7 @@ enum class EAttackAnimationState : uint8
     Error           UMETA(DisplayName = "Error")
 };
 
-DECLARE_DELEGATE(FApplyAttackDelegte);
+DECLARE_DELEGATE(FApplyAttackDelegate);
 
 //TODO: 몬스터 스탯을 테이블로 해야한다
 UCLASS()
