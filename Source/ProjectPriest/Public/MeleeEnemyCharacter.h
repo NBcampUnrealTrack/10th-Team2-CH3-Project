@@ -14,11 +14,19 @@ public:
 	AMeleeEnemyCharacter();
 
 protected:
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat|Collision")
+    USphereComponent* LeftHandCollision;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat|Collision")
+    USphereComponent* RightHandCollision;
+
 	//몬스터 공격
 	virtual void Attack(ACharacter* PlayerCharacter) override;
 
     UFUNCTION(BlueprintCallable)
     void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+    virtual void OnNotifyApplyDamage()override;
 
     const FName& GetRandomSessionName();
 

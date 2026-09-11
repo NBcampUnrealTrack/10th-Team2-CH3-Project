@@ -1,6 +1,7 @@
 ﻿#include "MeleeEnemyCharacter.h"
 #include "JUtility.h"
 #include <system_error>
+#include "Components/SphereComponent.h"
 
 AMeleeEnemyCharacter::AMeleeEnemyCharacter()
     : SessionNames({
@@ -8,6 +9,11 @@ AMeleeEnemyCharacter::AMeleeEnemyCharacter()
         ,"Attack1"
         ,"Attack2" })
 {
+    LeftHandCollision = CreateDefaultSubobject<USphereComponent>(TEXT("LeftHandCollision"));
+    RightHandCollision = CreateDefaultSubobject<USphereComponent>(TEXT("RightHandCollision"));
+
+    LeftHandCollision->SetupAttachment(GetMesh(), TEXT("hand_l"));
+    RightHandCollision->SetupAttachment(GetMesh(), TEXT("hand_r"));
 }
 
 void AMeleeEnemyCharacter::Attack(ACharacter* PlayerCharacter)
@@ -44,6 +50,11 @@ void AMeleeEnemyCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupt
     {
         AttackAnimationeState = EAttackAnimationState::Finished;
     }
+}
+
+void AMeleeEnemyCharacter::OnNotifyApplyDamage()
+{
+
 }
 
 const FName& AMeleeEnemyCharacter::GetRandomSessionName()
