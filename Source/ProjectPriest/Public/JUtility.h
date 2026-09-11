@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "BehaviorTree/BehaviorTreeComponent.h"
+#include "BehaviorTree/BehaviorTreeTypes.h"
 
 #define JLog(Format, ...) \
 UE_LOG(LogTemp, Log, TEXT(Format), ##__VA_ARGS__); \
@@ -42,6 +44,12 @@ if(!Condition) { \
 if(!Condition) { \
     JError(Format, ##__VA_ARGS__); \
     return nullptr;\
+}
+
+#define JASSERT_RETURN(Condition, Return, Format, ...) \
+if(!Condition) { \
+    JError(Format, ##__VA_ARGS__); \
+    return  Return;\
 }
 
 #define GET_ENUM_STRING(EnumType, EnumVariable) \

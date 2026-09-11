@@ -1,14 +1,12 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "EnemyCharacter.h"
 #include "RangedEnemyCharacter.generated.h"
 
-/**
- * 
- */
+class AProjectile;
+struct FTimerHandle;
+
 UCLASS()
 class PROJECTPRIEST_API ARangedEnemyCharacter : public AEnemyCharacter
 {
@@ -18,7 +16,18 @@ public:
 	ARangedEnemyCharacter();
 
 protected:
-	//¸ó½ºÅÍ °ø°Ý
+	//ëª¬ìŠ¤í„° ê³µê²©
 	virtual void Attack(ACharacter* PlayerCharacter) override;
+    virtual void SpawnBullet() const;
+    void OnAttackDelayTimer();
+
+protected:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Ranged Enemy ===|Properties")
+    TSubclassOf<AProjectile> Bullet;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Ranged Enemy ===|Properties")
+    float AttackDelay;
+
+    FTimerHandle AttackDelayTimerHandler;
 
 };
