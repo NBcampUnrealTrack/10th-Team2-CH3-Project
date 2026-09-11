@@ -26,7 +26,23 @@ EBTNodeResult::Type UBTTask_FindPlayer::ExecuteTask(UBehaviorTreeComponent& Owne
 	if (!playerPawn) 
 		return EBTNodeResult::Failed;
 
-	BlackboardComp->SetValueAsVector(TEXT("PlayerVector"), playerPawn->GetActorLocation());
+	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
+
+	if (!NavSystem)
+		return EBTNodeResult::Failed;
+
+	FNavLocation ProjectedLocation;
+
+	bool bFoundNavigationLocation = NavSystem->ProjectPointToNavigation(
+		playerPawn->GetActorLocation(),
+		ProjectedLocation,
+		FVector(200, 200, 500)
+	);
+
+	if (!bFoundNavigationLocation)
+		return EBTNodeResult::Failed;
+
+	BlackboardComp->SetValueAsVector(TEXT("PlayerVector"), ProjectedLocation.Location);
 
     //TODO REMOVE BY Joo jung yeol
     BlackboardComp->SetValueAsObject(TEXT("Player"), playerPawn);
