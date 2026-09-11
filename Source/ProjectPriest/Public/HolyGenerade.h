@@ -19,6 +19,9 @@ public:
 
 	FName GetItemType() const;
 
+	// 외부에서 수류탄을 투척할 때 사용
+	void Throw(const FVector& Direction, float Force);
+
 protected:
 	// Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "===Item===|Components")
@@ -27,7 +30,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "===Item===|Components")
 	USphereComponent* Collision;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Components")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Item===|Components")
 	USphereComponent* ExplosionCollision;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "===Item===|Components")

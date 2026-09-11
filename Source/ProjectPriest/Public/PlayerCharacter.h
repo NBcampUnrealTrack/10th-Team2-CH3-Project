@@ -7,8 +7,11 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
+class AHolyGenerade;
+class AWeaponItem;
 struct FInputActionInstance;
 struct FInputActionValue;
+
 
 USTRUCT(BlueprintType) struct  FSpeedConfig
 {
@@ -36,12 +39,22 @@ class PROJECTPRIEST_API APlayerCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+    virtual float TakeDamage(
+        float DamageAmount,
+        FDamageEvent const& DamageEvent,
+        AController* EventInstigator,
+        AActor* DamageCauser
+    ) override;
+
+    const FVector GetMuzzleLocation();
 
     UFUNCTION()
     void OnMoveInputted(const FInputActionInstance& InputValue);
@@ -68,6 +81,8 @@ protected:
 
     void ChangeWalkingMode(EWalkingMode WalkingMode);
 
+    void ResetThrowCoolTime();
+
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Components")
     TObjectPtr<USpringArmComponent> SpringArm;
@@ -89,4 +104,37 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Properties")
     float BaseDamage = 20.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Properties")
+    float MaxHealth = 100.0f;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "===PlayerCharacter===|Properties")
+    float CurrentHealth = 100.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Throw")
+    TSubclassOf<AHolyGenerade> HolyGrenadeClass;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Throw")
+    FName RightHandSocketName = TEXT("hand_r");
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Throw")
+    float ThrowDistance = 100.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Throw")
+    float ThrowForce = 1000.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Throw")
+    float ThrowCoolTime = 5.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Weapon")
+    TSubclassOf<AWeaponItem> WeaponClass;
+
+    //주의 현재 무기 메시가 캐릭터 모델에 달려있음
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Weapon")
+    TObjectPtr<AWeaponItem> WeaponInstance;
+
+protected:
+    bool bCanThrow = true;
+
+    FTimerHandle ThrowCoolTimeTimerHandle;
 };
