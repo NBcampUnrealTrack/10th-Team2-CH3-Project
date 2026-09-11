@@ -15,7 +15,8 @@ public class ProjectPriest : ModuleRules
 			"InputCore",
 			"EnhancedInput",
             "NavigationSystem",
-			"AIModule"
+			"AIModule",
+            "Niagara"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
