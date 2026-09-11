@@ -5,6 +5,11 @@
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "HolyGenerade.h"
+#include "DrawDebugHelpers.h"
+#include "JUtility.h"
+#include "WeaponItem.h"
+#include "Engine/SkeletalMeshSocket.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -26,7 +31,15 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+    CurrentHealth = MaxHealth;
+
     ChangeWalkingMode(EWalkingMode::Normal);
+
+    //주의 현재 무기 메시가 캐릭터 모델에 달려있음
+    WeaponInstance = Cast<AWeaponItem>(GetWorld()->SpawnActor(WeaponClass));
+    JASSERT(IsValid(WeaponInstance), "WeaponClass is not AWeaponClass");
+    
+    WeaponInstance->SetOwner(this);
 }
 
 void APlayerCharacter::ChangeWalkingMode(EWalkingMode WalkingMode)
@@ -42,6 +55,11 @@ void APlayerCharacter::ChangeWalkingMode(EWalkingMode WalkingMode)
     Mode = WalkingMode;
     GetCharacterMovement()->MaxWalkSpeed = Config->Speed;
     GetCharacterMovement()->MaxAcceleration = Config->Accel;
+}
+
+void APlayerCharacter::ResetThrowCoolTime()
+{
+    bCanThrow = true;
 }
 
 // Called every frame
@@ -105,6 +123,44 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     );
 }
 
+float APlayerCharacter::TakeDamage(
+    float DamageAmount,
+    FDamageEvent const& DamageEvent,
+    AController* EventInstigator,
+    AActor* DamageCauser)
+{
+    const float ActualDamage = Super::TakeDamage(
+        DamageAmount,
+        DamageEvent,
+        EventInstigator,
+        DamageCauser
+    );
+
+    CurrentHealth = FMath::Clamp(CurrentHealth - ActualDamage, 0.0f, MaxHealth);
+
+    //UE_LOG(LogTemp, Warning, TEXT("플레이어 데미지: %.1f / 현재 HP: %.1f"), ActualDamage, CurrentHealth);
+
+    if (CurrentHealth <= 0.0f)
+    {
+        // 사망 함수 호출
+    }
+
+    return ActualDamage;
+}
+
+const FVector APlayerCharacter::GetMuzzleLocation()
+{
+    const FName SocketName = TEXT("gun_pinSocket");
+
+    if (!GetMesh()->DoesSocketExist(SocketName))
+    {
+        JLog("총구 Socket이 없습니다.");
+        return FVector::Zero();
+    }
+
+    return GetMesh()->GetSocketLocation(SocketName);
+}
+
 void APlayerCharacter::OnMoveInputted(const FInputActionInstance& InputValue)
 {
     //GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Move"));
@@ -139,8 +195,31 @@ void APlayerCharacter::OnJumpInputted(const FInputActionInstance& InputValue)
 
 void APlayerCharacter::OnAttackInputted(const FInputActionValue& value)
 {
+    //JLog("OnAttackInputted");
+
+    JASSERT(IsValid(WeaponInstance), "Weapon is not valid");
+
+    if (WeaponInstance->CanFire())
+    {
+        WeaponInstance->Attack();
+    }
+    
+    if(WeaponInstance->GetCurrentAmmo() == 0)
+    {
+        if (!WeaponInstance->CanReload())
+        {
+            JLog("재장전 불가능");
+            return;
+        }
+
+        WeaponInstance->Reload();
+    }
+    
+    
+
     //GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Attack"));
 
+    /*
     const FName SocketName = TEXT("gun_pinSocket");
 
     if (!GetMesh()->DoesSocketExist(SocketName))
@@ -149,35 +228,167 @@ void APlayerCharacter::OnAttackInputted(const FInputActionValue& value)
         return;
     }
 
-    const FVector Start = GetMesh()->GetSocketLocation(SocketName);
-    const FVector Forward = GetMesh()->GetSocketRotation(SocketName).Vector();
+    AIngamePlayerController* PlayerController = Cast<AIngamePlayerController>(GetController());
 
-    const FVector End = Start + Forward * 10000.0f;
+    if (!PlayerController)
+    {
+        return;
+    }
 
-    FHitResult Hit;
+    // 카메라 기준으로 조준점 찾기
+    FVector CameraStart = PlayerController->PlayerCameraManager->GetCameraLocation();
+    FVector CameraForward = PlayerController->PlayerCameraManager->GetCameraRotation().Vector();
+    FVector CameraEnd = CameraStart + CameraForward * 10000.0f;
+
+    FHitResult CameraHitResult;
+
+    FCollisionQueryParams QueryParams;
+    QueryParams.AddIgnoredActor(this);
 
     GetWorld()->LineTraceSingleByChannel(
-        Hit,
-        Start,
-        End,
-        ECC_Visibility
+        CameraHitResult,
+        CameraStart,
+        CameraEnd,
+        ECC_Visibility,
+        QueryParams
     );
 
-    if (Hit.bBlockingHit)
+    // 조준점
+    FVector AimPoint;
+
+    if (CameraHitResult.bBlockingHit)
     {
-        UGameplayStatics::ApplyDamage(
-            Hit.GetActor(),
-            BaseDamage,
-            GetController(),
-            this,
-            UDamageType::StaticClass()
+        AimPoint = CameraHitResult.ImpactPoint;
+    }
+    else
+    {
+        AimPoint = CameraEnd;
+    }
+
+    const FVector MuzzleLocation = GetMesh()->GetSocketLocation(SocketName);
+    const FVector ShotDirection = (AimPoint - MuzzleLocation).GetSafeNormal();
+    const FVector ShotEnd = MuzzleLocation + ShotDirection * 10000.0f;
+
+    FHitResult ShotHitResult;
+
+    bool bHit = GetWorld()->LineTraceSingleByChannel(
+        ShotHitResult,
+        MuzzleLocation,
+        ShotEnd,
+        ECC_Visibility,
+        QueryParams
+    );
+
+    if (bHit)
+    {
+        AActor* HitActor = ShotHitResult.GetActor();
+
+        if (HitActor)
+        {
+            // 총구에서 피격 지점까지 디버그 라인 생성
+            DrawDebugLine(
+                GetWorld(),
+                MuzzleLocation,
+                ShotHitResult.ImpactPoint,
+                FColor::Green,
+                false,
+                1.0f,
+                0,
+                2.0f
+            );
+
+            // 데미지 적용
+            UGameplayStatics::ApplyDamage(
+                HitActor,
+                BaseDamage,
+                PlayerController,
+                this,
+                nullptr
+            );
+        }
+    }
+    else
+    {
+        // 총구에서 최대 사거리까지 디버그 라인 생성
+        DrawDebugLine(
+            GetWorld(),
+            MuzzleLocation,
+            ShotEnd,
+            FColor::Green,
+            false,
+            1.0f,
+            0,
+            2.0f
         );
     }
+    */
 }
 
 void APlayerCharacter::OnThrowInputted(const FInputActionValue& value)
 {
     //GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Throw"));
+
+    if (!bCanThrow)
+    {
+        return;
+    }
+
+    bCanThrow = false;
+
+    if (!HolyGrenadeClass)
+    {
+        return;
+    }
+
+    const FName SocketName = RightHandSocketName;
+
+    if (!GetMesh()->DoesSocketExist(SocketName))
+    {
+        //UE_LOG(LogTemp, Warning, TEXT("오른손 Socket이 없습니다."));
+        return;
+    }
+
+    // 오른손 위치
+    const FVector HandLocation = GetMesh()->GetSocketLocation(SocketName);
+
+    // 캐릭터가 바라보는 방향
+    const FVector Forward = GetActorForwardVector();
+    // 카메라가 바라보는 방향
+    // const FVector Forward = Camera->GetForwardVector();
+
+    // 캐릭터의 오른손보다 조금 앞에서 생성
+    const FVector SpawnLocation = HandLocation + Forward * ThrowDistance;
+
+    FRotator SpawnRotation = GetActorRotation();
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.Owner = this;
+    SpawnParams.Instigator = this;
+
+    // 스폰
+    AHolyGenerade* HolyGrenade =
+        GetWorld()->SpawnActor<AHolyGenerade>(
+            HolyGrenadeClass,
+            SpawnLocation,
+            SpawnRotation,
+            SpawnParams
+        );
+
+    if (!HolyGrenade)
+    {
+        return;
+    }
+
+    // 투척
+    HolyGrenade->Throw(Forward, ThrowForce);
+
+    GetWorld()->GetTimerManager().SetTimer(
+        ThrowCoolTimeTimerHandle,
+        this,
+        &APlayerCharacter::ResetThrowCoolTime,
+        ThrowCoolTime,
+        false
+    );
 }
 
 void APlayerCharacter::OnSprintInputted(const FInputActionInstance& InputValue)

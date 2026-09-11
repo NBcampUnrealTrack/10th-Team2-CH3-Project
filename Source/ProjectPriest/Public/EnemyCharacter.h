@@ -70,7 +70,7 @@ public:
 
     void SetAttackTarget(ACharacter* Target);
 
-    EAttackAnimationState GetAttackAnimationeState();
+    virtual EAttackAnimationState GetAttackAnimationeState();
 
 protected:
     virtual void BeginPlay() override;
