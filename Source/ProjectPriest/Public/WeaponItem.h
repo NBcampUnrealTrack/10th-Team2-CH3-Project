@@ -16,6 +16,17 @@ public:
 
 	bool IsReloading() const;
 
+    // Functions
+    virtual void Attack();
+
+    virtual void Reload();
+
+    virtual bool CanFire() const;
+
+    virtual bool CanReload() const;
+
+    int GetCurrentAmmo() const;
+
 protected:
 	// Properties
 	// 데미지
@@ -60,15 +71,6 @@ protected:
 	FTimerHandle FireTimerHandle;
 
 protected:
-	// Functions
-	virtual void Attack();
-
-	virtual void Reload();
-
-	virtual bool CanFire() const;
-
-	virtual bool CanReload() const;
-
 	void CompleteReload();
 
 	void ResetFire();

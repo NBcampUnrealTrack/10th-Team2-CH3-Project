@@ -2,16 +2,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "MvcEvents.h"
-#include "MvcModel.h"
 #include "PlayerCharacter.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
 class AHolyGenerade;
+class AWeaponItem;
 struct FInputActionInstance;
 struct FInputActionValue;
+
 
 USTRUCT(BlueprintType) struct  FSpeedConfig
 {
@@ -32,17 +32,9 @@ enum class EWalkingMode : uint8
 
 
 UCLASS()
-class PROJECTPRIEST_API APlayerCharacter
-    : public ACharacter
-    , public IMvcModel
+class PROJECTPRIEST_API APlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
-
-public:
-    enum class PropertyName {
-        CurrentHealth,
-        MaxHealth
-    };
 
 public:
 	// Sets default values for this character's properties
@@ -62,19 +54,7 @@ public:
         AActor* DamageCauser
     ) override;
 
-    virtual FDelegateHandle AddListener(UMvcControl* Control) override;
-    virtual void RemoveListener(FDelegateHandle Handle) override;
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="PropertyName">must be casted from enum type</param>
-    virtual void InvokePropertyChanged(uint8 PropertyName) override;
-
-    UFUNCTION(BlueprintCallable)
-    int GetCurrentHealth();
-
-    UFUNCTION(BlueprintCallable)
-    int GetMaxHealth();
+    const FVector GetMuzzleLocation();
 
     UFUNCTION()
     void OnMoveInputted(const FInputActionInstance& InputValue);
@@ -146,10 +126,15 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Throw")
     float ThrowCoolTime = 5.0f;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Weapon")
+    TSubclassOf<AWeaponItem> WeaponClass;
+
+    //주의 현재 무기 메시가 캐릭터 모델에 달려있음
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Weapon")
+    TObjectPtr<AWeaponItem> WeaponInstance;
+
 protected:
     bool bCanThrow = true;
 
     FTimerHandle ThrowCoolTimeTimerHandle;
-    
-    FModelChangedDelegate Listeners;
 };
