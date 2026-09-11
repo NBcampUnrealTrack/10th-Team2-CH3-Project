@@ -20,6 +20,8 @@ AHolyGenerade::AHolyGenerade()
 
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
 	StaticMesh->SetupAttachment(Collision);
+	StaticMesh->SetSimulatePhysics(true);
+	StaticMesh->SetEnableGravity(true);
 
 	Collision->OnComponentBeginOverlap.AddDynamic(this, &AHolyGenerade::OnItemOverlap);
 	Collision->OnComponentEndOverlap.AddDynamic(this, &AHolyGenerade::OnItemEndOverlap);
@@ -30,8 +32,23 @@ void AHolyGenerade::SetIsThrown(bool bThrown)
 	bIsThrown = bThrown;
 }
 
-FName AHolyGenerade::GetItemType() const {
+FName AHolyGenerade::GetItemType() const
+{
 	return ItemType;
+}
+
+void AHolyGenerade::Throw(const FVector& Direction, float Force)
+{
+	bIsThrown = true;
+
+	StaticMesh->SetSimulatePhysics(true);
+	StaticMesh->SetEnableGravity(true);
+
+	StaticMesh->AddImpulse(
+		Direction * Force,
+		NAME_None,
+		true
+	);
 }
 
 void AHolyGenerade::OnItemOverlap(
@@ -65,7 +82,10 @@ void AHolyGenerade::OnItemEndOverlap(
 
 void AHolyGenerade::ActivateItem(AActor* Activator)
 {
-	if (bHasExploded) return;
+	if (bHasExploded)
+	{
+		return;
+	}
 
 	GetWorld()->GetTimerManager().SetTimer(
 		ExplosionTimerHandle,
@@ -77,11 +97,13 @@ void AHolyGenerade::ActivateItem(AActor* Activator)
 	bHasExploded = true;
 }
 
-void AHolyGenerade::Explode() {
+void AHolyGenerade::Explode()
+{
 	TArray<AActor*> OverlappingActors;
 	ExplosionCollision->GetOverlappingActors(OverlappingActors);
 
-	for (AActor* Actor : OverlappingActors) {
+	for (AActor* Actor : OverlappingActors)
+	{
 		if (Actor && Actor->ActorHasTag("Monster")) {
 			UGameplayStatics::ApplyDamage(
 				Actor,
@@ -96,6 +118,7 @@ void AHolyGenerade::Explode() {
 	DestroyItem();
 }
 
-void AHolyGenerade::DestroyItem() {
+void AHolyGenerade::DestroyItem()
+{
 	Destroy();
 }
