@@ -2,6 +2,7 @@
 #include "IngamePlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/PlayerCameraManager.h"
+#include "PlayerCharacter.h"
 #include "JUtility.h"
 
 AWeaponItem::AWeaponItem()
@@ -245,11 +246,10 @@ void AWeaponItem::PerformTraceTPS(
 	}
 
 	// 총구에서 조준점으로 발사
-	// 임시로 총구를 캐릭터의 위치로 잡음 -> 총구의 socket 위치를 시작점으로 잡도록 변경해야 함
-    // TODO: 개발 편의를 위해 Actor(캐릭터)에서 MuzzleLocation을 잡도록함, 추후 총구 소켓으로 설정해야함.
-    //      그런데 총이 캐릭터에 달려있어서 따로 받는 방법이 필요해보임
+	// 캐릭터 메시가 총을 가지고 있어서 이와 같은 모습이 됨...
 	//FVector MuzzleLocation = GetActorLocation();
-    FVector MuzzleLocation = OwnerActor->GetActorLocation();
+    APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OwnerActor);
+    FVector MuzzleLocation = PlayerCharacter->GetMuzzleLocation();
 	FVector ShotDirection = (AimPoint - MuzzleLocation).GetSafeNormal();
 	FVector ShotEnd = MuzzleLocation + ShotDirection * Range;
 

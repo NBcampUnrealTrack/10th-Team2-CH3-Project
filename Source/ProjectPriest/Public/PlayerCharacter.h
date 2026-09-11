@@ -54,6 +54,8 @@ public:
         AActor* DamageCauser
     ) override;
 
+    const FVector GetMuzzleLocation();
+
     UFUNCTION()
     void OnMoveInputted(const FInputActionInstance& InputValue);
     

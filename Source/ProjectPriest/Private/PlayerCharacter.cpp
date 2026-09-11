@@ -9,6 +9,7 @@
 #include "DrawDebugHelpers.h"
 #include "JUtility.h"
 #include "WeaponItem.h"
+#include "Engine/SkeletalMeshSocket.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -145,6 +146,19 @@ float APlayerCharacter::TakeDamage(
     }
 
     return ActualDamage;
+}
+
+const FVector APlayerCharacter::GetMuzzleLocation()
+{
+    const FName SocketName = TEXT("gun_pinSocket");
+
+    if (!GetMesh()->DoesSocketExist(SocketName))
+    {
+        JLog("총구 Socket이 없습니다.");
+        return FVector::Zero();
+    }
+
+    return GetMesh()->GetSocketLocation(SocketName);
 }
 
 void APlayerCharacter::OnMoveInputted(const FInputActionInstance& InputValue)
