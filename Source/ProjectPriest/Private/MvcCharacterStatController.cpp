@@ -7,11 +7,11 @@ UMvcCharacterStatController::UMvcCharacterStatController()
 {
 }
 
-void UMvcCharacterStatController::HandleViewEvent(IMvcView* View, EViewEventType EventType, UEventParameterBase* Parameter)
+void UMvcCharacterStatController::HandleViewEvent(IMvcView* InView, EViewEventType EventType, UEventParameterBase* Parameter)
 {
 }
 
-void UMvcCharacterStatController::HandleModelChanged(IMvcModel* Model, uint8 PropertyName)
+void UMvcCharacterStatController::HandleModelChanged(IMvcModel* InModel, uint8 PropertyName)
 {
     JASSERT(nullptr != Model, "Model is invalid");
     JASSERT(nullptr != View, "View is invalid");
@@ -25,6 +25,4 @@ void UMvcCharacterStatController::HandleModelChanged(IMvcModel* Model, uint8 Pro
         = Cast<UPriestHUDWidget>(View);
 
     JASSERT(IsValid(PlayerCharacter), "View is not UPriestHUDWidget");
-
-    PlayerCharacter->hela
 }

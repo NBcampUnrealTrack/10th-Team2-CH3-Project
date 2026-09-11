@@ -75,7 +75,7 @@ void UPriestHUDWidget::SetHUDData(const FPriestHUDData& InData)
 
 void UPriestHUDWidget::SetHealth(int CurrentHealth, int MaxHealth)
 {
-    JASSERT(MaxHealth == 0, "Can not divde by zero");
+    JASSERT(MaxHealth != 0, "Can not divde by zero");
 
     float FCurrentHealth = (float)CurrentHealth;
     float FMaxHealth = (float)MaxHealth;

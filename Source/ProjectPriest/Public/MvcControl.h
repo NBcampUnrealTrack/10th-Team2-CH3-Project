@@ -33,9 +33,9 @@ public:
     template<DrivedMvcModel T>
     T* GetModel();
 
-    virtual void HandleViewEvent(IMvcView* View, EViewEventType EventType, UEventParameterBase* Parameter) PURE_VIRTUAL(&UMvcControl::HandleViewEvent, return;) ;
+    virtual void HandleViewEvent(IMvcView* InView, EViewEventType EventType, UEventParameterBase* Parameter) PURE_VIRTUAL(&UMvcControl::HandleViewEvent, return;) ;
 
-    virtual void HandleModelChanged(IMvcModel* Model, uint8 PropertyName) PURE_VIRTUAL(&UMvcControl::HandleModelChanged, return;) ;
+    virtual void HandleModelChanged(IMvcModel* InModel, uint8 PropertyName) PURE_VIRTUAL(&UMvcControl::HandleModelChanged, return;) ;
 
 
 protected:

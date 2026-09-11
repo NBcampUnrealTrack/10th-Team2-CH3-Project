@@ -11,7 +11,7 @@ class PROJECTPRIEST_API UMvcCharacterStatController : public UMvcControl
 public:
 	UMvcCharacterStatController();
 
-    virtual void HandleViewEvent(IMvcView* View, EViewEventType EventType, UEventParameterBase* Parameter) override;
+    virtual void HandleViewEvent(IMvcView* InView, EViewEventType EventType, UEventParameterBase* Parameter) override;
 
-    virtual void HandleModelChanged(IMvcModel* Model, uint8 PropertyName) override;
+    virtual void HandleModelChanged(IMvcModel* InModel, uint8 PropertyName) override;
 };
