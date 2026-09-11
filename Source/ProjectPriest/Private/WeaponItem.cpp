@@ -289,6 +289,8 @@ void AWeaponItem::PerformTraceTPS(
 				OwnerActor,
 				nullptr
 			);
+
+			JLog("몬스터에게 %.1f 데미지를 입힘", Damage);
 		}
 	}
 	else
