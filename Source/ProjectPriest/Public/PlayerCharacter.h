@@ -8,8 +8,10 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
 class AHolyGenerade;
+class AWeaponItem;
 struct FInputActionInstance;
 struct FInputActionValue;
+
 
 USTRUCT(BlueprintType) struct  FSpeedConfig
 {
@@ -121,6 +123,13 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Throw")
     float ThrowCoolTime = 5.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Weapon")
+    TSubclassOf<AWeaponItem> WeaponClass;
+
+    //주의 현재 무기 메시가 캐릭터 모델에 달려있음
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Weapon")
+    TObjectPtr<AWeaponItem> WeaponInstance;
 
 protected:
     bool bCanThrow = true;

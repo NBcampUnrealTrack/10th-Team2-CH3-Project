@@ -7,6 +7,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "HolyGenerade.h"
 #include "DrawDebugHelpers.h"
+#include "JUtility.h"
+#include "WeaponItem.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -31,6 +33,12 @@ void APlayerCharacter::BeginPlay()
     CurrentHealth = MaxHealth;
 
     ChangeWalkingMode(EWalkingMode::Normal);
+
+    //주의 현재 무기 메시가 캐릭터 모델에 달려있음
+    WeaponInstance = Cast<AWeaponItem>(GetWorld()->SpawnActor(WeaponClass));
+    JASSERT(IsValid(WeaponInstance), "WeaponClass is not AWeaponClass");
+    
+    WeaponInstance->SetOwner(this);
 }
 
 void APlayerCharacter::ChangeWalkingMode(EWalkingMode WalkingMode)
@@ -173,8 +181,31 @@ void APlayerCharacter::OnJumpInputted(const FInputActionInstance& InputValue)
 
 void APlayerCharacter::OnAttackInputted(const FInputActionValue& value)
 {
+    //JLog("OnAttackInputted");
+
+    JASSERT(IsValid(WeaponInstance), "Weapon is not valid");
+
+    if (WeaponInstance->CanFire())
+    {
+        WeaponInstance->Attack();
+    }
+    
+    if(WeaponInstance->GetCurrentAmmo() == 0)
+    {
+        if (!WeaponInstance->CanReload())
+        {
+            JLog("재장전 불가능");
+            return;
+        }
+
+        WeaponInstance->Reload();
+    }
+    
+    
+
     //GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Attack"));
 
+    /*
     const FName SocketName = TEXT("gun_pinSocket");
 
     if (!GetMesh()->DoesSocketExist(SocketName))
@@ -276,6 +307,7 @@ void APlayerCharacter::OnAttackInputted(const FInputActionValue& value)
             2.0f
         );
     }
+    */
 }
 
 void APlayerCharacter::OnThrowInputted(const FInputActionValue& value)
