@@ -2,10 +2,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "../UI/PriestHUDData.h"
 #include "IngamePlayerController.generated.h"
 
 class UInputMappingContext;
 class UInputAction;
+class UPriestHUDWidget;
 
 UCLASS()
 class PROJECTPRIEST_API AIngamePlayerController : public APlayerController
@@ -25,6 +27,14 @@ public:
     TObjectPtr<UInputAction> GetSprintAction();
     TObjectPtr<UInputAction> GetJumpAction();
 protected:
+    // BP_IngamePlayerController의 Class Defaults에서 WBP_PriestHUD를 지정한다.
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Priest|UI")
+    TSubclassOf<UPriestHUDWidget> HUDWidgetClass;
+
+    // 실제 게임 데이터 연결 전의 초기 표시 값이다.
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Priest|UI")
+    FPriestHUDData InitialHUDData;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Enhanced Inputs")
     UInputMappingContext* InputMappingContext;
 

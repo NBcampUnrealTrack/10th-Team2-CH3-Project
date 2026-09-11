@@ -1,17 +1,23 @@
-﻿#include "PriestUIManager.h"
+#include "PriestUIManager.h"
 #include "PriestHUDWidget.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
 
-//MVC
-//MVC
-//Model
-//View
-//Control
-//
+void UPriestUIManager::SetHUDWidgetClass(TSubclassOf<UPriestHUDWidget> WidgetClass)
+{
+    if (HUDWidgetClass == WidgetClass) return;
+    HideHUD();
+    HUD = nullptr;
+    HUDWidgetClass = WidgetClass;
+}
 
 bool UPriestUIManager::ShowHUD(const FPriestHUDData& Data)
 {
+    if (!HUDWidgetClass || HUDWidgetClass->HasAnyClassFlags(CLASS_Abstract))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Priest HUD: Set a concrete Widget Blueprint class before ShowHUD."));
+        return false;
+    }
 	APlayerController* Controller = GetLocalPlayer()->GetPlayerController(GetWorld());
 	if (!Controller) return false;
 	// 레벨 이동 등으로 소유 컨트롤러가 달라지면 기존 위젯 대신 새 위젯을 만든다.
@@ -20,7 +26,7 @@ bool UPriestUIManager::ShowHUD(const FPriestHUDData& Data)
 		HUD->RemoveFromParent();
 		HUD = nullptr;
 	}
-	if (!HUD) HUD = CreateWidget<UPriestHUDWidget>(Controller, UPriestHUDWidget::StaticClass());
+	if (!HUD) HUD = CreateWidget<UPriestHUDWidget>(Controller, HUDWidgetClass);
 	if (!HUD) return false;
 	HUD->SetHUDData(Data);
 	// HUD와 자식 위젯이 마우스 입력을 가로채지 않도록 표시 전용으로 설정한다.
@@ -45,5 +51,6 @@ void UPriestUIManager::Deinitialize()
 	// 서브시스템 종료 시 화면과 보유 참조를 정리한다.
 	HideHUD();
 	HUD = nullptr;
+	HUDWidgetClass = nullptr;
 	Super::Deinitialize();
 }

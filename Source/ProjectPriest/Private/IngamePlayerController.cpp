@@ -1,6 +1,9 @@
 #include "IngamePlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
+#include "Engine/LocalPlayer.h"
+#include "../UI/PriestHUDWidget.h"
+#include "../UI/PriestUIManager.h"
 
 AIngamePlayerController::AIngamePlayerController()
 {
@@ -11,13 +14,25 @@ void AIngamePlayerController::BeginPlay()
     Super::BeginPlay();
 
     ULocalPlayer* LocalPlayer = GetLocalPlayer();
-    //JASSERT(IsValid(LocalPlayer), "Local Player instance not exist");
+    if (!LocalPlayer) return;
+
+    if (HUDWidgetClass)
+    {
+        if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>())
+        {
+            UI->SetHUDWidgetClass(HUDWidgetClass);
+            UI->ShowHUD(InitialHUDData);
+        }
+    }
 
     UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
     //JASSERT(IsValid(Subsystem), "UEnhancedInputLocalPlayerSubsystem Not exist");
     //JASSERT(IsValid(InputMappingContext), "Input mapping context not exist");
 
-    Subsystem->AddMappingContext(InputMappingContext, 0);
+    if (Subsystem && InputMappingContext)
+    {
+        Subsystem->AddMappingContext(InputMappingContext, 0);
+    }
 }
 
 TObjectPtr<UInputAction> AIngamePlayerController::GetMoveAction()

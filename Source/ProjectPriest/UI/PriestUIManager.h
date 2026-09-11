@@ -13,6 +13,9 @@ class PROJECTPRIEST_API UPriestUIManager : public ULocalPlayerSubsystem
 {
 	GENERATED_BODY()
 public:
+	// WBP 클래스를 설정한다. 클래스가 달라지면 기존 HUD를 제거한다.
+	UFUNCTION(BlueprintCallable, Category="Priest|UI")
+	void SetHUDWidgetClass(TSubclassOf<UPriestHUDWidget> WidgetClass);
 	// 최초 호출 시 생성하고 이후에는 재사용한다. 생성 또는 화면 추가 실패 시 false를 반환한다.
 	UFUNCTION(BlueprintCallable, Category="Priest|UI")
 	bool ShowHUD(const FPriestHUDData& Data);
@@ -26,4 +29,5 @@ public:
 private:
 	// UPROPERTY로 참조를 유지해 가비지 컬렉션을 방지한다. Transient는 저장 대상에서 제외한다.
 	UPROPERTY(Transient) TObjectPtr<UPriestHUDWidget> HUD;
+	UPROPERTY(Transient) TSubclassOf<UPriestHUDWidget> HUDWidgetClass;
 };

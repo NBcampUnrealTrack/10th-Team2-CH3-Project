@@ -1,5 +1,6 @@
 #include "PriestHUDTestActor.h"
 #include "PriestUIManager.h"
+#include "PriestHUDWidget.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
@@ -27,6 +28,7 @@ void APriestHUDTestActor::PushTestData()
 	ULocalPlayer* Player = PC ? PC->GetLocalPlayer() : nullptr;
 	if (!Player) return;
 	UPriestUIManager* UI = Player->GetSubsystem<UPriestUIManager>();
+	if (UI && HUDWidgetClass) UI->SetHUDWidgetClass(HUDWidgetClass);
 	FPriestHUDData Snapshot = TestData;
 	// 원본 설정을 유지하려고 복사본만 변경한다. 실제 캐릭터의 체력/탄약에는 영향을 주지 않는다.
 	if (bAnimateData)
