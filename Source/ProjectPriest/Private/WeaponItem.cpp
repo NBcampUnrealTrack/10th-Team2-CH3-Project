@@ -1,4 +1,4 @@
-﻿#include "WeaponItem.h"
+#include "WeaponItem.h"
 #include "IngamePlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/PlayerCameraManager.h"
@@ -23,6 +23,7 @@ void AWeaponItem::Attack()
 	}
 
 	CurrentAmmo--;
+    OnAmmoChanged.Broadcast();
 
 	bCanFire = false;
 
@@ -123,6 +124,7 @@ void AWeaponItem::CompleteReload()
 
 	CurrentAmmo += ReloadAmount;
 	ReserveAmmo -= ReloadAmount;
+    OnAmmoChanged.Broadcast();
 
 	bIsReloading = false;
 

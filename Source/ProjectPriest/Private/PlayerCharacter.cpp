@@ -1,4 +1,4 @@
-﻿#include "PlayerCharacter.h"
+#include "PlayerCharacter.h"
 #include "IngamePlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -36,10 +36,12 @@ void APlayerCharacter::BeginPlay()
     ChangeWalkingMode(EWalkingMode::Normal);
 
     //주의 현재 무기 메시가 캐릭터 모델에 달려있음
-    WeaponInstance = Cast<AWeaponItem>(GetWorld()->SpawnActor(WeaponClass));
-    JASSERT(IsValid(WeaponInstance), "WeaponClass is not AWeaponClass");
-    
-    WeaponInstance->SetOwner(this);
+    if (WeaponClass)
+    {
+        WeaponInstance = GetWorld()->SpawnActor<AWeaponItem>(WeaponClass);
+        if (IsValid(WeaponInstance)) WeaponInstance->SetOwner(this);
+    }
+    OnCombatChanged.Broadcast();
 }
 
 void APlayerCharacter::ChangeWalkingMode(EWalkingMode WalkingMode)
@@ -137,6 +139,7 @@ float APlayerCharacter::TakeDamage(
     );
 
     CurrentHealth = FMath::Clamp(CurrentHealth - ActualDamage, 0.0f, MaxHealth);
+    OnCombatChanged.Broadcast();
 
     JLog("플레이어 데미지: %.1f / 현재 HP: %.1f", ActualDamage, CurrentHealth);
 
@@ -197,7 +200,7 @@ void APlayerCharacter::OnAttackInputted(const FInputActionValue& value)
 {
     //JLog("OnAttackInputted");
 
-    JASSERT(IsValid(WeaponInstance), "Weapon is not valid");
+    if (!IsValid(WeaponInstance)) return;
 
     if (WeaponInstance->CanFire())
     {

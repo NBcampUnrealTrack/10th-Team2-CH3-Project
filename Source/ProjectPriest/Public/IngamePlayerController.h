@@ -8,6 +8,8 @@
 class UInputMappingContext;
 class UInputAction;
 class UPriestHUDWidget;
+class APlayerCharacter;
+class AWeaponItem;
 
 UCLASS()
 class PROJECTPRIEST_API AIngamePlayerController : public APlayerController
@@ -18,6 +20,7 @@ public:
     AIngamePlayerController();
 
     virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
     TObjectPtr<UInputAction> GetMoveAction();
@@ -26,6 +29,16 @@ public:
     TObjectPtr<UInputAction> GetThrowAction();
     TObjectPtr<UInputAction> GetSprintAction();
     TObjectPtr<UInputAction> GetJumpAction();
+private:
+    UFUNCTION()
+    void HandleCombatPawnChanged(APawn* PreviousPawn, APawn* NewPawn);
+    void RefreshCombatHUD();
+    void UnbindCombatHUD();
+    TWeakObjectPtr<APlayerCharacter> HUDPlayer;
+    TWeakObjectPtr<AWeaponItem> HUDWeapon;
+    FDelegateHandle HealthChangedHandle;
+    FDelegateHandle AmmoChangedHandle;
+
 protected:
     // BP_IngamePlayerController의 Class Defaults에서 WBP_PriestHUD를 지정한다.
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Priest|UI")

@@ -22,6 +22,7 @@ public:
 	// 이미 생성된 HUD만 갱신한다. 최초 표시는 ShowHUD를 호출해야 한다.
 	UFUNCTION(BlueprintCallable, Category="Priest|UI")
 	void UpdateHUD(const FPriestHUDData& Data);
+    void UpdateCombatHUD(float Health, float Maximum, const FText& Name, int32 Ammo, int32 Reserve);
 	UFUNCTION(BlueprintCallable, Category="Priest|UI")
 	void HideHUD(); // 화면에서만 제거한다. 객체는 다시 표시할 때 재사용한다.
 	virtual void Deinitialize() override;

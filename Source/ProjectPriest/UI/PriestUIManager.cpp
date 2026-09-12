@@ -41,6 +41,11 @@ void UPriestUIManager::UpdateHUD(const FPriestHUDData& Data)
 	if (HUD) HUD->SetHUDData(Data);
 }
 
+void UPriestUIManager::UpdateCombatHUD(float Health, float Maximum, const FText& Name, int32 Ammo, int32 Reserve)
+{
+    if (HUD) HUD->SetCombatData(Health, Maximum, Name, Ammo, Reserve);
+}
+
 void UPriestUIManager::HideHUD()
 {
 	if (HUD) HUD->RemoveFromParent();

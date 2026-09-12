@@ -22,6 +22,16 @@ void UPriestHUDWidget::SetHealth(int CurrentHealth, int MaxHealth)
     Refresh();
 }
 
+void UPriestHUDWidget::SetCombatData(float Health, float Maximum, const FText& Name, int32 Ammo, int32 Reserve)
+{
+    Data.Health = Health;
+    Data.MaxHealth = Maximum;
+    Data.WeaponName = Name;
+    Data.MagazineAmmo = Ammo;
+    Data.ReserveAmmo = Reserve;
+    Refresh();
+}
+
 void UPriestHUDWidget::Refresh()
 {
 	// 데이터가 화면 생성보다 먼저 들어오면 보관만 하고, 생성 후 다시 반영한다.

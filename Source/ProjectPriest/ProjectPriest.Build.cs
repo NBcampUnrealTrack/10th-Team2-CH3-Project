@@ -16,10 +16,11 @@ public class ProjectPriest : ModuleRules
 			"EnhancedInput",
             "NavigationSystem",
 			"AIModule",
-            "Niagara"
+            "Niagara",
+            "UMG"
         });
 
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
+		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
 
         // Include paths for StateMachines subfolder
         PublicIncludePaths.AddRange(new string[] {
