@@ -46,6 +46,16 @@ void UPriestUIManager::UpdateCombatHUD(float Health, float Maximum, const FText&
     if (HUD) HUD->SetCombatData(Health, Maximum, Name, Ammo, Reserve);
 }
 
+void UPriestUIManager::NotifyHitConfirmed()
+{
+    // 숨겨진 HUD나 이전 레벨의 HUD에는 일회성 효과를 전달하지 않는다.
+    APlayerController* Controller = GetLocalPlayer()->GetPlayerController(GetWorld());
+    if (IsValid(HUD) && HUD->GetOwningPlayer() == Controller && HUD->IsInViewport() && HUD->IsVisible())
+    {
+        HUD->OnHitConfirmed();
+    }
+}
+
 void UPriestUIManager::HideHUD()
 {
 	if (HUD) HUD->RemoveFromParent();

@@ -122,3 +122,14 @@ void AIngamePlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
     UnbindCombatHUD();
     Super::EndPlay(EndPlayReason);
 }
+
+void AIngamePlayerController::ClientNotifyHitConfirmed_Implementation()
+{
+    if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
+    {
+        if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>())
+        {
+            UI->NotifyHitConfirmed();
+        }
+    }
+}

@@ -1,7 +1,8 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "EnemyCharacter.h"
+#include "IngamePlayerController.h"
 #include "PlayerCharacter.h"
 #include "MonsterAIController.h"
 #include "Engine/DamageEvents.h"
@@ -33,14 +34,23 @@ void AEnemyCharacter::Attack(ACharacter* PlayerCharacter)
 
 float AEnemyCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
-	float ActualDamage = FMath::Max(DamageAmount - Defense, MinimumDamage);
-	Health -= ActualDamage;
+    if (!FMath::IsFinite(DamageAmount) || DamageAmount <= 0.0f || Health <= 0.0f || bIsDead || IsActorBeingDestroyed())
+    {
+        return 0.0f;
+    }
+    const float ActualDamage = FMath::Min(Health, FMath::Max(0.0f, FMath::Max(DamageAmount - Defense, MinimumDamage)));
+    if (ActualDamage <= 0.0f) return 0.0f;
+    Health -= ActualDamage;
+    if (AIngamePlayerController* AttackingController = Cast<AIngamePlayerController>(EventInstigator))
+    {
+        AttackingController->ClientNotifyHitConfirmed();
+    }
 	UE_LOG(LogTemp, Warning, TEXT("몬스터가 받은 데미지: %.1f / 몬스터 현재 HP: %.1f"), ActualDamage, Health);
 	if (Health <= 0)
 	{
 		Die();
 	}
-	return 0.0f;
+	return ActualDamage;
 }
 
 void AEnemyCharacter::Die()

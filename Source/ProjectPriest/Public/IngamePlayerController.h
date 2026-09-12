@@ -19,6 +19,10 @@ class PROJECTPRIEST_API AIngamePlayerController : public APlayerController
 public:
     AIngamePlayerController();
 
+    // 데미지를 처리한 쪽에서 공격자의 컨트롤러로 전달하는 일회성 피드백.
+    UFUNCTION(Client, Unreliable)
+    void ClientNotifyHitConfirmed();
+
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

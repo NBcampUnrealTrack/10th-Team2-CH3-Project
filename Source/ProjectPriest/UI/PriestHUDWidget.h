@@ -19,6 +19,9 @@ class PROJECTPRIEST_API UPriestHUDWidget
 {
 	GENERATED_BODY()
 public:
+    // WBP에서 HitConfirm 애니메이션을 재생한다. 기존 위젯 바인딩은 변경하지 않는다.
+    UFUNCTION(BlueprintImplementableEvent, Category="Priest|UI", meta=(DisplayName="On Hit Confirmed"))
+    void OnHitConfirmed();
 	// 데이터를 보관한 후 표시를 갱신한다. 위젯 생성 전 호출되어도 데이터는 유지된다.
 	UFUNCTION(BlueprintCallable, Category="Priest|UI")
 	void SetHUDData(const FPriestHUDData& InData);
