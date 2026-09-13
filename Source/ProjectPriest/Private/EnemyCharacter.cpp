@@ -43,7 +43,7 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const&
     Health -= ActualDamage;
     if (AIngamePlayerController* AttackingController = Cast<AIngamePlayerController>(EventInstigator))
     {
-        AttackingController->ClientNotifyHitConfirmed();
+        AttackingController->ClientNotifyHitConfirmed(ActualDamage, GetActorLocation() + FVector(0.0f, 0.0f, 100.0f));
     }
 	UE_LOG(LogTemp, Warning, TEXT("몬스터가 받은 데미지: %.1f / 몬스터 현재 HP: %.1f"), ActualDamage, Health);
 	if (Health <= 0)

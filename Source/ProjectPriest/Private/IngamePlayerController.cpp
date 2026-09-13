@@ -123,13 +123,13 @@ void AIngamePlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
     Super::EndPlay(EndPlayReason);
 }
 
-void AIngamePlayerController::ClientNotifyHitConfirmed_Implementation()
+void AIngamePlayerController::ClientNotifyHitConfirmed_Implementation(float AppliedDamage, FVector DamageLocation)
 {
     if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
     {
         if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>())
         {
-            UI->NotifyHitConfirmed();
+            UI->NotifyHitConfirmed(AppliedDamage, DamageLocation);
         }
     }
 }

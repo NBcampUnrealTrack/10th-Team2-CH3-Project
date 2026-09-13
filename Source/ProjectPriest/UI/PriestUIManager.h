@@ -6,6 +6,7 @@
 #include "PriestUIManager.generated.h"
 
 class UPriestHUDWidget;
+class UPriestDamageNumberWidget;
 
 // 로컬 플레이어마다 엔진이 생성하는 UI 관리자. 맵에 직접 배치할 필요가 없다.
 UCLASS()
@@ -13,7 +14,7 @@ class PROJECTPRIEST_API UPriestUIManager : public ULocalPlayerSubsystem
 {
 	GENERATED_BODY()
 public:
-    void NotifyHitConfirmed();
+    void NotifyHitConfirmed(float AppliedDamage, const FVector& DamageLocation);
 	// WBP 클래스를 설정한다. 클래스가 달라지면 기존 HUD를 제거한다.
 	UFUNCTION(BlueprintCallable, Category="Priest|UI")
 	void SetHUDWidgetClass(TSubclassOf<UPriestHUDWidget> WidgetClass);
@@ -29,6 +30,7 @@ public:
 	virtual void Deinitialize() override;
 
 private:
+    UPROPERTY(Transient) TArray<TObjectPtr<UPriestDamageNumberWidget>> DamageNumbers;
 	// UPROPERTY로 참조를 유지해 가비지 컬렉션을 방지한다. Transient는 저장 대상에서 제외한다.
 	UPROPERTY(Transient) TObjectPtr<UPriestHUDWidget> HUD;
 	UPROPERTY(Transient) TSubclassOf<UPriestHUDWidget> HUDWidgetClass;

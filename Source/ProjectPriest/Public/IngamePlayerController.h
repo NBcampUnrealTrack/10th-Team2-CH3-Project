@@ -21,7 +21,7 @@ public:
 
     // 데미지를 처리한 쪽에서 공격자의 컨트롤러로 전달하는 일회성 피드백.
     UFUNCTION(Client, Unreliable)
-    void ClientNotifyHitConfirmed();
+    void ClientNotifyHitConfirmed(float AppliedDamage, FVector DamageLocation);
 
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;

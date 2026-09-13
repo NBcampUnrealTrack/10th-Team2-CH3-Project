@@ -1,5 +1,6 @@
 #include "PriestUIManager.h"
 #include "PriestHUDWidget.h"
+#include "PriestDamageNumberWidget.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
 
@@ -23,7 +24,7 @@ bool UPriestUIManager::ShowHUD(const FPriestHUDData& Data)
 	// 레벨 이동 등으로 소유 컨트롤러가 달라지면 기존 위젯 대신 새 위젯을 만든다.
 	if (HUD && HUD->GetOwningPlayer() != Controller)
 	{
-		HUD->RemoveFromParent();
+		HideHUD();
 		HUD = nullptr;
 	}
 	if (!HUD) HUD = CreateWidget<UPriestHUDWidget>(Controller, HUDWidgetClass);
@@ -46,18 +47,44 @@ void UPriestUIManager::UpdateCombatHUD(float Health, float Maximum, const FText&
     if (HUD) HUD->SetCombatData(Health, Maximum, Name, Ammo, Reserve);
 }
 
-void UPriestUIManager::NotifyHitConfirmed()
+void UPriestUIManager::NotifyHitConfirmed(float AppliedDamage, const FVector& DamageLocation)
 {
     // 숨겨진 HUD나 이전 레벨의 HUD에는 일회성 효과를 전달하지 않는다.
     APlayerController* Controller = GetLocalPlayer()->GetPlayerController(GetWorld());
     if (IsValid(HUD) && HUD->GetOwningPlayer() == Controller && HUD->IsInViewport() && HUD->IsVisible())
     {
         HUD->OnHitConfirmed();
+        if (!FMath::IsFinite(AppliedDamage) || AppliedDamage <= 0.0f || DamageLocation.ContainsNaN()) return;
+        DamageNumbers.RemoveAll([](const TObjectPtr<UPriestDamageNumberWidget>& Number)
+        {
+            return !IsValid(Number) || !Number->IsInViewport();
+        });
+        // 범위 공격/연속 명중으로 일시 위젯이 무한히 늘어나지 않도록 제한한다.
+        if (DamageNumbers.Num() >= 32)
+        {
+            DamageNumbers[0]->RemoveFromParent();
+            DamageNumbers.RemoveAt(0);
+        }
+        TSubclassOf<UPriestDamageNumberWidget> NumberClass = HUD->DamageNumberWidgetClass;
+        if (!NumberClass) NumberClass = UPriestDamageNumberWidget::StaticClass();
+        if (NumberClass->HasAnyClassFlags(CLASS_Abstract)) return;
+        UPriestDamageNumberWidget* Number = CreateWidget<UPriestDamageNumberWidget>(Controller, NumberClass);
+        if (Number)
+        {
+            Number->InitializeDamage(AppliedDamage, DamageLocation);
+            Number->SetVisibility(ESlateVisibility::HitTestInvisible);
+            if (Number->AddToPlayerScreen(10)) DamageNumbers.Add(Number);
+        }
     }
 }
 
 void UPriestUIManager::HideHUD()
 {
+    for (UPriestDamageNumberWidget* Number : DamageNumbers)
+    {
+        if (IsValid(Number)) Number->RemoveFromParent();
+    }
+    DamageNumbers.Reset();
 	if (HUD) HUD->RemoveFromParent();
 }
 

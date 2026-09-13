@@ -10,6 +10,7 @@
 class UProgressBar;
 class UTextBlock;
 class UMvcControl;
+class UPriestDamageNumberWidget;
 
 // WBP에서 배치하고 C++에서 전달받은 데이터를 표시하는 HUD 부모 클래스.
 UCLASS(Abstract)
@@ -19,6 +20,9 @@ class PROJECTPRIEST_API UPriestHUDWidget
 {
 	GENERATED_BODY()
 public:
+    // 비워두면 기본 노란 숫자. WBP 자식에는 DamageText(TextBlock)를 배치한다.
+    UPROPERTY(EditDefaultsOnly, Category="Priest|UI")
+    TSubclassOf<UPriestDamageNumberWidget> DamageNumberWidgetClass;
     // WBP에서 HitConfirm 애니메이션을 재생한다. 기존 위젯 바인딩은 변경하지 않는다.
     UFUNCTION(BlueprintImplementableEvent, Category="Priest|UI", meta=(DisplayName="On Hit Confirmed"))
     void OnHitConfirmed();
