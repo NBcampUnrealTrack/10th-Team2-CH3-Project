@@ -14,6 +14,8 @@ class PROJECTPRIEST_API UPriestUIManager : public ULocalPlayerSubsystem
 {
 	GENERATED_BODY()
 public:
+    void NotifyPlayerDamaged();
+    void ResetDamageFeedback();
     void NotifyHitConfirmed(float AppliedDamage, const FVector& DamageLocation);
 	// WBP 클래스를 설정한다. 클래스가 달라지면 기존 HUD를 제거한다.
 	UFUNCTION(BlueprintCallable, Category="Priest|UI")

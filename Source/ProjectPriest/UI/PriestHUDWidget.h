@@ -20,6 +20,18 @@ class PROJECTPRIEST_API UPriestHUDWidget
 {
 	GENERATED_BODY()
 public:
+    void ShowDamageFeedback();
+    void ResetDamageFeedback();
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Priest|Damage Feedback")
+    bool bEnableDamageFeedback = true;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Priest|Damage Feedback")
+    FLinearColor DamageFeedbackColor = FLinearColor(0.8f, 0.0f, 0.0f, 0.5f);
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Priest|Damage Feedback", meta=(ClampMin="0.05"))
+    float DamageFeedbackDuration = 0.4f;
+    // 화면 짧은 변에 대한 가장자리 효과의 너비 비율.
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Priest|Damage Feedback", meta=(ClampMin="0.01", ClampMax="0.45"))
+    float DamageFeedbackWidth = 0.12f;
     // 비워두면 기본 노란 숫자. WBP 자식에는 DamageText(TextBlock)를 배치한다.
     UPROPERTY(EditDefaultsOnly, Category="Priest|UI")
     TSubclassOf<UPriestDamageNumberWidget> DamageNumberWidgetClass;
@@ -40,8 +52,13 @@ public:
 protected:
 	// WBP의 위젯 바인딩 이후 보관한 데이터를 반영한다.
 	virtual void NativeConstruct() override;
+    virtual void NativeTick(const FGeometry& Geometry, float DeltaTime) override;
+    virtual int32 NativePaint(const FPaintArgs& Args, const FGeometry& Geometry,
+        const FSlateRect& CullingRect, FSlateWindowElementList& OutDrawElements,
+        int32 LayerId, const FWidgetStyle& Style, bool bParentEnabled) const override;
 
 private:
+    float DamageFeedbackRemaining = 0.0f;
 	// 보관한 데이터를 화면에 반영한다. 게임 상태 자체는 변경하지 않는다.
 	void Refresh();
 	UPROPERTY(Transient) FPriestHUDData Data;

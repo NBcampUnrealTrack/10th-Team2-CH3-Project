@@ -80,6 +80,7 @@ void UPriestUIManager::NotifyHitConfirmed(float AppliedDamage, const FVector& Da
 
 void UPriestUIManager::HideHUD()
 {
+    ResetDamageFeedback();
     for (UPriestDamageNumberWidget* Number : DamageNumbers)
     {
         if (IsValid(Number)) Number->RemoveFromParent();
@@ -95,4 +96,18 @@ void UPriestUIManager::Deinitialize()
 	HUD = nullptr;
 	HUDWidgetClass = nullptr;
 	Super::Deinitialize();
+}
+
+void UPriestUIManager::NotifyPlayerDamaged()
+{
+    APlayerController* Controller = GetLocalPlayer()->GetPlayerController(GetWorld());
+    if (IsValid(HUD) && HUD->GetOwningPlayer() == Controller && HUD->IsInViewport() && HUD->IsVisible())
+    {
+        HUD->ShowDamageFeedback();
+    }
+}
+
+void UPriestUIManager::ResetDamageFeedback()
+{
+    if (IsValid(HUD)) HUD->ResetDamageFeedback();
 }

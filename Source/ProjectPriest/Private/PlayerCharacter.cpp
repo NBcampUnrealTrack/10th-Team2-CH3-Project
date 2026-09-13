@@ -138,7 +138,15 @@ float APlayerCharacter::TakeDamage(
         DamageCauser
     );
 
+    const float PreviousHealth = CurrentHealth;
     CurrentHealth = FMath::Clamp(CurrentHealth - ActualDamage, 0.0f, MaxHealth);
+    if (CurrentHealth < PreviousHealth)
+    {
+        if (AIngamePlayerController* OwningController = Cast<AIngamePlayerController>(GetController()))
+        {
+            OwningController->ClientNotifyPlayerDamaged(this);
+        }
+    }
     OnCombatChanged.Broadcast();
 
     JLog("플레이어 데미지: %.1f / 현재 HP: %.1f", ActualDamage, CurrentHealth);

@@ -83,6 +83,10 @@ void AIngamePlayerController::UnbindCombatHUD()
 void AIngamePlayerController::HandleCombatPawnChanged(APawn* PreviousPawn, APawn* NewPawn)
 {
     UnbindCombatHUD();
+    if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
+    {
+        if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>()) UI->ResetDamageFeedback();
+    }
     HUDPlayer = Cast<APlayerCharacter>(NewPawn);
     if (HUDPlayer.IsValid())
     {
@@ -131,5 +135,14 @@ void AIngamePlayerController::ClientNotifyHitConfirmed_Implementation(float Appl
         {
             UI->NotifyHitConfirmed(AppliedDamage, DamageLocation);
         }
+    }
+}
+
+void AIngamePlayerController::ClientNotifyPlayerDamaged_Implementation(APawn* DamagedPawn)
+{
+    if (!DamagedPawn || DamagedPawn != GetPawn()) return;
+    if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
+    {
+        if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>()) UI->NotifyPlayerDamaged();
     }
 }

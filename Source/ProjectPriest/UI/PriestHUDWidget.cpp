@@ -2,6 +2,8 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "MvcControl.h"
+#include "Rendering/DrawElements.h"
+#include "Styling/CoreStyle.h"
 
 void UPriestHUDWidget::NativeConstruct()
 {
@@ -59,4 +61,61 @@ void UPriestHUDWidget::RemoveListener(FDelegateHandle DelegateHandle)
 void UPriestHUDWidget::InvokeViewEvent(EViewEventType EventName, UEventParameterBase* Parameter)
 {
     Listener.Broadcast(this, EventName, Parameter);
+}
+void UPriestHUDWidget::ShowDamageFeedback()
+{
+    if (!bEnableDamageFeedback) return;
+    DamageFeedbackRemaining = FMath::Max(0.05f, DamageFeedbackDuration);
+    InvalidateLayoutAndVolatility();
+}
+
+void UPriestHUDWidget::ResetDamageFeedback()
+{
+    DamageFeedbackRemaining = 0.0f;
+    InvalidateLayoutAndVolatility();
+}
+
+void UPriestHUDWidget::NativeTick(const FGeometry& Geometry, float DeltaTime)
+{
+    Super::NativeTick(Geometry, DeltaTime);
+    if (DamageFeedbackRemaining > 0.0f)
+    {
+        DamageFeedbackRemaining = FMath::Max(0.0f, DamageFeedbackRemaining - DeltaTime);
+        InvalidateLayoutAndVolatility();
+    }
+}
+
+int32 UPriestHUDWidget::NativePaint(const FPaintArgs& Args, const FGeometry& Geometry,
+    const FSlateRect& CullingRect, FSlateWindowElementList& OutDrawElements,
+    int32 LayerId, const FWidgetStyle& Style, bool bParentEnabled) const
+{
+    int32 TopLayer = Super::NativePaint(Args, Geometry, CullingRect, OutDrawElements, LayerId, Style, bParentEnabled);
+    if (!bEnableDamageFeedback || DamageFeedbackRemaining <= 0.0f) return TopLayer;
+    const FVector2D Size = Geometry.GetLocalSize();
+    const float Width = FMath::Min(Size.X, Size.Y) * FMath::Clamp(DamageFeedbackWidth, 0.01f, 0.45f);
+    if (Width <= 0.0f) return TopLayer;
+    const float Fade = FMath::Clamp(DamageFeedbackRemaining / FMath::Max(0.05f, DamageFeedbackDuration), 0.0f, 1.0f);
+    const FSlateBrush* Brush = FCoreStyle::Get().GetBrush("WhiteBrush");
+    const int32 EffectLayer = TopLayer + 1;
+    // 서로 겹치지 않는 사각 고리로 중앙이 투명한 가장자리 그라데이션을 만든다.
+    constexpr int32 Steps = 32;
+    for (int32 Index = 0; Index < Steps; ++Index)
+    {
+        const float Inset = Width * Index / Steps;
+        const float Thickness = Width / Steps;
+        FLinearColor Color = DamageFeedbackColor;
+        const float Edge = 1.0f - (Index + 0.5f) / Steps;
+        Color.A *= Edge * Edge * Fade * Style.GetColorAndOpacityTint().A;
+        auto Draw = [&](FVector2D Position, FVector2D Extent)
+        {
+            FSlateDrawElement::MakeBox(OutDrawElements, EffectLayer,
+                Geometry.ToPaintGeometry(FVector2f(Extent), FSlateLayoutTransform(FVector2f(Position))),
+                Brush, ESlateDrawEffect::None, Color);
+        };
+        Draw({Inset, Inset}, {Size.X - 2 * Inset, Thickness});
+        Draw({Inset, Size.Y - Inset - Thickness}, {Size.X - 2 * Inset, Thickness});
+        Draw({Inset, Inset + Thickness}, {Thickness, Size.Y - 2 * (Inset + Thickness)});
+        Draw({Size.X - Inset - Thickness, Inset + Thickness}, {Thickness, Size.Y - 2 * (Inset + Thickness)});
+    }
+    return EffectLayer;
 }
