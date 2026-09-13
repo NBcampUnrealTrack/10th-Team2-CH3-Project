@@ -18,6 +18,8 @@ class PROJECTPRIEST_API AIngamePlayerController : public APlayerController
 	
 public:
     AIngamePlayerController();
+    UFUNCTION(Client, Reliable)
+    void ClientNotifyEnemyKilled();
     UFUNCTION(Client, Unreliable)
     void ClientNotifyPlayerDamaged(APawn* DamagedPawn);
 

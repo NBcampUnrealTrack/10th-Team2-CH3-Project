@@ -146,3 +146,11 @@ void AIngamePlayerController::ClientNotifyPlayerDamaged_Implementation(APawn* Da
         if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>()) UI->NotifyPlayerDamaged();
     }
 }
+
+void AIngamePlayerController::ClientNotifyEnemyKilled_Implementation()
+{
+    if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
+    {
+        if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>()) UI->NotifyEnemyKilled();
+    }
+}

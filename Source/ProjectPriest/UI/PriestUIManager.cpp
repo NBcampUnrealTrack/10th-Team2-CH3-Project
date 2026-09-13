@@ -109,5 +109,18 @@ void UPriestUIManager::NotifyPlayerDamaged()
 
 void UPriestUIManager::ResetDamageFeedback()
 {
-    if (IsValid(HUD)) HUD->ResetDamageFeedback();
+    if (IsValid(HUD))
+    {
+        HUD->ResetDamageFeedback();
+        HUD->ResetKillNotification();
+    }
+}
+
+void UPriestUIManager::NotifyEnemyKilled()
+{
+    APlayerController* Controller = GetLocalPlayer()->GetPlayerController(GetWorld());
+    if (IsValid(HUD) && HUD->GetOwningPlayer() == Controller && HUD->IsInViewport() && HUD->IsVisible())
+    {
+        HUD->ShowKillNotification();
+    }
 }

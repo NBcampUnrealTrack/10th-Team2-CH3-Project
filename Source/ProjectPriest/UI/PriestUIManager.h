@@ -14,6 +14,7 @@ class PROJECTPRIEST_API UPriestUIManager : public ULocalPlayerSubsystem
 {
 	GENERATED_BODY()
 public:
+    void NotifyEnemyKilled();
     void NotifyPlayerDamaged();
     void ResetDamageFeedback();
     void NotifyHitConfirmed(float AppliedDamage, const FVector& DamageLocation);

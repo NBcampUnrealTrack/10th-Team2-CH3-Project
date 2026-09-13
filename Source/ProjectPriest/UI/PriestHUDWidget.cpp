@@ -4,6 +4,8 @@
 #include "MvcControl.h"
 #include "Rendering/DrawElements.h"
 #include "Styling/CoreStyle.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Fonts/FontMeasure.h"
 
 void UPriestHUDWidget::NativeConstruct()
 {
@@ -78,6 +80,11 @@ void UPriestHUDWidget::ResetDamageFeedback()
 void UPriestHUDWidget::NativeTick(const FGeometry& Geometry, float DeltaTime)
 {
     Super::NativeTick(Geometry, DeltaTime);
+    if (KillNotificationRemaining > 0.0f)
+    {
+        KillNotificationRemaining = FMath::Max(0.0f, KillNotificationRemaining - DeltaTime);
+        InvalidateLayoutAndVolatility();
+    }
     if (DamageFeedbackRemaining > 0.0f)
     {
         DamageFeedbackRemaining = FMath::Max(0.0f, DamageFeedbackRemaining - DeltaTime);
@@ -90,6 +97,25 @@ int32 UPriestHUDWidget::NativePaint(const FPaintArgs& Args, const FGeometry& Geo
     int32 LayerId, const FWidgetStyle& Style, bool bParentEnabled) const
 {
     int32 TopLayer = Super::NativePaint(Args, Geometry, CullingRect, OutDrawElements, LayerId, Style, bParentEnabled);
+    if (KillNotificationRemaining > 0.0f && !KillNotificationText.IsEmpty())
+    {
+        const FSlateFontInfo Font = FCoreStyle::GetDefaultFontStyle("Bold", FMath::Clamp(KillNotificationFontSize, 8, 120));
+        const FString Text = KillNotificationText.ToString();
+        const FVector2D TextSize = FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->Measure(Text, Font);
+        const FVector2D ScreenSize = Geometry.GetLocalSize();
+        const FVector2D Position = FVector2D(ScreenSize.X * FMath::Clamp(KillNotificationPosition.X, 0.0, 1.0),
+            ScreenSize.Y * FMath::Clamp(KillNotificationPosition.Y, 0.0, 1.0)) - TextSize * 0.5;
+        FLinearColor Color = KillNotificationColor;
+        // 마지막 0.3초에만 페이드아웃한다.
+        Color.A *= FMath::Clamp(KillNotificationRemaining / FMath::Min(0.3f, FMath::Max(0.1f, KillNotificationDuration)), 0.0f, 1.0f)
+            * Style.GetColorAndOpacityTint().A;
+        FSlateDrawElement::MakeText(OutDrawElements, ++TopLayer,
+            Geometry.ToPaintGeometry(FVector2f(TextSize), FSlateLayoutTransform(FVector2f(Position + FVector2D(1, 1)))),
+            Text, Font, ESlateDrawEffect::None, FLinearColor(0, 0, 0, Color.A));
+        FSlateDrawElement::MakeText(OutDrawElements, ++TopLayer,
+            Geometry.ToPaintGeometry(FVector2f(TextSize), FSlateLayoutTransform(FVector2f(Position))),
+            Text, Font, ESlateDrawEffect::None, Color);
+    }
     if (!bEnableDamageFeedback || DamageFeedbackRemaining <= 0.0f) return TopLayer;
     const FVector2D Size = Geometry.GetLocalSize();
     const float Width = FMath::Min(Size.X, Size.Y) * FMath::Clamp(DamageFeedbackWidth, 0.01f, 0.45f);
@@ -118,4 +144,16 @@ int32 UPriestHUDWidget::NativePaint(const FPaintArgs& Args, const FGeometry& Geo
         Draw({Size.X - Inset - Thickness, Inset + Thickness}, {Thickness, Size.Y - 2 * (Inset + Thickness)});
     }
     return EffectLayer;
+}
+
+void UPriestHUDWidget::ShowKillNotification()
+{
+    KillNotificationRemaining = FMath::Max(0.1f, KillNotificationDuration);
+    InvalidateLayoutAndVolatility();
+}
+
+void UPriestHUDWidget::ResetKillNotification()
+{
+    KillNotificationRemaining = 0.0f;
+    InvalidateLayoutAndVolatility();
 }

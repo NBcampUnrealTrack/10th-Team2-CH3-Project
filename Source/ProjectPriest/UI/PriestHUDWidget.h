@@ -20,6 +20,19 @@ class PROJECTPRIEST_API UPriestHUDWidget
 {
 	GENERATED_BODY()
 public:
+    void ShowKillNotification();
+    void ResetKillNotification();
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Priest|Kill Notification")
+    FText KillNotificationText = NSLOCTEXT("PriestHUD", "EnemyKilled", "몬스터 처치");
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Priest|Kill Notification", meta=(ClampMin="0.1"))
+    float KillNotificationDuration = 1.5f;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Priest|Kill Notification")
+    FLinearColor KillNotificationColor = FLinearColor(1.0f, 0.85f, 0.25f, 1.0f);
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Priest|Kill Notification", meta=(ClampMin="8", ClampMax="120"))
+    int32 KillNotificationFontSize = 28;
+    // 화면 비율 좌표. 기본값은 중앙보다 위쪽.
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Priest|Kill Notification")
+    FVector2D KillNotificationPosition = FVector2D(0.5f, 0.3f);
     void ShowDamageFeedback();
     void ResetDamageFeedback();
 
@@ -58,6 +71,7 @@ protected:
         int32 LayerId, const FWidgetStyle& Style, bool bParentEnabled) const override;
 
 private:
+    float KillNotificationRemaining = 0.0f;
     float DamageFeedbackRemaining = 0.0f;
 	// 보관한 데이터를 화면에 반영한다. 게임 상태 자체는 변경하지 않는다.
 	void Refresh();
