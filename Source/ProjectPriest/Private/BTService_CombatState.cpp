@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "BTService_CombatState.h"
@@ -7,7 +7,6 @@
 #include "MonsterAIController.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/Character.h"
-#include "JUtility.h"
 
 UBTService_CombatState::UBTService_CombatState()
 {
@@ -29,24 +28,14 @@ void UBTService_CombatState::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
 	AMonsterAIController* AIController = Cast<AMonsterAIController>(AICon);
 
 	if (!AIController)
-	{
 		return BlackboardComp->SetValueAsBool(TEXT("IsCombat"), false);
-	}
-
 
 	if (playerPawn != AIController->GetDetectedPlayer())
-	{
 		return BlackboardComp->SetValueAsBool(TEXT("IsCombat"), false);
-	}
 
-	//FVector DetectedPlayerLocation = AIController->GetDetectedPlayerLocation();
-
-	//if (FVector::ZeroVector == DetectedPlayerLocation)
-	//	return BlackboardComp->SetValueAsBool(TEXT("IsCombat"), false);
-
-	//BlackboardComp->SetValueAsVector(TEXT("PlayerVector"), DetectedPlayerLocation);
-
-	BlackboardComp->SetValueAsInt(TEXT("SearchCount"), 3);
+	FVector DetectedPlayerLocation = AIController->GetDetectedPlayerLocation();
+	if (FVector::ZeroVector == DetectedPlayerLocation)
+		return BlackboardComp->SetValueAsBool(TEXT("IsCombat"), false);
 
 	BlackboardComp->SetValueAsBool(TEXT("IsCombat"), true);
 }

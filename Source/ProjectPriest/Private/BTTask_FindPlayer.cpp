@@ -1,4 +1,4 @@
-ï»¿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "BTTask_FindPlayer.h"
@@ -15,45 +15,19 @@ UBTTask_FindPlayer::UBTTask_FindPlayer()
 
 EBTNodeResult::Type UBTTask_FindPlayer::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	//ë¸”ëž™ë³´ë“œ ì»´í¬ë„ŒíŠ¸ ê°€ì ¸ì˜¤ê¸°
+	//ºí·¢º¸µå ÄÄÆ÷³ÍÆ® °¡Á®¿À±â
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 
 	if (!BlackboardComp)
-	{
 		return EBTNodeResult::Failed;
-	}
 
-	APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);//ë¶ˆëŸ¬ì˜¬ ê³³, ë¶ˆëŸ¬ì˜¬ í”Œë ˆì´ì–´ì˜ ë²ˆí˜¸
+	APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);//ºÒ·¯¿Ã °÷, ºÒ·¯¿Ã ÇÃ·¹ÀÌ¾îÀÇ ¹øÈ£
 
-	if (!playerPawn)
-	{
+	if (!playerPawn) 
 		return EBTNodeResult::Failed;
-	}
 
-	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
+	BlackboardComp->SetValueAsVector(TEXT("PlayerVector"), playerPawn->GetActorLocation());
 
-	if (!NavSystem)
-	{
-		return EBTNodeResult::Failed;
-	}
-
-	FNavLocation ProjectedLocation;
-
-	bool bFoundNavigationLocation = NavSystem->ProjectPointToNavigation(
-		playerPawn->GetActorLocation(),
-		ProjectedLocation,
-		FVector(200, 200, 500)
-	);
-
-	if (!bFoundNavigationLocation)
-	{
-		return EBTNodeResult::Failed;
-	}
-
-	BlackboardComp->SetValueAsVector(TEXT("PlayerVector"), ProjectedLocation.Location);
-
-    //TODO REMOVE BY Joo jung yeol
-    BlackboardComp->SetValueAsObject(TEXT("Player"), playerPawn);
-
-	return EBTNodeResult::Succeeded;	
+	return EBTNodeResult::Succeeded;
+	
 }
