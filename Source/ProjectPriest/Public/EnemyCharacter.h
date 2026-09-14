@@ -2,6 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Engine/DataTable.h"   
+#include "MonsterData.h"
+
 #include "EnemyCharacter.generated.h"
 
 class APlayerCharacter;
@@ -85,6 +88,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI|Patrol")
 	FVector PatrolOrigin;
 
+    //몬스터 스탯 테이블
+    UPROPERTY(EditAnywhere, Category = "Stats|DataTable")
+    FDataTableRowHandle RowDataTable;
+
 	//몬스터의 순찰반경
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Patrol")
 	float PatrolRadius;
@@ -124,4 +131,8 @@ protected:
     TObjectPtr<ACharacter> AttackTarget;
 
     EAttackAnimationState AttackAnimationeState;
+
+    FTimerHandle DeathTimerHandle;
+
+    void DestroyEnemy();
 };

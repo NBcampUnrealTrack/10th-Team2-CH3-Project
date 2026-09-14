@@ -19,14 +19,6 @@ AEnemyCharacter::AEnemyCharacter()
 	//생성시 AI Possess 설정
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	//스탯 초기화
-	Health = 100.0f;
-	Damage = 10.0f;
-	Defense = 5.0f;
-	AttackRange = 0; //공격 사거리
-	MinimumDamage = 1.0f;//몬스터가 받는 최소피해
-
-	PatrolRadius = 1000.0f;
 }
 
 void AEnemyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -73,7 +65,18 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const&
 
 void AEnemyCharacter::Die()
 {
-	Destroy();
+	if (bIsDead)
+		return;
+
+	bIsDead = true;
+
+	GetWorldTimerManager().SetTimer(
+		DeathTimerHandle,
+		this,
+		&AEnemyCharacter::DestroyEnemy,//bool형을 반환하지 않는 함수를 다시 정의
+		5.0f,
+		false
+	);
 }
 
 void AEnemyCharacter::BeginPlay()
@@ -83,6 +86,20 @@ void AEnemyCharacter::BeginPlay()
 	PatrolOrigin = this->GetActorLocation();
 
     AnimInstance = GetMesh()->GetAnimInstance();
+
+	const FMonsterData* MonsterData =
+		RowDataTable.GetRow<FMonsterData>(
+			TEXT("AEnemyCharacter::BeginPlay")
+		);
+	if (MonsterData)
+	{
+		AttackRange = MonsterData->AttackRange;
+		Damage = MonsterData->Damage;
+		Defense = MonsterData->Defense;
+		Health = MonsterData->Health;
+		MinimumDamage = MonsterData->MinimumDamage;
+		PatrolRadius = MonsterData->PatrolRadius;
+	}
 	
 	AIngameGameMode* IngameGameMode 
 		= Cast<AIngameGameMode>( GetWorld()->GetAuthGameMode());
@@ -148,6 +165,11 @@ void AEnemyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AEnemyCharacter::DestroyEnemy()
+{
+	Destroy();
 }
 
 FVector AEnemyCharacter::GetPatrolOrigin()
