@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "EnemyCharacter.h"
@@ -6,6 +6,8 @@
 #include "PlayerCharacter.h"
 #include "MonsterAIController.h"
 #include "Engine/DamageEvents.h"
+#include "IngameGameMode.h"
+#include "JUtility.h"
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
@@ -27,6 +29,15 @@ AEnemyCharacter::AEnemyCharacter()
 	PatrolRadius = 1000.0f;
 }
 
+void AEnemyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	
+	AIngameGameMode* IngameGameMode = Cast<AIngameGameMode>(GetWorld()->GetAuthGameMode());
+	JASSERT(IsValid(IngameGameMode), "Ingame game mode is invalid");
+	
+	IngameGameMode->OnMonsterDead();	
+}
 
 void AEnemyCharacter::Attack(ACharacter* PlayerCharacter)
 {
@@ -72,7 +83,14 @@ void AEnemyCharacter::BeginPlay()
 	PatrolOrigin = this->GetActorLocation();
 
     AnimInstance = GetMesh()->GetAnimInstance();
+	
+	AIngameGameMode* IngameGameMode 
+		= Cast<AIngameGameMode>( GetWorld()->GetAuthGameMode());
+	JASSERT(IsValid(IngameGameMode), "Ingame game mode is invalid");
+	
+	IngameGameMode->OnMonsterSpawned();	
 }
+
 
 //TODO: 아 맘에 안들어 겁나 화나는 그런 구조네...
 // BT_Attack 
