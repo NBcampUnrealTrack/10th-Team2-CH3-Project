@@ -6,23 +6,53 @@
 void UPriestDeathWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
+    if (!IsValid(RestartButton))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Missing required RestartButton binding. Check the Widget Blueprint."), __FUNCTION__, *GetNameSafe(this));
+    }
+    if (!IsValid(MainMenuButton))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Missing required MainMenuButton binding. Check the Widget Blueprint."), __FUNCTION__, *GetNameSafe(this));
+    }
+    if (!IsValid(StatusText))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Missing required StatusText binding. Check the Widget Blueprint."), __FUNCTION__, *GetNameSafe(this));
+    }
     SetIsFocusable(true);
-    if (RestartButton) RestartButton->OnClicked.AddUniqueDynamic(this, &UPriestDeathWidget::RequestRestart);
-    if (MainMenuButton) MainMenuButton->OnClicked.AddUniqueDynamic(this, &UPriestDeathWidget::RequestMainMenu);
+    if (RestartButton)
+    {
+        RestartButton->OnClicked.AddUniqueDynamic(this, &UPriestDeathWidget::RequestRestart);
+    }
+    if (MainMenuButton)
+    {
+        MainMenuButton->OnClicked.AddUniqueDynamic(this, &UPriestDeathWidget::RequestMainMenu);
+    }
     ShowStatus(FText::GetEmpty());
 }
 void UPriestDeathWidget::SetBusy(bool bBusy)
 {
-    if (RestartButton) RestartButton->SetIsEnabled(!bBusy);
-    if (MainMenuButton) MainMenuButton->SetIsEnabled(!bBusy);
+    if (RestartButton)
+    {
+        RestartButton->SetIsEnabled(!bBusy);
+    }
+    if (MainMenuButton)
+    {
+        MainMenuButton->SetIsEnabled(!bBusy);
+    }
 }
 void UPriestDeathWidget::ShowStatus(const FText& Message)
 {
-    if (StatusText) StatusText->SetText(Message);
+    if (StatusText)
+    {
+        StatusText->SetText(Message);
+    }
 }
 void UPriestDeathWidget::FocusRestart()
 {
-    if (RestartButton && GetOwningPlayer()) RestartButton->SetUserFocus(GetOwningPlayer());
+    if (RestartButton && GetOwningPlayer())
+    {
+        RestartButton->SetUserFocus(GetOwningPlayer());
+    }
 }
 void UPriestDeathWidget::RequestRestart() { SendRequest(true); }
 void UPriestDeathWidget::RequestMainMenu() { SendRequest(false); }

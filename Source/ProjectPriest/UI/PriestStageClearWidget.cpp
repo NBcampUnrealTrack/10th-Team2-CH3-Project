@@ -6,21 +6,45 @@
 void UPriestStageClearWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
+    if (!IsValid(MainMenuButton))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Missing required MainMenuButton binding. Check the Widget Blueprint."), __FUNCTION__, *GetNameSafe(this));
+    }
+    if (!IsValid(ClearTimeText))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Missing required ClearTimeText binding. Check the Widget Blueprint."), __FUNCTION__, *GetNameSafe(this));
+    }
+    if (!IsValid(StatusText))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Missing required StatusText binding. Check the Widget Blueprint."), __FUNCTION__, *GetNameSafe(this));
+    }
     SetIsFocusable(true);
-    if (MainMenuButton) MainMenuButton->OnClicked.AddUniqueDynamic(this, &UPriestStageClearWidget::RequestMainMenu);
+    if (MainMenuButton)
+    {
+        MainMenuButton->OnClicked.AddUniqueDynamic(this, &UPriestStageClearWidget::RequestMainMenu);
+    }
     ShowStatus(FText::GetEmpty());
 }
 void UPriestStageClearWidget::SetBusy(bool bBusy)
 {
-    if (MainMenuButton) MainMenuButton->SetIsEnabled(!bBusy);
+    if (MainMenuButton)
+    {
+        MainMenuButton->SetIsEnabled(!bBusy);
+    }
 }
 void UPriestStageClearWidget::ShowStatus(const FText& Message)
 {
-    if (StatusText) StatusText->SetText(Message);
+    if (StatusText)
+    {
+        StatusText->SetText(Message);
+    }
 }
 void UPriestStageClearWidget::FocusMainMenu()
 {
-    if (MainMenuButton && GetOwningPlayer()) MainMenuButton->SetUserFocus(GetOwningPlayer());
+    if (MainMenuButton && GetOwningPlayer())
+    {
+        MainMenuButton->SetUserFocus(GetOwningPlayer());
+    }
 }
 void UPriestStageClearWidget::RequestMainMenu()
 {
@@ -38,5 +62,8 @@ FText UPriestStageClearWidget::FormatClearTime(float Seconds)
 }
 void UPriestStageClearWidget::SetClearTime(float Seconds)
 {
-    if (ClearTimeText) ClearTimeText->SetText(FormatClearTime(Seconds));
+    if (ClearTimeText)
+    {
+        ClearTimeText->SetText(FormatClearTime(Seconds));
+    }
 }

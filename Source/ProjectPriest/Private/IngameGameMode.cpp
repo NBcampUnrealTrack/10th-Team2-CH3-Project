@@ -32,23 +32,35 @@ void AIngameGameMode::OnOpenBossRoomDoor(APlayerCharacter* Player)
 {
     if (!IsValid(IngameState) || !IsValid(Player) || Player->GetWorld() != GetWorld()
         || !FMath::IsFinite(Player->GetCurrentHealth()) || Player->GetCurrentHealth() <= 0.0f
-        || !IngameState->IsExitAvailable() || IngameState->GetMonsterCount() != 0) return;
+        || !IngameState->IsExitAvailable() || IngameState->GetMonsterCount() != 0)
+    {
+        return;
+    }
     TArray<AActor*> Objectives;
     Player->GetOverlappingActors(Objectives, ABossRoomOpenInteractor::StaticClass());
-    if (Objectives.IsEmpty()) return;
+    if (Objectives.IsEmpty())
+    {
+        return;
+    }
     IngameState->TryCompleteStage(GetWorld()->GetTimeSeconds() - IngameState->GetStartTime());
 }
 
 void AIngameGameMode::OnMonsterSpawned()
 {
-    if (!IsValid(IngameState)) return;
+    if (!IsValid(IngameState))
+    {
+        return;
+    }
     IngameState->SetDoorVisibility(false);
     IngameState->IncreaseMosnterCount();
 }
 
 void AIngameGameMode::OnMonsterDead()
 {
-    if (!IsValid(IngameState)) return;
+    if (!IsValid(IngameState))
+    {
+        return;
+    }
     IngameState->DecreaseMosnterCount();
     if (IngameState->GetMonsterCount() <= 0 )
     {

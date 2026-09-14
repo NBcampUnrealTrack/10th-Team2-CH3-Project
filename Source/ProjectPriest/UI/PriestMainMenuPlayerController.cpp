@@ -26,6 +26,10 @@ void APriestMainMenuPlayerController::BeginPlay()
 	{
 		UI->DisconnectCombatHUD();
 	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed."), __FUNCTION__, *GetNameSafe(this));
+	}
 	if (!MainMenuWidgetClass || MainMenuWidgetClass->HasAnyClassFlags(CLASS_Abstract))
 	{
 		UE_LOG(LogTemp, Error, TEXT("Priest Menu: Set MainMenuWidgetClass in the menu PlayerController Blueprint."));
@@ -103,7 +107,10 @@ void APriestMainMenuPlayerController::EndPlay(const EEndPlayReason::Type EndPlay
 		GEngine->OnTravelFailure().Remove(TravelFailureHandle);
 	}
 	TravelFailureHandle.Reset();
-    if (MenuController) MenuController->Disconnect();
+    if (MenuController)
+    {
+        MenuController->Disconnect();
+    }
     MenuController = nullptr;
     MenuModel = nullptr;
 	if (MainMenu)
@@ -116,5 +123,8 @@ void APriestMainMenuPlayerController::EndPlay(const EEndPlayReason::Type EndPlay
 
 void APriestMainMenuPlayerController::RequestQuitGame()
 {
-    if (CanProcessMenuRequest()) UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
+    if (CanProcessMenuRequest())
+    {
+        UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
+    }
 }

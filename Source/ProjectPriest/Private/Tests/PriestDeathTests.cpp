@@ -17,7 +17,10 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPriestDeathModelTest, "Priest.UI.MVC.DeathStat
 bool FPriestDeathModelTest::RunTest(const FString& Parameters)
 {
     UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
-    if (!TestNotNull(TEXT("Test world"), World)) return false;
+    if (!TestNotNull(TEXT("Test world"), World))
+    {
+        return false;
+    }
     // APawn only accepts damage in a world with an authority GameMode.
     TStrongObjectPtr<UGameInstance> GameInstance(NewObject<UGameInstance>());
     World->SetGameInstance(GameInstance.Get());

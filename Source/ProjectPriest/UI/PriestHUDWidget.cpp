@@ -6,6 +6,22 @@
 void UPriestHUDWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+    if (!IsValid(HealthBar))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Missing required HealthBar binding. Check the Widget Blueprint."), __FUNCTION__, *GetNameSafe(this));
+    }
+    if (!IsValid(HealthText))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Missing required HealthText binding. Check the Widget Blueprint."), __FUNCTION__, *GetNameSafe(this));
+    }
+    if (!IsValid(WeaponText))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Missing required WeaponText binding. Check the Widget Blueprint."), __FUNCTION__, *GetNameSafe(this));
+    }
+    if (!IsValid(MissionText))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Missing required MissionText binding. Check the Widget Blueprint."), __FUNCTION__, *GetNameSafe(this));
+    }
     ResetDamageFeedback();
     ResetKillNotification();
 	Refresh();
@@ -127,5 +143,8 @@ void UPriestHUDWidget::ResetKillNotification()
 void UPriestHUDWidget::SetMissionObjective(const FText& Objective)
 {
     Data.MissionObjective = Objective;
-    if (MissionText) MissionText->SetText(Data.MissionObjective);
+    if (MissionText)
+    {
+        MissionText->SetText(Data.MissionObjective);
+    }
 }

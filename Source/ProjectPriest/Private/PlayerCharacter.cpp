@@ -156,7 +156,10 @@ float APlayerCharacter::TakeDamage(
 {
     if (const AIngameGameState* State = GetWorld()->GetGameState<AIngameGameState>())
     {
-        if (State->HasStageCleared()) return 0.0f;
+        if (State->HasStageCleared())
+        {
+            return 0.0f;
+        }
     }
     const float ActualDamage = Super::TakeDamage(
         DamageAmount,

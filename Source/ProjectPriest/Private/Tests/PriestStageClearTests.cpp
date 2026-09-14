@@ -13,7 +13,10 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPriestStageClearTest, "Priest.UI.MVC.StageClea
 bool FPriestStageClearTest::RunTest(const FString& Parameters)
 {
     UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
-    if (!TestNotNull(TEXT("World"), World)) return false;
+    if (!TestNotNull(TEXT("World"), World))
+    {
+        return false;
+    }
     AIngameGameState* State = World->SpawnActor<AIngameGameState>();
     AIngameGameState* Other = World->SpawnActor<AIngameGameState>();
     AIngamePlayerController* Owner = World->SpawnActor<AIngamePlayerController>();

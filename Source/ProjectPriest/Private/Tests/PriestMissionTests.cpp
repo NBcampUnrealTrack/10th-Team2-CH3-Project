@@ -11,7 +11,10 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPriestMissionTest, "Priest.UI.MVC.MissionProgr
 bool FPriestMissionTest::RunTest(const FString& Parameters)
 {
     UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
-    if (!TestNotNull(TEXT("Test world"), World)) return false;
+    if (!TestNotNull(TEXT("Test world"), World))
+    {
+        return false;
+    }
     AIngameGameState* State = World->SpawnActor<AIngameGameState>();
     AIngameGameState* OtherState = World->SpawnActor<AIngameGameState>();
     if (!TestNotNull(TEXT("Mission state"), State) || !TestNotNull(TEXT("Replacement state"), OtherState))

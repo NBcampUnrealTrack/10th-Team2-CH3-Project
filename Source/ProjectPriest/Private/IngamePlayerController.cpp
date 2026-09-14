@@ -38,6 +38,10 @@ void AIngamePlayerController::BeginPlay()
         UI->SetDeathWidgetClass(DeathWidgetClass);
         UI->SetStageClearWidgetClass(StageClearWidgetClass);
     }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed."), __FUNCTION__, *GetNameSafe(this));
+    }
     if (GEngine)
     {
         ResultTravelFailureHandle = GEngine->OnTravelFailure().AddUObject(this, &AIngamePlayerController::HandleResultTravelFailure);
@@ -49,6 +53,10 @@ void AIngamePlayerController::BeginPlay()
         {
             UI->SetHUDWidgetClass(HUDWidgetClass);
             UI->ShowHUD(InitialHUDData);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed."), __FUNCTION__, *GetNameSafe(this));
         }
     }
 
@@ -66,6 +74,7 @@ void AIngamePlayerController::BeginPlay()
     {
         Subsystem->AddMappingContext(InputMappingContext, 0);
     }
+
 }
 
 TObjectPtr<UInputAction> AIngamePlayerController::GetMoveAction()
@@ -111,13 +120,23 @@ void AIngamePlayerController::HandleCombatPawnChanged(APawn* PreviousPawn, APawn
         {
             UI->SetCombatPawn(NewPawn, this);
         }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed."), __FUNCTION__, *GetNameSafe(this));
+        }
     }
 }
 void AIngamePlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-    if (GEngine) GEngine->OnTravelFailure().Remove(ResultTravelFailureHandle);
+    if (GEngine)
+    {
+        GEngine->OnTravelFailure().Remove(ResultTravelFailureHandle);
+    }
     ResultTravelFailureHandle.Reset();
-    if (GetWorld()) GetWorld()->GameStateSetEvent.Remove(MissionGameStateHandle);
+    if (GetWorld())
+    {
+        GetWorld()->GameStateSetEvent.Remove(MissionGameStateHandle);
+    }
     MissionGameStateHandle.Reset();
     OnPossessedPawnChanged.RemoveDynamic(this, &AIngamePlayerController::HandleCombatPawnChanged);
     if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
@@ -138,6 +157,10 @@ void AIngamePlayerController::ClientNotifyHitConfirmed_Implementation(float Appl
         {
             UI->NotifyHitConfirmed(AppliedDamage, DamageLocation);
         }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed."), __FUNCTION__, *GetNameSafe(this));
+        }
     }
 }
 
@@ -153,6 +176,10 @@ void AIngamePlayerController::ClientNotifyPlayerDamaged_Implementation(APawn* Da
         {
             UI->NotifyPlayerDamaged();
         }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed."), __FUNCTION__, *GetNameSafe(this));
+        }
     }
 }
 
@@ -164,25 +191,41 @@ void AIngamePlayerController::ClientNotifyEnemyKilled_Implementation()
         {
             UI->NotifyEnemyKilled();
         }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed."), __FUNCTION__, *GetNameSafe(this));
+        }
     }
 }
 
 void AIngamePlayerController::SetResultInput(bool bActive, UUserWidget* Widget)
 {
-    if (!IsLocalController()) return;
+    if (!IsLocalController())
+    {
+        return;
+    }
     if (bResultInputActive != bActive)
     {
         SetIgnoreMoveInput(bActive);
         SetIgnoreLookInput(bActive);
         bResultInputActive = bActive;
     }
-    if (PlayerInput) PlayerInput->FlushPressedKeys();
+    if (PlayerInput)
+    {
+        PlayerInput->FlushPressedKeys();
+    }
     bShowMouseCursor = bActive;
     if (bActive)
     {
-        if (GetPawn() && GetPawn()->GetMovementComponent()) GetPawn()->GetMovementComponent()->StopMovementImmediately();
+        if (GetPawn() && GetPawn()->GetMovementComponent())
+        {
+            GetPawn()->GetMovementComponent()->StopMovementImmediately();
+        }
         FInputModeUIOnly Mode;
-        if (Widget) Mode.SetWidgetToFocus(Widget->TakeWidget());
+        if (Widget)
+        {
+            Mode.SetWidgetToFocus(Widget->TakeWidget());
+        }
         Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
         SetInputMode(Mode);
     }
@@ -224,7 +267,10 @@ bool AIngamePlayerController::ExecuteResultTravel(bool bRestart, FText& OutError
 
 void AIngamePlayerController::HandleResultTravelFailure(UWorld* World, ETravelFailure::Type FailureType, const FString& ErrorString)
 {
-    if (World != GetWorld() || !bResultTravelRequested) return;
+    if (World != GetWorld() || !bResultTravelRequested)
+    {
+        return;
+    }
     bResultTravelRequested = false;
     UE_LOG(LogTemp, Warning, TEXT("Priest Death UI: Travel failed (%d): %s"), static_cast<int32>(FailureType), *ErrorString);
     OnResultTravelFailed.Broadcast(NSLOCTEXT("PriestDeath", "TravelFailed", "Map travel failed. Please try again."));
@@ -232,8 +278,19 @@ void AIngamePlayerController::HandleResultTravelFailure(UWorld* World, ETravelFa
 
 void AIngamePlayerController::HandleMissionGameStateChanged(AGameStateBase* State)
 {
+    if (IsValid(State) && !Cast<AIngameGameState>(State))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: GameState has the wrong type. Set GameStateClass to IngameGameState in the game mode."), __FUNCTION__, *GetNameSafe(this));
+    }
     if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
     {
-        if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>()) UI->SetMissionState(Cast<AIngameGameState>(State), this);
+        if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>())
+        {
+            UI->SetMissionState(Cast<AIngameGameState>(State), this);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed."), __FUNCTION__, *GetNameSafe(this));
+        }
     }
 }

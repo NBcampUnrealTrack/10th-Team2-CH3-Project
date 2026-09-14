@@ -11,18 +11,58 @@ void UPriestMenuModel::RemoveListener(FDelegateHandle Handle) { Changed.Remove(H
 void UPriestMenuModel::InvokePropertyChanged(uint8 PropertyName) { Changed.Broadcast(this, PropertyName); }
 void UPriestMenuController::HandleModelChanged(IMvcModel* InModel, uint8 PropertyName)
 {
-    auto* Model = GetModel<UPriestMenuModel>();
-    auto* View = GetView<UPriestMainMenuWidget>();
-    if (Model && View && InModel == Model) View->ApplyMenuState(Model->GetPage(), Model->GetTab());
+    UPriestMenuModel* Model = GetModel<UPriestMenuModel>();
+    UPriestMainMenuWidget* View = GetView<UPriestMainMenuWidget>();
+    if (!IsValid(Model))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Menu model is invalid. Connect the model before updating the menu."), __FUNCTION__, *GetNameSafe(this));
+        return;
+    }
+    if (!IsValid(View))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Menu view is invalid. Connect the view before updating the menu."), __FUNCTION__, *GetNameSafe(this));
+        return;
+    }
+    if (InModel != Model)
+    {
+        return;
+    }
+    View->ApplyMenuState(Model->GetPage(), Model->GetTab());
 }
 void UPriestMenuController::HandleViewEvent(IMvcView* InView, EViewEventType EventType, UEventParameterBase* Parameter)
 {
-    auto* Model = GetModel<UPriestMenuModel>();
-    auto* View = GetView<UPriestMainMenuWidget>();
-    auto* Request = Cast<UPriestMenuRequest>(Parameter);
-    if (!Model || !View || InView != View || !Request || EventType != EViewEventType::ButtonClicked) return;
-    auto* Owner = Cast<APriestMainMenuPlayerController>(View->GetOwningPlayer());
-    if (!Owner || !Owner->CanProcessMenuRequest()) return;
+    UPriestMenuModel* Model = GetModel<UPriestMenuModel>();
+    UPriestMainMenuWidget* View = GetView<UPriestMainMenuWidget>();
+    UPriestMenuRequest* Request = Cast<UPriestMenuRequest>(Parameter);
+    if (!IsValid(Model))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Menu model is invalid."), __FUNCTION__, *GetNameSafe(this));
+        return;
+    }
+    if (!IsValid(View))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Menu view is invalid."), __FUNCTION__, *GetNameSafe(this));
+        return;
+    }
+    if (InView != View || EventType != EViewEventType::ButtonClicked)
+    {
+        return;
+    }
+    if (!IsValid(Request))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Menu button event requires a PriestMenuRequest parameter."), __FUNCTION__, *GetNameSafe(this));
+        return;
+    }
+    APriestMainMenuPlayerController* Owner = Cast<APriestMainMenuPlayerController>(View->GetOwningPlayer());
+    if (!Owner)
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Menu view must be owned by PriestMainMenuPlayerController."), __FUNCTION__, *GetNameSafe(this));
+        return;
+    }
+    if (!Owner->CanProcessMenuRequest())
+    {
+        return;
+    }
     Request->bAccepted = true;
     switch (Request->Action)
     {
@@ -32,7 +72,10 @@ void UPriestMenuController::HandleViewEvent(IMvcView* InView, EViewEventType Eve
     case EPriestMenuAction::Credits: Model->SetState(EPriestMenuPage::Credits, Model->GetTab()); break;
     case EPriestMenuAction::SwitchTab:
         Request->bAccepted = Model->GetPage() == EPriestMenuPage::Lobby;
-        if (Request->bAccepted) Model->SetState(EPriestMenuPage::Lobby, Model->GetTab() == EPriestLobbyTab::Region ? EPriestLobbyTab::Equipment : EPriestLobbyTab::Region);
+        if (Request->bAccepted)
+        {
+            Model->SetState(EPriestMenuPage::Lobby, Model->GetTab() == EPriestLobbyTab::Region ? EPriestLobbyTab::Equipment : EPriestLobbyTab::Region);
+        }
         break;
     case EPriestMenuAction::StartStage:
         Request->bAccepted = Model->GetPage() == EPriestMenuPage::Lobby && Model->GetTab() == EPriestLobbyTab::Region && Owner->StartStageOne();

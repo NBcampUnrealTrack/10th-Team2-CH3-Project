@@ -55,6 +55,8 @@ public:
 
 private:
     void ConnectCombatView();
+    bool bMissionBindingInitialized = false;
+    bool bCombatBindingInitialized = false;
     UPROPERTY(Transient) TObjectPtr<UPriestStageClearController> StageClearController;
     UPROPERTY(Transient) TObjectPtr<UPriestStageClearWidget> StageClearWidget;
     UPROPERTY(Transient) TSubclassOf<UPriestStageClearWidget> StageClearWidgetClass;

@@ -5,7 +5,10 @@
 FText UPriestMissionController::GetMissionText() const
 {
     const AIngameGameState* State = Cast<AIngameGameState>(ModelObject.Get());
-    if (!State) return NSLOCTEXT("PriestMission", "Waiting", "Loading mission...");
+    if (!State)
+    {
+        return NSLOCTEXT("PriestMission", "Waiting", "Loading mission...");
+    }
     const FText Count = FText::Format(NSLOCTEXT("PriestMission", "Remaining", "Enemies remaining: {0}"), FText::AsNumber(State->GetMonsterCount()));
     if (State->GetMonsterCount() == 0 && State->IsExitAvailable())
     {
@@ -16,6 +19,12 @@ FText UPriestMissionController::GetMissionText() const
 
 void UPriestMissionController::HandleModelChanged(IMvcModel* InModel, uint8 PropertyName)
 {
-    if (InModel != GetModel<AIngameGameState>()) return;
-    if (UPriestHUDWidget* View = GetView<UPriestHUDWidget>()) View->SetMissionObjective(GetMissionText());
+    if (InModel != GetModel<AIngameGameState>())
+    {
+        return;
+    }
+    if (UPriestHUDWidget* View = GetView<UPriestHUDWidget>())
+    {
+        View->SetMissionObjective(GetMissionText());
+    }
 }

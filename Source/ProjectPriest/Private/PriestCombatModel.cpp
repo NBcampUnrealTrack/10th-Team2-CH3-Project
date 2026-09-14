@@ -4,8 +4,14 @@
 #include "MvcControl.h"
 void UPriestCombatModel::Disconnect()
 {
-    if (Player.IsValid()) Player->OnCombatChanged.Remove(HealthHandle);
-    if (Weapon.IsValid()) Weapon->OnAmmoChanged.Remove(AmmoHandle);
+    if (Player.IsValid())
+    {
+        Player->OnCombatChanged.Remove(HealthHandle);
+    }
+    if (Weapon.IsValid())
+    {
+        Weapon->OnAmmoChanged.Remove(AmmoHandle);
+    }
     Player.Reset();
     Weapon.Reset();
     HealthHandle.Reset();
@@ -20,19 +26,31 @@ void UPriestCombatModel::SetPawn(APawn* Pawn)
 {
     Disconnect();
     Player = Cast<APlayerCharacter>(Pawn);
-    if (Player.IsValid()) HealthHandle = Player->OnCombatChanged.AddUObject(this, &UPriestCombatModel::Refresh);
+    if (Player.IsValid())
+    {
+        HealthHandle = Player->OnCombatChanged.AddUObject(this, &UPriestCombatModel::Refresh);
+    }
     Refresh();
 }
 void UPriestCombatModel::Refresh()
 {
     AWeaponItem* Current = Player.IsValid() ? Player->GetEquippedWeapon() : nullptr;
-    if (!IsValid(Current)) Current = nullptr;
+    if (!IsValid(Current))
+    {
+        Current = nullptr;
+    }
     if (Weapon.Get() != Current)
     {
-        if (Weapon.IsValid()) Weapon->OnAmmoChanged.Remove(AmmoHandle);
+        if (Weapon.IsValid())
+        {
+            Weapon->OnAmmoChanged.Remove(AmmoHandle);
+        }
         AmmoHandle.Reset();
         Weapon = Current;
-        if (Current) AmmoHandle = Current->OnAmmoChanged.AddUObject(this, &UPriestCombatModel::Refresh);
+        if (Current)
+        {
+            AmmoHandle = Current->OnAmmoChanged.AddUObject(this, &UPriestCombatModel::Refresh);
+        }
     }
     InvokePropertyChanged(0); // Full combat snapshot.
 }

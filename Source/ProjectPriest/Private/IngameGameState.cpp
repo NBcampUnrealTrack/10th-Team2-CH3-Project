@@ -30,28 +30,43 @@ FOnDoorVisibiliyChangedDelegate& AIngameGameState::GetOnDoorVisibiliyChangedDele
 
 void AIngameGameState::SetStartTime(float NewStartTime)
 {
-    if (bStageCleared) return;
+    if (bStageCleared)
+    {
+        return;
+    }
     StartTime = NewStartTime;
 }
 
 void AIngameGameState::SetElapsedTime(float NewElapsedTime)
 {
-    if (bStageCleared) return;
+    if (bStageCleared)
+    {
+        return;
+    }
     ElapsedTime = NewElapsedTime;
 }
 
 void AIngameGameState::SetMonsterCount(int NewCount)
 {
-    if (bStageCleared) return;
+    if (bStageCleared)
+    {
+        return;
+    }
     const int ClampedCount = FMath::Max(0, NewCount);
-    if (MonsterCount == ClampedCount) return;
+    if (MonsterCount == ClampedCount)
+    {
+        return;
+    }
     MonsterCount = ClampedCount;
     InvokePropertyChanged(0);
 }
 
 void AIngameGameState::SetDoorVisibility(bool Visibility)
 {
-    if (bStageCleared) return;
+    if (bStageCleared)
+    {
+        return;
+    }
     if (DoorVisibility != Visibility )
     {
         DoorVisibility = Visibility;
@@ -82,7 +97,10 @@ void AIngameGameState::InvokePropertyChanged(uint8 PropertyName) { OnMissionChan
 bool AIngameGameState::TryCompleteStage(float ClearSeconds)
 {
     if (bStageCleared || MonsterCount != 0 || !DoorVisibility
-        || !FMath::IsFinite(ClearSeconds) || ClearSeconds < 0.0f) return false;
+        || !FMath::IsFinite(ClearSeconds) || ClearSeconds < 0.0f)
+    {
+        return false;
+    }
     ElapsedTime = ClearSeconds;
     bStageCleared = true;
     DoorVisibility = false;

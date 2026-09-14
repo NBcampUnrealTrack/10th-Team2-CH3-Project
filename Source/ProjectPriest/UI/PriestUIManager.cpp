@@ -20,32 +20,53 @@ void UPriestUIManager::SetHUDWidgetClass(TSubclassOf<UPriestHUDWidget> WidgetCla
         return;
     }
     HideHUD();
-    if (CombatController) CombatController->SetView(nullptr);
-    if (MissionController) MissionController->SetView(nullptr);
+    if (CombatController)
+    {
+        CombatController->SetView(nullptr);
+        CombatController->SetModel(nullptr);
+    }
+    if (MissionController)
+    {
+        MissionController->SetView(nullptr);
+    }
     HUD = nullptr;
     HUDWidgetClass = WidgetClass;
 }
 
 bool UPriestUIManager::ShowHUD(const FPriestHUDData& Data)
 {
-    if (DeathController && DeathController->IsDeathActive()) return false;
-    if (StageClearController && StageClearController->IsStageClearActive()) return false;
+    if (DeathController && DeathController->IsDeathActive())
+    {
+        return false;
+    }
+    if (StageClearController && StageClearController->IsStageClearActive())
+    {
+        return false;
+    }
     if (!HUDWidgetClass || HUDWidgetClass->HasAnyClassFlags(CLASS_Abstract))
     {
         UE_LOG(LogTemp, Warning, TEXT("Priest HUD: Set a concrete Widget Blueprint class before ShowHUD."));
         return false;
     }
-	APlayerController* Controller = GetLocalPlayer()->GetPlayerController(GetWorld());
+	APlayerController* Controller = GetLocalPlayer() ? GetLocalPlayer()->GetPlayerController(GetWorld()) : nullptr;
 	if (!Controller)
 	{
+		UE_LOG(LogTemp, Error, TEXT("%hs [%s]: No PlayerController is available to create the HUD."), __FUNCTION__, *GetNameSafe(this));
 	    return false;
 	}
 	// 레벨 이동 등으로 소유 컨트롤러가 달라지면 기존 위젯 대신 새 위젯을 만든다.
 	if (HUD && HUD->GetOwningPlayer() != Controller)
 	{
 		HideHUD();
-		if (CombatController) CombatController->SetView(nullptr);
-		if (MissionController) MissionController->SetView(nullptr);
+		if (CombatController)
+		{
+			CombatController->SetView(nullptr);
+			CombatController->SetModel(nullptr);
+		}
+		if (MissionController)
+		{
+			MissionController->SetView(nullptr);
+		}
 		HUD = nullptr;
 	}
 	if (!HUD)
@@ -54,6 +75,7 @@ bool UPriestUIManager::ShowHUD(const FPriestHUDData& Data)
 	}
 	if (!HUD)
 	{
+		UE_LOG(LogTemp, Error, TEXT("%hs [%s]: CreateWidget failed for HUDWidgetClass."), __FUNCTION__, *GetNameSafe(this));
 	    return false;
 	}
 	HUD->SetHUDData(Data);
@@ -63,23 +85,30 @@ bool UPriestUIManager::ShowHUD(const FPriestHUDData& Data)
 	// 중복 추가를 막는다. ZOrder 0은 기본 HUD 레이어다.
 	if (!HUD->IsInViewport())
 	{
-	    return HUD->AddToPlayerScreen(0);
+        const bool bDisplayed = HUD->AddToPlayerScreen(0);
+        if (!bDisplayed)
+        {
+            UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Failed to add HUD to the player screen."), __FUNCTION__, *GetNameSafe(this));
+        }
+        return bDisplayed;
 	}
 	return true;
 }
 
 void UPriestUIManager::UpdateHUD(const FPriestHUDData& Data)
 {
-	if (HUD)
-	{
-	    HUD->SetHUDData(Data);
-	}
+    if (!IsValid(HUD))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: HUD is missing. Call ShowHUD before UpdateHUD."), __FUNCTION__, *GetNameSafe(this));
+        return;
+    }
+    HUD->SetHUDData(Data);
 }
 
 void UPriestUIManager::NotifyHitConfirmed(float AppliedDamage, const FVector& DamageLocation)
 {
     // 숨겨진 HUD나 이전 레벨의 HUD에는 일회성 효과를 전달하지 않는다.
-    APlayerController* Controller = GetLocalPlayer()->GetPlayerController(GetWorld());
+    APlayerController* Controller = GetLocalPlayer() ? GetLocalPlayer()->GetPlayerController(GetWorld()) : nullptr;
     if (IsValid(HUD) && HUD->GetOwningPlayer() == Controller && HUD->IsInViewport() && HUD->IsVisible())
     {
         HUD->OnHitConfirmed();
@@ -112,6 +141,14 @@ void UPriestUIManager::NotifyHitConfirmed(float AppliedDamage, const FVector& Da
             {
                 DamageNumbers.Add(Number);
             }
+            else
+            {
+                UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Failed to display damage number widget."), __FUNCTION__, *GetNameSafe(this));
+            }
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Failed to create damage number widget."), __FUNCTION__, *GetNameSafe(this));
         }
     }
 }
@@ -144,7 +181,7 @@ void UPriestUIManager::Deinitialize()
 
 void UPriestUIManager::NotifyPlayerDamaged()
 {
-    APlayerController* Controller = GetLocalPlayer()->GetPlayerController(GetWorld());
+    APlayerController* Controller = GetLocalPlayer() ? GetLocalPlayer()->GetPlayerController(GetWorld()) : nullptr;
     if (IsValid(HUD) && HUD->GetOwningPlayer() == Controller && HUD->IsInViewport() && HUD->IsVisible())
     {
         HUD->ShowDamageFeedback();
@@ -162,7 +199,7 @@ void UPriestUIManager::ResetDamageFeedback()
 
 void UPriestUIManager::NotifyEnemyKilled()
 {
-    APlayerController* Controller = GetLocalPlayer()->GetPlayerController(GetWorld());
+    APlayerController* Controller = GetLocalPlayer() ? GetLocalPlayer()->GetPlayerController(GetWorld()) : nullptr;
     if (IsValid(HUD) && HUD->GetOwningPlayer() == Controller && HUD->IsInViewport() && HUD->IsVisible())
     {
         HUD->ShowKillNotification();
@@ -171,9 +208,21 @@ void UPriestUIManager::NotifyEnemyKilled()
 
 void UPriestUIManager::SetCombatPawn(APawn* Pawn, AIngamePlayerController* Owner)
 {
-    if (!CombatModel) CombatModel = NewObject<UPriestCombatModel>(this);
-    if (!CombatController) CombatController = NewObject<UMvcCharacterStatController>(this);
-    CombatController->SetModel(CombatModel);
+    if (!IsValid(Owner))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Combat binding requires a valid IngamePlayerController."), __FUNCTION__, *GetNameSafe(this));
+        return;
+    }
+    bCombatBindingInitialized = true;
+    if (!CombatModel)
+    {
+        CombatModel = NewObject<UPriestCombatModel>(this);
+    }
+    if (!CombatController)
+    {
+        CombatController = NewObject<UMvcCharacterStatController>(this);
+    }
+    CombatController->SetModel(IsValid(HUD) ? CombatModel.Get() : nullptr);
     CombatController->SetView(HUD);
     ResetDamageFeedback();
     if (!DeathController)
@@ -186,30 +235,76 @@ void UPriestUIManager::SetCombatPawn(APawn* Pawn, AIngamePlayerController* Owner
 
 void UPriestUIManager::ConnectCombatView()
 {
-    if (MissionController)
+    if (!IsValid(HUD))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: HUD is missing. Create the HUD before connecting its controllers."), __FUNCTION__, *GetNameSafe(this));
+        return;
+    }
+    if (IsValid(MissionController))
     {
         MissionController->SetView(HUD);
         MissionController->HandleModelChanged(MissionController->GetModel<AIngameGameState>(), 0);
     }
-    if (CombatController && CombatModel)
+    else if (bMissionBindingInitialized)
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: MissionController is missing after SetMissionState. Reinitialize mission binding."), __FUNCTION__, *GetNameSafe(this));
+    }
+    else
+    {
+        UE_LOG(LogTemp, Verbose, TEXT("%hs [%s]: Mission binding has not started; SetMissionState will connect the HUD."), __FUNCTION__, *GetNameSafe(this));
+    }
+    if (IsValid(CombatController) && IsValid(CombatModel))
     {
         CombatController->SetView(HUD);
+        CombatController->SetModel(CombatModel);
         CombatController->HandleModelChanged(CombatModel, 0);
+    }
+    else if (bCombatBindingInitialized)
+    {
+        if (!IsValid(CombatController))
+        {
+            UE_LOG(LogTemp, Error, TEXT("%hs [%s]: CombatController is invalid after SetCombatPawn."), __FUNCTION__, *GetNameSafe(this));
+        }
+        if (!IsValid(CombatModel))
+        {
+            UE_LOG(LogTemp, Error, TEXT("%hs [%s]: CombatModel is invalid after SetCombatPawn."), __FUNCTION__, *GetNameSafe(this));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Verbose, TEXT("%hs [%s]: Combat binding has not started; SetCombatPawn will connect the HUD."), __FUNCTION__, *GetNameSafe(this));
     }
 }
 
 void UPriestUIManager::DisconnectCombatHUD()
 {
-    if (StageClearController) StageClearController->Disconnect();
+    bCombatBindingInitialized = false;
+    bMissionBindingInitialized = false;
+    if (StageClearController)
+    {
+        StageClearController->Disconnect();
+    }
     HideStageClearScreen();
     StageClearController = nullptr;
-    if (MissionController) MissionController->Disconnect();
+    if (MissionController)
+    {
+        MissionController->Disconnect();
+    }
     MissionController = nullptr;
-    if (DeathController) DeathController->Disconnect();
+    if (DeathController)
+    {
+        DeathController->Disconnect();
+    }
     HideDeathScreen();
     DeathController = nullptr;
-    if (CombatController) CombatController->Disconnect();
-    if (CombatModel) CombatModel->Disconnect();
+    if (CombatController)
+    {
+        CombatController->Disconnect();
+    }
+    if (CombatModel)
+    {
+        CombatModel->Disconnect();
+    }
     CombatController = nullptr;
     CombatModel = nullptr;
     HideHUD();
@@ -222,25 +317,45 @@ void UPriestUIManager::SetDeathWidgetClass(TSubclassOf<UPriestDeathWidget> Widge
 
 UPriestDeathWidget* UPriestUIManager::ShowDeathScreen(APlayerController* Owner)
 {
-    if (!IsValid(Owner)) return nullptr;
-    if (DeathWidget && DeathWidget->GetOwningPlayer() != Owner) HideDeathScreen();
-    if (!DeathWidget && DeathWidgetClass && !DeathWidgetClass->HasAnyClassFlags(CLASS_Abstract))
+    if (!IsValid(Owner))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: A valid owning PlayerController is required to create the Death screen."), __FUNCTION__, *GetNameSafe(this));
+        return nullptr;
+    }
+    if (!DeathWidgetClass || DeathWidgetClass->HasAnyClassFlags(CLASS_Abstract))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Configure a concrete DeathWidgetClass in the ingame PlayerController Blueprint."), __FUNCTION__, *GetNameSafe(this));
+        return nullptr;
+    }
+    if (IsValid(DeathWidget) && DeathWidget->GetOwningPlayer() != Owner)
+    {
+        HideDeathScreen();
+    }
+    if (!IsValid(DeathWidget))
     {
         DeathWidget = CreateWidget<UPriestDeathWidget>(Owner, DeathWidgetClass);
     }
-    if (DeathWidget && (DeathWidget->IsInViewport() || DeathWidget->AddToPlayerScreen(100)))
+    if (!IsValid(DeathWidget))
     {
-        DeathWidget->SetVisibility(ESlateVisibility::Visible);
-        return DeathWidget;
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: CreateWidget failed for DeathWidgetClass."), __FUNCTION__, *GetNameSafe(this));
+        return nullptr;
     }
-    HideDeathScreen();
-    UE_LOG(LogTemp, Error, TEXT("Priest Death UI: Set DeathWidgetClass to a configured death Widget Blueprint in the ingame PlayerController."));
-    return nullptr;
+    if (!DeathWidget->IsInViewport() && !DeathWidget->AddToPlayerScreen(100))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Failed to add the Death screen to the owning player."), __FUNCTION__, *GetNameSafe(this));
+        HideDeathScreen();
+        return nullptr;
+    }
+    DeathWidget->SetVisibility(ESlateVisibility::Visible);
+    return DeathWidget;
 }
 
 void UPriestUIManager::HideDeathScreen()
 {
-    if (DeathWidget) DeathWidget->RemoveFromParent();
+    if (DeathWidget)
+    {
+        DeathWidget->RemoveFromParent();
+    }
     DeathWidget = nullptr;
 }
 
@@ -251,19 +366,49 @@ bool UPriestUIManager::IsHUDDisplayed() const
 
 void UPriestUIManager::RestoreHUD()
 {
-    APlayerController* Owner = GetLocalPlayer()->GetPlayerController(GetWorld());
-    if (HUD && HUD->GetOwningPlayer() == Owner && !HUD->IsInViewport())
+    APlayerController* Owner = GetLocalPlayer() ? GetLocalPlayer()->GetPlayerController(GetWorld()) : nullptr;
+    if (!IsValid(HUD) || !IsValid(Owner))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Cannot restore HUD without a valid HUD and owning PlayerController."), __FUNCTION__, *GetNameSafe(this));
+        return;
+    }
+    if (HUD->GetOwningPlayer() != Owner)
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Cannot restore a HUD owned by a previous PlayerController."), __FUNCTION__, *GetNameSafe(this));
+        return;
+    }
+    if (!HUD->IsInViewport())
     {
         ConnectCombatView();
-        HUD->AddToPlayerScreen(0);
+        if (!HUD->AddToPlayerScreen(0))
+        {
+            UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Failed to restore HUD to the player screen."), __FUNCTION__, *GetNameSafe(this));
+            return;
+        }
     }
 }
 
 void UPriestUIManager::SetMissionState(AIngameGameState* State, AIngamePlayerController* Owner)
 {
-    if (!StageClearController) StageClearController = NewObject<UPriestStageClearController>(this);
+    if (!IsValid(Owner))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Mission binding requires a valid IngamePlayerController."), __FUNCTION__, *GetNameSafe(this));
+        return;
+    }
+    bMissionBindingInitialized = true;
+    if (!IsValid(State))
+    {
+        UE_LOG(LogTemp, Verbose, TEXT("%hs [%s]: Waiting for IngameGameState. Mission view will show loading."), __FUNCTION__, *GetNameSafe(this));
+    }
+    if (!StageClearController)
+    {
+        StageClearController = NewObject<UPriestStageClearController>(this);
+    }
     StageClearController->Initialize(State, this, Owner);
-    if (!MissionController) MissionController = NewObject<UPriestMissionController>(this);
+    if (!MissionController)
+    {
+        MissionController = NewObject<UPriestMissionController>(this);
+    }
     MissionController->SetModel(State);
     MissionController->SetView(HUD);
     MissionController->HandleModelChanged(State, 0);
@@ -276,24 +421,44 @@ void UPriestUIManager::SetStageClearWidgetClass(TSubclassOf<UPriestStageClearWid
 
 UPriestStageClearWidget* UPriestUIManager::ShowStageClearScreen(APlayerController* Owner)
 {
-    if (!IsValid(Owner)) return nullptr;
-    if (StageClearWidget && StageClearWidget->GetOwningPlayer() != Owner) HideStageClearScreen();
-    if (!StageClearWidget && StageClearWidgetClass && !StageClearWidgetClass->HasAnyClassFlags(CLASS_Abstract))
+    if (!IsValid(Owner))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: A valid owning PlayerController is required to create the StageClear screen."), __FUNCTION__, *GetNameSafe(this));
+        return nullptr;
+    }
+    if (!StageClearWidgetClass || StageClearWidgetClass->HasAnyClassFlags(CLASS_Abstract))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Configure a concrete StageClearWidgetClass in the ingame PlayerController Blueprint."), __FUNCTION__, *GetNameSafe(this));
+        return nullptr;
+    }
+    if (IsValid(StageClearWidget) && StageClearWidget->GetOwningPlayer() != Owner)
+    {
+        HideStageClearScreen();
+    }
+    if (!IsValid(StageClearWidget))
     {
         StageClearWidget = CreateWidget<UPriestStageClearWidget>(Owner, StageClearWidgetClass);
     }
-    if (StageClearWidget && (StageClearWidget->IsInViewport() || StageClearWidget->AddToPlayerScreen(100)))
+    if (!IsValid(StageClearWidget))
     {
-        StageClearWidget->SetVisibility(ESlateVisibility::Visible);
-        return StageClearWidget;
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: CreateWidget failed for StageClearWidgetClass."), __FUNCTION__, *GetNameSafe(this));
+        return nullptr;
     }
-    HideStageClearScreen();
-    UE_LOG(LogTemp, Error, TEXT("Priest StageClear UI: Set StageClearWidgetClass to a configured stage clear Widget Blueprint in the ingame PlayerController."));
-    return nullptr;
+    if (!StageClearWidget->IsInViewport() && !StageClearWidget->AddToPlayerScreen(100))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Failed to add the StageClear screen to the owning player."), __FUNCTION__, *GetNameSafe(this));
+        HideStageClearScreen();
+        return nullptr;
+    }
+    StageClearWidget->SetVisibility(ESlateVisibility::Visible);
+    return StageClearWidget;
 }
 
 void UPriestUIManager::HideStageClearScreen()
 {
-    if (StageClearWidget) StageClearWidget->RemoveFromParent();
+    if (StageClearWidget)
+    {
+        StageClearWidget->RemoveFromParent();
+    }
     StageClearWidget = nullptr;
 }
