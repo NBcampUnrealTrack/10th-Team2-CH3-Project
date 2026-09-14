@@ -1,8 +1,10 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
+
+DECLARE_MULTICAST_DELEGATE(FPlayerCombatChanged);
 
 class USpringArmComponent;
 class UCameraComponent;
@@ -53,6 +55,11 @@ public:
         AController* EventInstigator,
         AActor* DamageCauser
     ) override;
+
+    FPlayerCombatChanged OnCombatChanged;
+    float GetCurrentHealth() const { return CurrentHealth; }
+    float GetMaxHealth() const { return MaxHealth; }
+    AWeaponItem* GetEquippedWeapon() const { return WeaponInstance.Get(); }
 
     const FVector GetMuzzleLocation();
 

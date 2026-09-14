@@ -1,4 +1,4 @@
-﻿#include "HolyGenerade.h"
+#include "HolyGenerade.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -108,7 +108,7 @@ void AHolyGenerade::Explode()
 			UGameplayStatics::ApplyDamage(
 				Actor,
 				ExplosionDamage,
-				nullptr,
+				GetInstigatorController(),
 				this,
 				UDamageType::StaticClass()
 			);
