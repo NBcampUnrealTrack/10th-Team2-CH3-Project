@@ -1,72 +1,93 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+Ôªø// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "EnemyCharacter.h"
-//√ﬂ»ƒ «√∑π¿ÃæÓ ƒ≥∏Ø≈Õ ¿Œ≈¨∑ÁµÂ  
-//#include "PlayerCharacter.h"
+#include "IngamePlayerController.h"
+#include "PlayerCharacter.h"
 #include "MonsterAIController.h"
+#include "Engine/DamageEvents.h"
+#include "IngameGameMode.h"
+#include "Components/CapsuleComponent.h"
+#include "JUtility.h"
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	//AI ƒ¡∆Æ∑—∑Ø class º≥¡§
+	//AI Ïª®Ìä∏Î°§Îü¨ class ÏÑ§Ï†ï
 	AIControllerClass = AMonsterAIController::StaticClass();
-	//ª˝º∫Ω√ AI Possess º≥¡§
+	//ÏÉùÏÑ±Ïãú AI Possess ÏÑ§Ï†ï
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	//Ω∫≈» √ ±‚»≠
-	Health = 100.0f;
-	Damage = 10.0f;
-	Defense = 5.0f;
-	MinimumDamage = 1.0f;//∏ÛΩ∫≈Õ∞° πﬁ¥¬ √÷º“«««ÿ
-
-	PatrolRadius = 1000.0f;
 }
 
+void AEnemyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	
+	AIngameGameMode* IngameGameMode = Cast<AIngameGameMode>(GetWorld()->GetAuthGameMode());
+	JASSERT(IsValid(IngameGameMode), "Ingame game mode is invalid");
+	
+	IngameGameMode->OnMonsterDead();	
+}
 
 void AEnemyCharacter::Attack(ACharacter* PlayerCharacter)
 {
-    float MontagePlayResult = AnimInstance->Montage_Play(MontageToPlaying, 1.0f);
-    if (FMath::IsNearlyZero(MontagePlayResult))
-    {
-        //TODO: Error what to do
-        AttackMontageState = EAttackMontageState::Error;
-        return;
-    }
-
-    FOnMontageEnded EndDelegate;
-    EndDelegate.BindUObject(this, &AEnemyCharacter::OnMontageEnded);
-
-    AnimInstance->Montage_SetEndDelegate(EndDelegate, MontageToPlaying);
-    AttackMontageState = EAttackMontageState::InProgress;
 }
 
-void AEnemyCharacter::TakeDamage(float DamageAmount)
+float AEnemyCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
-	float ActualDamage = FMath::Max(DamageAmount - Defense, MinimumDamage);
-	Health -= ActualDamage;
+    if (!FMath::IsFinite(DamageAmount) || DamageAmount <= 0.0f || Health <= 0.0f || bIsDead || IsActorBeingDestroyed())
+    {
+        return 0.0f;
+    }
+    const float ActualDamage = FMath::Min(Health, FMath::Max(0.0f, FMath::Max(DamageAmount - Defense, MinimumDamage)));
+    if (ActualDamage <= 0.0f)
+    {
+        return 0.0f;
+    }
+    Health -= ActualDamage;
+    if (AIngamePlayerController* AttackingController = Cast<AIngamePlayerController>(EventInstigator))
+    {
+        AttackingController->ClientNotifyHitConfirmed(ActualDamage, GetActorLocation() + FVector(0.0f, 0.0f, 100.0f));
+        if (Health <= 0.0f)
+        {
+            AttackingController->ClientNotifyEnemyKilled();
+        }
+    }
+	UE_LOG(LogTemp, Warning, TEXT("Î™¨Ïä§ÌÑ∞Í∞Ä Î∞õÏùÄ Îç∞ÎØ∏ÏßÄ: %.1f / Î™¨Ïä§ÌÑ∞ ÌòÑÏû¨ HP: %.1f"), ActualDamage, Health);
 	if (Health <= 0)
 	{
 		Die();
 	}
+	return ActualDamage;
 }
 
 void AEnemyCharacter::Die()
 {
-	Destroy();
-}
-void AEnemyCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{
-    if (bInterrupted)
-    {
-        AttackMontageState = EAttackMontageState::Interrupted;
-    }
-    else
-    {
-        AttackMontageState = EAttackMontageState::Finished;
-    }
+	if (bIsDead)
+	{
+		return;
+	}
+
+	bIsDead = true;
+
+	AMonsterAIController* AiController = Cast<AMonsterAIController>(GetController());
+
+	GetCapsuleComponent()->SetCollisionEnabled(
+		ECollisionEnabled::NoCollision
+	);
+
+	DropItem();
+
+	GetWorldTimerManager().SetTimer(
+		DeathTimerHandle,
+		this,
+		&AEnemyCharacter::DestroyEnemy,//boolÌòïÏùÑ Î∞òÌôòÌïòÏßÄ ÏïäÎäî Ìï®ÏàòÎ•º Îã§Ïãú Ï†ïÏùò
+		5.0f,
+		false
+	);
 }
 
 void AEnemyCharacter::BeginPlay()
@@ -76,9 +97,30 @@ void AEnemyCharacter::BeginPlay()
 	PatrolOrigin = this->GetActorLocation();
 
     AnimInstance = GetMesh()->GetAnimInstance();
+
+	const FMonsterData* MonsterData =
+		RowDataTable.GetRow<FMonsterData>(
+			TEXT("AEnemyCharacter::BeginPlay")
+		);
+	if (MonsterData)
+	{
+		AttackRange = MonsterData->AttackRange;
+		Damage = MonsterData->Damage;
+		Defense = MonsterData->Defense;
+		Health = MonsterData->Health;
+		MinimumDamage = MonsterData->MinimumDamage;
+		PatrolRadius = MonsterData->PatrolRadius;
+	}
+	
+	AIngameGameMode* IngameGameMode 
+		= Cast<AIngameGameMode>( GetWorld()->GetAuthGameMode());
+	JASSERT(IsValid(IngameGameMode), "Ingame game mode is invalid");
+	
+	IngameGameMode->OnMonsterSpawned();	
 }
 
-//TODO: æ∆ ∏æø° æ»µÈæÓ ∞Ã≥™ »≠≥™¥¬ ±◊∑± ±∏¡∂≥◊...
+
+//TODO: ÏïÑ ÎßòÏóê ÏïàÎì§Ïñ¥ Í≤ÅÎÇò ÌôîÎÇòÎäî Í∑∏Îü∞ Íµ¨Ï°∞ÎÑ§...
 // BT_Attack 
 // -> AEnemyCharacter::Attack() 
 // -> Play Montage 
@@ -86,9 +128,18 @@ void AEnemyCharacter::BeginPlay()
 // -> AEnemyCharacter::OnNotifyApplyDamage
 // -> BT_Attack.OnApplyDamage;
 
+float AEnemyCharacter::GetAttackRange()
+{
+	return AttackRange;
+}
+
 void AEnemyCharacter::OnNotifyApplyDamage()
 {
-    ApplyAttackDelegate.ExecuteIfBound();
+    FDamageEvent DummyDelegate;
+    this->AttackTarget->TakeDamage(Damage
+        , DummyDelegate
+        , this->GetController()
+        , this);
 }
 
 bool AEnemyCharacter::GetIsDead()
@@ -106,30 +157,48 @@ bool AEnemyCharacter::HitThisFrame()
     return bHitThisFrame;
 }
 
-EAttackMontageState AEnemyCharacter::GetAttackMontageState() const
-{
-    return AttackMontageState;
-}
-
 float AEnemyCharacter::GetDamage()
 {
     return Damage;
 }
 
-void AEnemyCharacter::SetApplyAttackDelegate(FApplyAttackDelegte& Delegate)
+void AEnemyCharacter::SetAttackTarget(ACharacter* Target)
 {
-    ApplyAttackDelegate = Delegate;
+    AttackTarget = Target;
 }
 
-void AEnemyCharacter::UnbindApplyAttackDelegate()
+EAttackAnimationState AEnemyCharacter::GetAttackAnimationeState()
 {
-    ApplyAttackDelegate.Unbind();
+    return AttackAnimationeState;
 }
 
 void AEnemyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
 
+void AEnemyCharacter::DropItem()
+{
+	const FMonsterData* MonsterData =
+		RowDataTable.GetRow<FMonsterData>(
+			TEXT("AEnemyCharacter::DropItem")
+		);
+	if (!MonsterData || !MonsterData->DropItemClass)
+	{ 
+		return;
+	}
+
+	GetWorld()->SpawnActor<AActor>(
+		MonsterData->DropItemClass,
+		GetActorLocation(),
+		FRotator::ZeroRotator
+	);
+	
+}
+
+void AEnemyCharacter::DestroyEnemy()
+{
+	Destroy();
 }
 
 FVector AEnemyCharacter::GetPatrolOrigin()
