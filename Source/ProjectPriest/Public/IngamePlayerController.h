@@ -37,6 +37,7 @@ public:
     TObjectPtr<UInputAction> GetThrowAction();
     TObjectPtr<UInputAction> GetSprintAction();
     TObjectPtr<UInputAction> GetJumpAction();
+    TObjectPtr<UInputAction> GetInteractAction();
 private:
     UFUNCTION()
     void HandleCombatPawnChanged(APawn* PreviousPawn, APawn* NewPawn);
@@ -76,4 +77,7 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Enhanced Inputs")
     TObjectPtr<UInputAction> ThrowAction;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Enhanced Inputs")
+    TObjectPtr<UInputAction> InteractAction;
 };

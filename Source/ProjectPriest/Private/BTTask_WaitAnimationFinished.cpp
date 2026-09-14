@@ -45,7 +45,7 @@ void UBTTask_WaitAnimationFinished::TickTask(UBehaviorTreeComponent& OwnerComp, 
         break;
 
     case EAttackAnimationState::Finished:
-        JLog("Animation Finished");
+        //JLog("Animation Finished");
         FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
         break;
     }
