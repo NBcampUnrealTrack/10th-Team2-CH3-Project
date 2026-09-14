@@ -77,6 +77,8 @@ void AEnemyCharacter::Die()
 		ECollisionEnabled::NoCollision
 	);
 
+	DropItem();
+
 	GetWorldTimerManager().SetTimer(
 		DeathTimerHandle,
 		this,
@@ -171,7 +173,23 @@ EAttackAnimationState AEnemyCharacter::GetAttackAnimationeState()
 void AEnemyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
 
+void AEnemyCharacter::DropItem()
+{
+	const FMonsterData* MonsterData =
+		RowDataTable.GetRow<FMonsterData>(
+			TEXT("AEnemyCharacter::DropItem")
+		);
+	if (!MonsterData || !MonsterData->DropItemClass)
+		return;
+
+	GetWorld()->SpawnActor<AActor>(
+		MonsterData->DropItemClass,
+		GetActorLocation(),
+		FRotator::ZeroRotator
+	);
+	
 }
 
 void AEnemyCharacter::DestroyEnemy()
