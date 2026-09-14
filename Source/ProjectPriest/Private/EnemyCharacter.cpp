@@ -7,6 +7,7 @@
 #include "MonsterAIController.h"
 #include "Engine/DamageEvents.h"
 #include "IngameGameMode.h"
+#include "Components/CapsuleComponent.h"
 #include "JUtility.h"
 
 // Sets default values
@@ -66,9 +67,19 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const&
 void AEnemyCharacter::Die()
 {
 	if (bIsDead)
+	{
 		return;
+	}
 
 	bIsDead = true;
+
+	AMonsterAIController* AiController = Cast<AMonsterAIController>(GetController());
+
+	GetCapsuleComponent()->SetCollisionEnabled(
+		ECollisionEnabled::NoCollision
+	);
+
+	DropItem();
 
 	GetWorldTimerManager().SetTimer(
 		DeathTimerHandle,
@@ -164,7 +175,25 @@ EAttackAnimationState AEnemyCharacter::GetAttackAnimationeState()
 void AEnemyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
 
+void AEnemyCharacter::DropItem()
+{
+	const FMonsterData* MonsterData =
+		RowDataTable.GetRow<FMonsterData>(
+			TEXT("AEnemyCharacter::DropItem")
+		);
+	if (!MonsterData || !MonsterData->DropItemClass)
+	{ 
+		return;
+	}
+
+	GetWorld()->SpawnActor<AActor>(
+		MonsterData->DropItemClass,
+		GetActorLocation(),
+		FRotator::ZeroRotator
+	);
+	
 }
 
 void AEnemyCharacter::DestroyEnemy()

@@ -13,26 +13,30 @@ struct FMonsterData : public FTableRowBase
 
 	//몬스터 체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	float Health;
+	float Health = 0.0f;
 
 	//몬스터 공격력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	float Damage;
+	float Damage = 0.0f;
 
 	//몬스터 방어력
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")
-	float Defense = 0;
+	float Defense = 0.0f;
 
 	//몬스터 최소 피해량
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	float MinimumDamage;
+	float MinimumDamage = 0.0f;
 
 	//몬스터 사거리
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	float AttackRange;
+	float AttackRange = 0.0f;
 
 	//몬스터의 순찰반경
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Patrol")
-	float PatrolRadius;
+	float PatrolRadius = 0.0f;
+
+	//드롭 아이템
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|DropItem")
+	TSubclassOf<AActor> DropItemClass = nullptr;
 
 };
