@@ -8,8 +8,15 @@ UMvcControl::UMvcControl()
 
 void UMvcControl::BeginDestroy()
 {
-    Model->RemoveListener(ModelListenerHandle);
-    View->RemoveListener(ViewListenerHandle);
+    if (nullptr != Model)
+    {
+        Model->RemoveListener(ModelListenerHandle);
+    }
+    
+    if (nullptr != View)
+    {
+        View->RemoveListener(ViewListenerHandle);
+    }
 }
 
 void UMvcControl::SetView(IMvcView* NewView)
