@@ -6,7 +6,10 @@
 
 void UPriestUIManager::SetHUDWidgetClass(TSubclassOf<UPriestHUDWidget> WidgetClass)
 {
-    if (HUDWidgetClass == WidgetClass) return;
+    if (HUDWidgetClass == WidgetClass)
+    {
+        return;
+    }
     HideHUD();
     HUD = nullptr;
     HUDWidgetClass = WidgetClass;
@@ -20,31 +23,49 @@ bool UPriestUIManager::ShowHUD(const FPriestHUDData& Data)
         return false;
     }
 	APlayerController* Controller = GetLocalPlayer()->GetPlayerController(GetWorld());
-	if (!Controller) return false;
+	if (!Controller)
+	{
+	    return false;
+	}
 	// 레벨 이동 등으로 소유 컨트롤러가 달라지면 기존 위젯 대신 새 위젯을 만든다.
 	if (HUD && HUD->GetOwningPlayer() != Controller)
 	{
 		HideHUD();
 		HUD = nullptr;
 	}
-	if (!HUD) HUD = CreateWidget<UPriestHUDWidget>(Controller, HUDWidgetClass);
-	if (!HUD) return false;
+	if (!HUD)
+	{
+	    HUD = CreateWidget<UPriestHUDWidget>(Controller, HUDWidgetClass);
+	}
+	if (!HUD)
+	{
+	    return false;
+	}
 	HUD->SetHUDData(Data);
 	// HUD와 자식 위젯이 마우스 입력을 가로채지 않도록 표시 전용으로 설정한다.
 	HUD->SetVisibility(ESlateVisibility::HitTestInvisible);
 	// 중복 추가를 막는다. ZOrder 0은 기본 HUD 레이어다.
-	if (!HUD->IsInViewport()) return HUD->AddToPlayerScreen(0);
+	if (!HUD->IsInViewport())
+	{
+	    return HUD->AddToPlayerScreen(0);
+	}
 	return true;
 }
 
 void UPriestUIManager::UpdateHUD(const FPriestHUDData& Data)
 {
-	if (HUD) HUD->SetHUDData(Data);
+	if (HUD)
+	{
+	    HUD->SetHUDData(Data);
+	}
 }
 
 void UPriestUIManager::UpdateCombatHUD(float Health, float Maximum, const FText& Name, int32 Ammo, int32 Reserve)
 {
-    if (HUD) HUD->SetCombatData(Health, Maximum, Name, Ammo, Reserve);
+    if (HUD)
+    {
+        HUD->SetCombatData(Health, Maximum, Name, Ammo, Reserve);
+    }
 }
 
 void UPriestUIManager::NotifyHitConfirmed(float AppliedDamage, const FVector& DamageLocation)
@@ -54,7 +75,10 @@ void UPriestUIManager::NotifyHitConfirmed(float AppliedDamage, const FVector& Da
     if (IsValid(HUD) && HUD->GetOwningPlayer() == Controller && HUD->IsInViewport() && HUD->IsVisible())
     {
         HUD->OnHitConfirmed();
-        if (!FMath::IsFinite(AppliedDamage) || AppliedDamage <= 0.0f || DamageLocation.ContainsNaN()) return;
+        if (!FMath::IsFinite(AppliedDamage) || AppliedDamage <= 0.0f || DamageLocation.ContainsNaN())
+        {
+            return;
+        }
         DamageNumbers.RemoveAll([](const TObjectPtr<UPriestDamageNumberWidget>& Number)
         {
             return !IsValid(Number) || !Number->IsInViewport();
@@ -66,14 +90,20 @@ void UPriestUIManager::NotifyHitConfirmed(float AppliedDamage, const FVector& Da
             DamageNumbers.RemoveAt(0);
         }
         TSubclassOf<UPriestDamageNumberWidget> NumberClass = HUD->DamageNumberWidgetClass;
-        if (!NumberClass) NumberClass = UPriestDamageNumberWidget::StaticClass();
-        if (NumberClass->HasAnyClassFlags(CLASS_Abstract)) return;
+        if (!NumberClass || NumberClass->HasAnyClassFlags(CLASS_Abstract))
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Priest HUD: Set DamageNumberWidgetClass to a concrete Widget Blueprint."));
+            return;
+        }
         UPriestDamageNumberWidget* Number = CreateWidget<UPriestDamageNumberWidget>(Controller, NumberClass);
         if (Number)
         {
             Number->InitializeDamage(AppliedDamage, DamageLocation);
             Number->SetVisibility(ESlateVisibility::HitTestInvisible);
-            if (Number->AddToPlayerScreen(10)) DamageNumbers.Add(Number);
+            if (Number->AddToPlayerScreen(10))
+            {
+                DamageNumbers.Add(Number);
+            }
         }
     }
 }
@@ -83,10 +113,16 @@ void UPriestUIManager::HideHUD()
     ResetDamageFeedback();
     for (UPriestDamageNumberWidget* Number : DamageNumbers)
     {
-        if (IsValid(Number)) Number->RemoveFromParent();
+        if (IsValid(Number))
+        {
+            Number->RemoveFromParent();
+        }
     }
     DamageNumbers.Reset();
-	if (HUD) HUD->RemoveFromParent();
+	if (HUD)
+	{
+	    HUD->RemoveFromParent();
+	}
 }
 
 void UPriestUIManager::Deinitialize()

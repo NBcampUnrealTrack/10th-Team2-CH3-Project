@@ -99,13 +99,13 @@ C++ 빌드와 실제 WBP 화면 검증은 별개다. WBP 에셋 생성/바인딩
 
 ## 데미지 숫자 표시 (2026-09-13)
 
-- 추가 WBP 작업 없이 기본 숫자를 표시한다. 몬스터 피격 당시 위치 + Z 100에서 노란 숫자가 0.7초 동안 위로 60 UI 단위 이동하며 사라진다.
+- WBP_DamageNumber 설정이 필수다. 몬스터 피격 당시 위치 + Z 100에서 숫자가 0.7초 동안 위로 60 UI 단위 이동하며 사라진다. 디자인은 WBP에서 설정한다.
 - 표시 값은 방어력 적용 후 실제 HP 감소량이며, 마지막 일격은 남은 HP까지만 표시한다. 소수점은 최대 1자리다.
 - 카메라 이동 시 월드 위치를 다시 화면에 투영한다. 몬스터가 죽어 삭제되어도 저장한 위치에서 숫자가 유지된다.
 - 총격/성수 명중마다 별도 숫자를 생성한다. 최대 32개이며 HUD 숨김/교체/종료 시 정리한다.
 - 기존 On Hit Confirmed → HitConfirm 애니메이션 연결은 변경하지 않는다.
 
-디자인 변경(선택):
+데미지 숫자 WBP 설정(필수):
 1. /Game/01_PP/UI/WBP_DamageNumber를 생성하고 부모를 PriestDamageNumberWidget으로 선택한다.
 2. Text Block을 루트로 두고 정확히 DamageText로 이름을 지정한다. Is Variable을 켠다. 또는 SizeBox 안에 DamageText를 배치한다.
 3. 폰트/색/테두리/그림자를 편집한다. 화면 전체 Canvas 대신 숫자 크기의 레이아웃을 권장한다.
@@ -118,9 +118,11 @@ PIE 확인: 명중 숫자와 로그 비교, 빗나감에 표시 없음, 연속/�
 ## 플레이어 피격 가장자리 효과
 
 - 실제 HP가 감소할 때 피해받은 플레이어 컨트롤러 → UIManager → HUD로 전달한다.
-- 별도 이미지/머티리얼/애니메이션 없이 NativePaint로 화면 가장자리에 붉은 그라데이션을 그린다. 중앙은 투명하다.
-- 기본 지속 0.4초, 색 (0.8, 0, 0, 0.5), 너비는 화면 짧은 변의 12%다. 연속 피격 시 효과 시간을 다시 시작한다.
-- WBP_PriestHUD Class Defaults → Priest | Damage Feedback에서 Enable Damage Feedback, Damage Feedback Color, Duration, Width 조절.
+- WBP_PriestHUD에 화면 전체를 채우는 Canvas Panel을 추가하고 이름을 DamageFeedback으로 지정한다. Is Variable을 켠다.
+- 그 안에 Image 4개를 배치하여 상하좌우 단색 가장자리를 만든다. Brush의 Draw As는 Image, Tint는 붉은색(예: 0.8, 0, 0, 0.5)으로 설정한다.
+- 예시 두께 60: 상단은 가로 Stretch/상단 고정, 높이 60. 하단은 가로 Stretch/하단 고정, Alignment Y=1, 높이 60. 좌우는 세로 Stretch/각 측면 고정, 너비 60, Top/Bottom 오프셋 60. 오른쪽은 Alignment X=1. 겹치지 않게 배치한다.
+- DamageFeedback의 Render Opacity는 0, Visibility는 Not Hit-Testable (Self & All Children)로 설정한다. Hidden/Collapsed로 두지 않는다. Designer에서 편집할 때만 Opacity를 1로 올린다.
+- 기본 지속 시간은 0.4초이며 연속 피격 시 다시 시작한다. Class Defaults → Priest | Damage Feedback에서 Enable Damage Feedback과 Duration을 조절한다. 색과 두께는 Designer에서 편집한다.
 - WBP의 Tick Frequency는 Auto로 유지하고, HUD 루트는 플레이어 화면 전체를 채우도록 유지한다.
 - 회복/체력 초기화/이미 HP 0인 상태에서는 표시하지 않는다. HideHUD 및 조종 캐릭터 변경 시 잔여 효과를 초기화한다.
 - L_UITest에서 피격 후 0.4초 내 사라짐, 연속 피격, HP 0, 카메라/해상도 변경, HUD 숨김 후 재표시를 확인한다.
@@ -129,8 +131,19 @@ PIE 확인: 명중 숫자와 로그 비교, 빗나감에 표시 없음, 연속/�
 
 - 공격으로 몬스터 HP가 0이 된 순간 공격자의 PlayerController에 ClientNotifyEnemyKilled를 보낸다. 일반 명중/벽 명중에는 보내지 않는다.
 - 기존 명중 효과와 데미지 숫자는 유지한다. 총격과 성수 처치 모두 포함한다.
-- 기본 문구는 몬스터 처치, 위치는 화면 비율 (0.5, 0.3), 크기 28, 노란색, 지속 시간 1.5초다. 마지막 0.3초에 사라진다.
-- 별도 WBP 노드/위젯 추가 없이 기본 표시된다. WBP_PriestHUD Class Defaults → Priest | Kill Notification에서 문구/시간/색/크기/위치를 편집한다.
+- WBP_PriestHUD의 루트 Canvas에 Text Block을 추가하고 이름을 KillNotification으로 지정한다. Is Variable을 켠다.
+- Designer에서 문구를 몬스터 처치로 설정한다. 예시: 앵커 Min/Max (0.5, 0.3), Alignment (0.5, 0.5), Position (0, 0), Auto Size 켜기, 폰트 28, 노란색. 원하는 임포트 폰트를 지정할 수 있다.
+- Render Opacity는 0, Visibility는 Not Hit-Testable (Self & All Children)로 설정한다. DamageFeedback의 자식으로 넣지 않는다.
+- 지속 시간은 Class Defaults → Priest | Kill Notification의 Duration(기본 1.5초)에서 설정한다. 마지막 0.3초에 사라진다. 문구/색/폰트/위치는 Designer에서 편집한다.
 - 연속 처치는 같은 문구의 지속 시간을 갱신한다. 처치 수 합산 또는 목록 표시는 하지 않는다.
 - HUD 숨김/교체 및 조종 캐릭터 변경 시 알림을 초기화한다. Tick Frequency는 Auto를 유지한다.
 - PIE 확인: 일반 명중에서는 미표시, 마지막 일격에서 표시, 마지막 데미지 숫자와 동시 표시, 성수 처치, 연속 처치, 표시 종료, HUD 숨김 후 재표시.
+
+## PR 리뷰 반영: WBP 전환 (2026-09-14)
+
+- C++ NativePaint와 DamageNumber RebuildWidget을 제거했다. 코드에서 위젯 생성/폰트/색/도형 배치를 하지 않는다.
+- HUD의 DamageFeedback(UWidget 계열), KillNotification(TextBlock), 데미지 숫자의 DamageText(TextBlock)는 필수 BindWidget이다. 이름과 타입을 맞춘 뒤 각 WBP를 Compile/Save한다. 기존 HealthBar/HealthText/WeaponText/MissionText는 유지한다.
+- WBP_DamageNumber를 HUD의 Damage Number Widget Class에 지정하지 않으면 숫자는 생성되지 않고 로그 경고가 출력된다. 네이티브 기본 위젯 대체 기능은 제거했다.
+- C++은 데이터 갱신, 효과 표시 시간/불투명도, 데미지 숫자 월드 위치 투영/이동/수명 관리를 담당한다. 별도의 BP 타이머/Opacity 애니메이션을 연결하면 중복 제어되므로 필요 없다.
+- 에디터 재시작 후 위 필수 WBP 설정을 완료하고 Compile한다. 필수 위젯이 누락된 기존 WBP는 컴파일 오류가 발생하므로 PIE 전에 수정한다.
+- 검증: 초기 효과 숨김, 실제 피격과 연속 피격, 일반 명중과 처치 구분, 연속 처치, 숫자 표시와 소멸, 화면 크기 변경, 레벨 재시작.

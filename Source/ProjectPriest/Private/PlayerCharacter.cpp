@@ -39,7 +39,10 @@ void APlayerCharacter::BeginPlay()
     if (WeaponClass)
     {
         WeaponInstance = GetWorld()->SpawnActor<AWeaponItem>(WeaponClass);
-        if (IsValid(WeaponInstance)) WeaponInstance->SetOwner(this);
+        if (IsValid(WeaponInstance))
+        {
+            WeaponInstance->SetOwner(this);
+        }
     }
     OnCombatChanged.Broadcast();
 }
@@ -208,7 +211,10 @@ void APlayerCharacter::OnAttackInputted(const FInputActionValue& value)
 {
     //JLog("OnAttackInputted");
 
-    if (!IsValid(WeaponInstance)) return;
+    if (!IsValid(WeaponInstance))
+    {
+        return;
+    }
 
     if (WeaponInstance->CanFire())
     {

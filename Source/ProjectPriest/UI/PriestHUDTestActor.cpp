@@ -26,9 +26,15 @@ void APriestHUDTestActor::PushTestData()
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	// 첫 번째 로컬 플레이어용 테스트다. 아직 준비되지 않았다면 다음 타이머 호출에서 재시도한다.
 	ULocalPlayer* Player = PC ? PC->GetLocalPlayer() : nullptr;
-	if (!Player) return;
+	if (!Player)
+	{
+	    return;
+	}
 	UPriestUIManager* UI = Player->GetSubsystem<UPriestUIManager>();
-	if (UI && HUDWidgetClass) UI->SetHUDWidgetClass(HUDWidgetClass);
+	if (UI && HUDWidgetClass)
+	{
+	    UI->SetHUDWidgetClass(HUDWidgetClass);
+	}
 	FPriestHUDData Snapshot = TestData;
 	// 원본 설정을 유지하려고 복사본만 변경한다. 실제 캐릭터의 체력/탄약에는 영향을 주지 않는다.
 	if (bAnimateData)
@@ -38,7 +44,10 @@ void APriestHUDTestActor::PushTestData()
 		// 표시 성공 횟수로 만든 테스트 시간이며, 실제 게임의 정밀한 시간 측정 로직은 아니다.
 		Snapshot.ElapsedSeconds = TestData.ElapsedSeconds + Step;
 	}
-	if (UI && UI->ShowHUD(Snapshot)) ++Step;
+	if (UI && UI->ShowHUD(Snapshot))
+	{
+	    ++Step;
+	}
 }
 
 void APriestHUDTestActor::EndPlay(const EEndPlayReason::Type Reason)
