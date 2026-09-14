@@ -1,5 +1,6 @@
 #include "PlayerCharacter.h"
 #include "IngamePlayerController.h"
+#include "IngameGameMode.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
@@ -67,7 +68,24 @@ void APlayerCharacter::ResetThrowCoolTime()
     bCanThrow = true;
 }
 
-// Called every frame
+void APlayerCharacter::OnDeath()
+{
+    if (bIsDead)
+    {
+        return;
+    }
+
+    bIsDead = true;
+
+    // 게임 모드 호출
+    AIngameGameMode* IngameGameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AIngameGameMode>() : nullptr;
+
+    if (IngameGameMode)
+    {
+        IngameGameMode->OnPlayerDead();
+    }
+}
+
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -156,7 +174,7 @@ float APlayerCharacter::TakeDamage(
 
     if (CurrentHealth <= 0.0f)
     {
-        // 사망 함수 호출
+        OnDeath();
     }
 
     return ActualDamage;
@@ -232,8 +250,6 @@ void APlayerCharacter::OnAttackInputted(const FInputActionValue& value)
         WeaponInstance->Reload();
     }
     
-    
-
     //GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Attack"));
 
     /*
