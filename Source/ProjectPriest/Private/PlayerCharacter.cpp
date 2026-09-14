@@ -55,7 +55,7 @@ void APlayerCharacter::BeginPlay()
     }
     OnCombatChanged.Broadcast();
     
-    CanInteract = false;
+    bCanInteract = false;
 }
 
 void APlayerCharacter::ChangeWalkingMode(EWalkingMode WalkingMode)
@@ -197,19 +197,19 @@ const FVector APlayerCharacter::GetMuzzleLocation()
 void APlayerCharacter::OnSensorOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor,
     class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-    CanInteract = true;
+    bCanInteract = true;
     
     JLog("CanInteract : True");
-    OnCanInteractChanged.Broadcast(CanInteract);
+    OnCanInteractChanged.Broadcast(bCanInteract);
 }
 
 void APlayerCharacter::OnSensorOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor,
                                     class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-    CanInteract = false;
+    bCanInteract = false;
     
     JLog("CanInteract : False");
-    OnCanInteractChanged.Broadcast(CanInteract);
+    OnCanInteractChanged.Broadcast(bCanInteract);
 }
 
 FCanInteractChangedDelegate APlayerCharacter::GetOnCanInteractDelegate()
@@ -454,7 +454,7 @@ void APlayerCharacter::OnInteractInputted(const FInputActionValue& value)
 {
     JLog("Intract inputted");
     
-    if (!CanInteract)
+    if (!bCanInteract)
     {
         JLog("Can not interact at this moment");
         return;

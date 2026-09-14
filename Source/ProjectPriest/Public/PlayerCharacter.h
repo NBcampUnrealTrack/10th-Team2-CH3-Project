@@ -169,13 +169,13 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Weapon")
     TObjectPtr<AWeaponItem> WeaponInstance;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Interacting")
-    bool CanInteract;
-    
     //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Interacting")
     FCanInteractChangedDelegate OnCanInteractChanged;
     
 protected:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Interacting")
+    bool bCanInteract;
+    
     bool bCanThrow = true;
 
     FTimerHandle ThrowCoolTimeTimerHandle;
