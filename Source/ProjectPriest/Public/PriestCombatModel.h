@@ -12,6 +12,7 @@ class PROJECTPRIEST_API UPriestCombatModel : public UObject, public IMvcModel
     GENERATED_BODY()
 public:
     void SetPawn(APawn* Pawn);
+    bool IsPlayerDead() const;
     void Disconnect();
     FPriestHUDData GetCombatData() const;
     virtual void BeginDestroy() override;

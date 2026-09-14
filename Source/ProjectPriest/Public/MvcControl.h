@@ -12,7 +12,7 @@ public:
     virtual void BeginDestroy() override;
     void SetView(IMvcView* View);
     void SetModel(IMvcModel* Model);
-    void Disconnect();
+    virtual void Disconnect();
     template<class T> T* GetView() { return Cast<T>(ViewObject.Get()); }
     template<class T> T* GetModel() { return Cast<T>(ModelObject.Get()); }
     virtual void HandleViewEvent(IMvcView* InView, EViewEventType EventType, UEventParameterBase* Parameter) PURE_VIRTUAL(UMvcControl::HandleViewEvent, return;);

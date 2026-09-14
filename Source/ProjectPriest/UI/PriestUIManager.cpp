@@ -1,4 +1,7 @@
 #include "PriestUIManager.h"
+#include "PriestDeathWidget.h"
+#include "PriestDeathController.h"
+#include "IngamePlayerController.h"
 #include "PriestCombatModel.h"
 #include "MvcCharacterStatController.h"
 #include "PriestHUDWidget.h"
@@ -20,6 +23,7 @@ void UPriestUIManager::SetHUDWidgetClass(TSubclassOf<UPriestHUDWidget> WidgetCla
 
 bool UPriestUIManager::ShowHUD(const FPriestHUDData& Data)
 {
+    if (DeathController && DeathController->IsDeathActive()) return false;
     if (!HUDWidgetClass || HUDWidgetClass->HasAnyClassFlags(CLASS_Abstract))
     {
         UE_LOG(LogTemp, Warning, TEXT("Priest HUD: Set a concrete Widget Blueprint class before ShowHUD."));
@@ -158,13 +162,18 @@ void UPriestUIManager::NotifyEnemyKilled()
     }
 }
 
-void UPriestUIManager::SetCombatPawn(APawn* Pawn)
+void UPriestUIManager::SetCombatPawn(APawn* Pawn, AIngamePlayerController* Owner)
 {
     if (!CombatModel) CombatModel = NewObject<UPriestCombatModel>(this);
     if (!CombatController) CombatController = NewObject<UMvcCharacterStatController>(this);
     CombatController->SetModel(CombatModel);
     CombatController->SetView(HUD);
     ResetDamageFeedback();
+    if (!DeathController)
+    {
+        DeathController = NewObject<UPriestDeathController>(this);
+        DeathController->Initialize(CombatModel, this, Owner);
+    }
     CombatModel->SetPawn(Pawn);
 }
 
@@ -179,9 +188,56 @@ void UPriestUIManager::ConnectCombatView()
 
 void UPriestUIManager::DisconnectCombatHUD()
 {
+    if (DeathController) DeathController->Disconnect();
+    HideDeathScreen();
+    DeathController = nullptr;
     if (CombatController) CombatController->Disconnect();
     if (CombatModel) CombatModel->Disconnect();
     CombatController = nullptr;
     CombatModel = nullptr;
     HideHUD();
+}
+
+void UPriestUIManager::SetDeathWidgetClass(TSubclassOf<UPriestDeathWidget> WidgetClass)
+{
+    DeathWidgetClass = WidgetClass;
+}
+
+UPriestDeathWidget* UPriestUIManager::ShowDeathScreen(APlayerController* Owner)
+{
+    if (!IsValid(Owner)) return nullptr;
+    if (DeathWidget && DeathWidget->GetOwningPlayer() != Owner) HideDeathScreen();
+    if (!DeathWidget && DeathWidgetClass && !DeathWidgetClass->HasAnyClassFlags(CLASS_Abstract))
+    {
+        DeathWidget = CreateWidget<UPriestDeathWidget>(Owner, DeathWidgetClass);
+    }
+    if (DeathWidget && (DeathWidget->IsInViewport() || DeathWidget->AddToPlayerScreen(100)))
+    {
+        DeathWidget->SetVisibility(ESlateVisibility::Visible);
+        return DeathWidget;
+    }
+    HideDeathScreen();
+    UE_LOG(LogTemp, Error, TEXT("Priest Death UI: Set DeathWidgetClass to a configured death Widget Blueprint in the ingame PlayerController."));
+    return nullptr;
+}
+
+void UPriestUIManager::HideDeathScreen()
+{
+    if (DeathWidget) DeathWidget->RemoveFromParent();
+    DeathWidget = nullptr;
+}
+
+bool UPriestUIManager::IsHUDDisplayed() const
+{
+    return IsValid(HUD) && HUD->IsInViewport();
+}
+
+void UPriestUIManager::RestoreHUD()
+{
+    APlayerController* Owner = GetLocalPlayer()->GetPlayerController(GetWorld());
+    if (HUD && HUD->GetOwningPlayer() == Owner && !HUD->IsInViewport())
+    {
+        ConnectCombatView();
+        HUD->AddToPlayerScreen(0);
+    }
 }

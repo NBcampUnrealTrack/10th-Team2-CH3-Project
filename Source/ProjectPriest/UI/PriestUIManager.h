@@ -6,9 +6,13 @@
 #include "PriestUIManager.generated.h"
 
 class UPriestHUDWidget;
+class UPriestDeathWidget;
+class UPriestDeathController;
 class UPriestCombatModel;
 class UMvcCharacterStatController;
 class APawn;
+class APlayerController;
+class AIngamePlayerController;
 class UPriestDamageNumberWidget;
 
 // 로컬 플레이어마다 엔진이 생성하는 UI 관리자. 맵에 직접 배치할 필요가 없다.
@@ -17,7 +21,12 @@ class PROJECTPRIEST_API UPriestUIManager : public ULocalPlayerSubsystem
 {
 	GENERATED_BODY()
 public:
-    void SetCombatPawn(APawn* Pawn);
+    void SetDeathWidgetClass(TSubclassOf<UPriestDeathWidget> WidgetClass);
+    UPriestDeathWidget* ShowDeathScreen(APlayerController* Owner);
+    void HideDeathScreen();
+    bool IsHUDDisplayed() const;
+    void RestoreHUD();
+    void SetCombatPawn(APawn* Pawn, AIngamePlayerController* Owner);
     void DisconnectCombatHUD();
     void NotifyEnemyKilled();
     void NotifyPlayerDamaged();
@@ -38,6 +47,9 @@ public:
 
 private:
     void ConnectCombatView();
+    UPROPERTY(Transient) TObjectPtr<UPriestDeathController> DeathController;
+    UPROPERTY(Transient) TObjectPtr<UPriestDeathWidget> DeathWidget;
+    UPROPERTY(Transient) TSubclassOf<UPriestDeathWidget> DeathWidgetClass;
     UPROPERTY(Transient) TObjectPtr<UPriestCombatModel> CombatModel;
     UPROPERTY(Transient) TObjectPtr<UMvcCharacterStatController> CombatController;
     UPROPERTY(Transient) TArray<TObjectPtr<UPriestDamageNumberWidget>> DamageNumbers;

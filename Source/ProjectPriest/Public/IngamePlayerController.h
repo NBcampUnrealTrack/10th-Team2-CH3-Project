@@ -2,12 +2,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Engine/EngineBaseTypes.h"
 #include "../UI/PriestHUDData.h"
 #include "IngamePlayerController.generated.h"
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FPriestDeathTravelFailed, const FText&);
 
 class UInputMappingContext;
 class UInputAction;
 class UPriestHUDWidget;
+class UPriestDeathWidget;
 class APlayerCharacter;
 class AWeaponItem;
 
@@ -18,6 +22,9 @@ class PROJECTPRIEST_API AIngamePlayerController : public APlayerController
 	
 public:
     AIngamePlayerController();
+    void SetDeathInput(bool bActive, UPriestDeathWidget* Widget);
+    bool ExecuteDeathTravel(bool bRestart, FText& OutError);
+    FPriestDeathTravelFailed OnDeathTravelFailed;
     UFUNCTION(Client, Reliable)
     void ClientNotifyEnemyKilled();
     UFUNCTION(Client, Unreliable)
@@ -39,11 +46,19 @@ public:
     TObjectPtr<UInputAction> GetJumpAction();
     TObjectPtr<UInputAction> GetInteractAction();
 private:
+    void HandleDeathTravelFailure(UWorld* World, ETravelFailure::Type FailureType, const FString& ErrorString);
+    FDelegateHandle DeathTravelFailureHandle;
+    bool bDeathInputActive = false;
+    bool bDeathTravelRequested = false;
     UFUNCTION()
     void HandleCombatPawnChanged(APawn* PreviousPawn, APawn* NewPawn);
 
 
 protected:
+    UPROPERTY(EditDefaultsOnly, Category="Priest|Death UI")
+    TSubclassOf<UPriestDeathWidget> DeathWidgetClass;
+    UPROPERTY(EditDefaultsOnly, Category="Priest|Death UI")
+    TSoftObjectPtr<UWorld> MainMenuMap;
     // BP_IngamePlayerController의 Class Defaults에서 WBP_PriestHUD를 지정한다.
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Priest|UI")
     TSubclassOf<UPriestHUDWidget> HUDWidgetClass;

@@ -49,3 +49,9 @@ FPriestHUDData UPriestCombatModel::GetCombatData() const
 FDelegateHandle UPriestCombatModel::AddListener(UMvcControl* Control) { return Changed.AddUObject(Control, &UMvcControl::HandleModelChanged); }
 void UPriestCombatModel::RemoveListener(FDelegateHandle Handle) { Changed.Remove(Handle); }
 void UPriestCombatModel::InvokePropertyChanged(uint8 PropertyName) { Changed.Broadcast(this, PropertyName); }
+
+bool UPriestCombatModel::IsPlayerDead() const
+{
+    // A missing pawn is an initialization/unpossess state, not a death.
+    return Player.IsValid() && FMath::IsFinite(Player->GetCurrentHealth()) && Player->GetCurrentHealth() <= 0.0f;
+}
