@@ -1,4 +1,6 @@
 #include "PriestDeathController.h"
+#include "JUtility.h"
+#include "Engine/Engine.h"
 #include "PriestDeathWidget.h"
 #include "PriestUIManager.h"
 #include "PriestCombatModel.h"
@@ -15,7 +17,7 @@ void UPriestDeathController::Initialize(UPriestCombatModel* Model, UPriestUIMana
     }
     if (UI && !IsValid(InPlayerController))
     {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: UI presentation was requested without a valid IngamePlayerController."), __FUNCTION__, *GetNameSafe(this));
+        JError("%hs [%s]: UI presentation was requested without a valid IngamePlayerController.", __FUNCTION__, *GetNameSafe(this));
     }
     SetModel(Model);
     HandleModelChanged(Model, 0);
@@ -112,23 +114,15 @@ void UPriestDeathController::HandleViewEvent(IMvcView* InView, EViewEventType Ev
     {
         return;
     }
-    if (!IsValid(Model) || !IsValid(View))
-    {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Active Death UI lost its model or view."), __FUNCTION__, *GetNameSafe(this));
-        return;
-    }
+    JASSERT((IsValid(Model) && IsValid(View)), "%hs [%s]: Active Death UI lost its model or view.", __FUNCTION__, *GetNameSafe(this));
     if (InView != View || !Model->IsPlayerDead())
     {
         return;
     }
-    if (!IsValid(Request))
-    {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Button event requires a PriestDeathRequest parameter."), __FUNCTION__, *GetNameSafe(this));
-        return;
-    }
+    JASSERT((IsValid(Request)), "%hs [%s]: Button event requires a PriestDeathRequest parameter.", __FUNCTION__, *GetNameSafe(this));
     if (!PlayerController.IsValid())
     {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Owning IngamePlayerController is unavailable; map travel cannot be requested."), __FUNCTION__, *GetNameSafe(this));
+        JError("%hs [%s]: Owning IngamePlayerController is unavailable; map travel cannot be requested.", __FUNCTION__, *GetNameSafe(this));
         View->ShowStatus(NSLOCTEXT("PriestUI", "MissingOwner", "Unable to return to the menu: player controller is unavailable."));
         return;
     }
@@ -155,11 +149,7 @@ void UPriestDeathController::HandleTravelFailed(const FText& Message)
 void UPriestDeathController::PresentTravelStatus(bool bBusy, const FText& Message)
 {
     UPriestDeathWidget* View = GetView<UPriestDeathWidget>();
-    if (!IsValid(View))
-    {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Death view is invalid. Cannot display travel status."), __FUNCTION__, *GetNameSafe(this));
-        return;
-    }
+    JASSERT((IsValid(View)), "%hs [%s]: Death view is invalid. Cannot display travel status.", __FUNCTION__, *GetNameSafe(this));
     View->SetBusy(bBusy);
     View->ShowStatus(Message);
     if (!bBusy)

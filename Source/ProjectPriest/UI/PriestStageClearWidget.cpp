@@ -1,47 +1,37 @@
 #include "PriestStageClearWidget.h"
+#include "JUtility.h"
+#include "Engine/Engine.h"
 #include "MvcControl.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "UObject/StrongObjectPtr.h"
-void UPriestStageClearWidget::NativeOnInitialized()
+bool UPriestStageClearWidget::Initialize()
 {
-    Super::NativeOnInitialized();
-    if (!IsValid(MainMenuButton))
+    if (bBindingsReady)
     {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Missing required MainMenuButton binding. Check the Widget Blueprint."), __FUNCTION__, *GetNameSafe(this));
+        return true;
     }
-    if (!IsValid(ClearTimeText))
-    {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Missing required ClearTimeText binding. Check the Widget Blueprint."), __FUNCTION__, *GetNameSafe(this));
-    }
-    if (!IsValid(StatusText))
-    {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Missing required StatusText binding. Check the Widget Blueprint."), __FUNCTION__, *GetNameSafe(this));
-    }
+    JASSERT_BOOL((Super::Initialize()), "%hs: Base widget initialization failed", __FUNCTION__);
+    JASSERT_BOOL((IsValid(MainMenuButton)), "%hs: Missing required MainMenuButton binding", __FUNCTION__);
+    JASSERT_BOOL((IsValid(ClearTimeText)), "%hs: Missing required ClearTimeText binding", __FUNCTION__);
+    JASSERT_BOOL((IsValid(StatusText)), "%hs: Missing required StatusText binding", __FUNCTION__);
+    bBindingsReady = true;
     SetIsFocusable(true);
-    if (MainMenuButton)
-    {
-        MainMenuButton->OnClicked.AddUniqueDynamic(this, &UPriestStageClearWidget::RequestMainMenu);
-    }
+    MainMenuButton->OnClicked.AddUniqueDynamic(this, &UPriestStageClearWidget::RequestMainMenu);
     ShowStatus(FText::GetEmpty());
+    return true;
 }
 void UPriestStageClearWidget::SetBusy(bool bBusy)
 {
-    if (MainMenuButton)
-    {
-        MainMenuButton->SetIsEnabled(!bBusy);
-    }
+    MainMenuButton->SetIsEnabled(!bBusy);
 }
 void UPriestStageClearWidget::ShowStatus(const FText& Message)
 {
-    if (StatusText)
-    {
-        StatusText->SetText(Message);
-    }
+    StatusText->SetText(Message);
 }
 void UPriestStageClearWidget::FocusMainMenu()
 {
-    if (MainMenuButton && GetOwningPlayer())
+    if (GetOwningPlayer())
     {
         MainMenuButton->SetUserFocus(GetOwningPlayer());
     }
@@ -71,8 +61,5 @@ FText UPriestStageClearWidget::FormatClearTime(float Seconds)
 }
 void UPriestStageClearWidget::SetClearTime(float Seconds)
 {
-    if (ClearTimeText)
-    {
-        ClearTimeText->SetText(FormatClearTime(Seconds));
-    }
+    ClearTimeText->SetText(FormatClearTime(Seconds));
 }

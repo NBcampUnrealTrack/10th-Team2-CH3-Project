@@ -1,22 +1,38 @@
 #include "PriestMainMenuWidget.h"
+#include "JUtility.h"
+#include "Engine/Engine.h"
 #include "PriestMainMenuPlayerController.h"
 #include "Components/TextBlock.h"
 #include "Components/WidgetSwitcher.h"
 #include "PriestMenuMvc.h"
 #include "UObject/StrongObjectPtr.h"
 
+bool UPriestMainMenuWidget::Initialize()
+{
+    if (bBindingsReady)
+    {
+        return true;
+    }
+    JASSERT_BOOL((Super::Initialize()), "%hs: Base widget initialization failed", __FUNCTION__);
+    JASSERT_BOOL((IsValid(MenuSwitcher)), "%hs: Missing required MenuSwitcher binding", __FUNCTION__);
+    JASSERT_BOOL((IsValid(LobbySwitcher)), "%hs: Missing required LobbySwitcher binding", __FUNCTION__);
+    JASSERT_BOOL((MenuSwitcher->GetNumWidgets() == 3), "MenuSwitcher requires Title, Lobby and Credits pages");
+    JASSERT_BOOL((LobbySwitcher->GetNumWidgets() == 2), "LobbySwitcher requires Region and Equipment pages");
+    bBindingsReady = true;
+    return true;
+}
+
 void UPriestMainMenuWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+    if (!bBindingsReady)
+    {
+        return;
+    }
 	SetIsFocusable(true);
 	ShowStatusMessage(FText::GetEmpty());
 	RefreshPage();
 
-	if (!MenuSwitcher || MenuSwitcher->GetNumWidgets() != 3
-		|| !LobbySwitcher || LobbySwitcher->GetNumWidgets() != 2)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Priest Menu: MenuSwitcher needs Title/Lobby/Credits; LobbySwitcher needs Region/Equipment."));
-	}
 }
 
 void UPriestMainMenuWidget::ShowTitle()
@@ -47,14 +63,8 @@ void UPriestMainMenuWidget::ApplyMenuState(EPriestMenuPage Page, EPriestLobbyTab
 }
 void UPriestMainMenuWidget::RefreshPage()
 {
-	if (MenuSwitcher)
-	{
-		MenuSwitcher->SetActiveWidgetIndex(static_cast<int32>(CurrentPage));
-	}
-	if (LobbySwitcher)
-	{
-		LobbySwitcher->SetActiveWidgetIndex(static_cast<int32>(CurrentTab));
-	}
+	MenuSwitcher->SetActiveWidgetIndex(static_cast<int32>(CurrentPage));
+	LobbySwitcher->SetActiveWidgetIndex(static_cast<int32>(CurrentTab));
 	ShowStatusMessage(FText::GetEmpty());
 	OnMenuStateChanged(CurrentPage, CurrentTab);
 }

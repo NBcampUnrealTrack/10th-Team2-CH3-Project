@@ -12,6 +12,11 @@ class PROJECTPRIEST_API UPriestDamageNumberWidget : public UUserWidget
 {
     GENERATED_BODY()
 public:
+    virtual bool Initialize() override;
+    bool HasValidBindings() const
+    {
+        return bBindingsReady;
+    }
     void InitializeDamage(float Amount, const FVector& Location);
 protected:
     virtual void NativeConstruct() override;
@@ -23,6 +28,7 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category="Damage Number")
     float RiseDistance = 60.0f;
 private:
+    bool bBindingsReady = false;
     void RefreshText();
     FVector WorldLocation = FVector::ZeroVector;
     float Damage = 0.0f;

@@ -33,6 +33,11 @@ class PROJECTPRIEST_API UPriestMainMenuWidget : public UUserWidget, public IMvcV
 	GENERATED_BODY()
 
 public:
+    virtual bool Initialize() override;
+    bool HasValidBindings() const
+    {
+        return bBindingsReady;
+    }
     void ApplyMenuState(EPriestMenuPage Page, EPriestLobbyTab Tab);
     virtual FDelegateHandle AddListener(UMvcControl* Control) override;
     virtual void RemoveListener(FDelegateHandle Handle) override;
@@ -75,6 +80,7 @@ protected:
 	EPriestLobbyTab CurrentTab = EPriestLobbyTab::Region;
 
 private:
+    bool bBindingsReady = false;
     bool SendRequest(EPriestMenuAction Action);
     FViewEventRaisedDelegate Listener;
 	void RefreshPage();
