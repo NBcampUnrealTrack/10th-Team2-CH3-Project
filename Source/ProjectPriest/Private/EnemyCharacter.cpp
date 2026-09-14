@@ -67,7 +67,9 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const&
 void AEnemyCharacter::Die()
 {
 	if (bIsDead)
+	{
 		return;
+	}
 
 	bIsDead = true;
 
@@ -182,7 +184,9 @@ void AEnemyCharacter::DropItem()
 			TEXT("AEnemyCharacter::DropItem")
 		);
 	if (!MonsterData || !MonsterData->DropItemClass)
+	{ 
 		return;
+	}
 
 	GetWorld()->SpawnActor<AActor>(
 		MonsterData->DropItemClass,
