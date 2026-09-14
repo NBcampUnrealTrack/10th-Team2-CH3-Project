@@ -19,22 +19,30 @@ EBTNodeResult::Type UBTT_FindRandomPatrol::ExecuteTask(UBehaviorTreeComponent& O
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 
 	if (!BlackboardComp)
+	{
 		return EBTNodeResult::Failed;
+	}
 
 	AAIController* Aicom = OwnerComp.GetAIOwner();
 
 	if (!Aicom)
+	{
 		return EBTNodeResult::Failed;
+	}
 
 	AEnemyCharacter* EnemyCharacter = Cast<AEnemyCharacter>(Aicom->GetPawn());
 
 	if (!EnemyCharacter)
+	{
 		return EBTNodeResult::Failed;
+	}
 
 	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
 
 	if (!NavSystem)
+	{
 		return EBTNodeResult::Failed;
+	}
 
 	FVector PlayerVector = BlackboardComp->GetValueAsVector(TEXT("PlayerVector"));
 

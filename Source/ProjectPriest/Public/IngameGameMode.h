@@ -1,10 +1,11 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "IngameGameMode.generated.h"
 
 class UWorld;
+class APlayerCharacter;
 class AIngameGameState;
 
 UCLASS()
@@ -17,7 +18,7 @@ public:
     virtual void InitGameState() override;
     
     void OnPlayerDead();
-    void OnOpenBossRoomDoor();
+    void OnOpenBossRoomDoor(APlayerCharacter* Player);
     void OnMonsterSpawned();
 	void OnMonsterDead();
 
