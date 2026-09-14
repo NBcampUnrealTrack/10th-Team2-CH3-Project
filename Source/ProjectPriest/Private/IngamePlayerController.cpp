@@ -73,6 +73,11 @@ TObjectPtr<UInputAction> AIngamePlayerController::GetJumpAction()
     return JumpAction;
 }
 
+TObjectPtr<UInputAction> AIngamePlayerController::GetInteractAction()
+{
+    return InteractAction;
+}
+
 void AIngamePlayerController::UnbindCombatHUD()
 {
     if (HUDPlayer.IsValid())
