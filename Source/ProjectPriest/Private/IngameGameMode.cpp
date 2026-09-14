@@ -4,12 +4,21 @@
 
 void AIngameGameMode::BeginPlay()
 {
+    Super::BeginPlay();
+
+}
+
+void AIngameGameMode::InitGameState()
+{
+    Super::InitGameState();
+
     JASSERT(IsValid(GameState), "Game mode is not valid");
 
     IngameState = Cast<AIngameGameState>(GameState);
     JASSERT(IsValid(IngameState), "Game stae is not AIngameGameState");
 
     IngameState->SetStartTime(GetWorld()->TimeSeconds);
+    IngameState->SetMonsterCount(0);
 }
 
 void AIngameGameMode::OnPlayerDead()
@@ -26,4 +35,18 @@ void AIngameGameMode::OnOpenBossRoomDoor()
     float ElapsedTime = NowTime - StartTime;
 
     JError("클리어 화면을 구현하세요 클리어 시간은 %f", ElapsedTime);
+}
+
+void AIngameGameMode::OnMonsterSpawned()
+{
+    IngameState->IncreaseMosnterCount();
+}
+
+void AIngameGameMode::OnMonsterDead()
+{
+    IngameState->DecreaseMosnterCount();
+    if (IngameState->GetMonsterCount() <= 0 )
+    {
+        IngameState->SetDoorVisibility(true);
+    }
 }

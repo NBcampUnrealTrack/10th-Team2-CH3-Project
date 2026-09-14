@@ -29,7 +29,8 @@ class PROJECTPRIEST_API AEnemyCharacter : public ACharacter
 
 public:
 	AEnemyCharacter();
-
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
 	//몬스터의 기준위치
 	UFUNCTION(BlueprintCallable)
 	FVector GetPatrolOrigin();

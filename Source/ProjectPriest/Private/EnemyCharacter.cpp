@@ -6,6 +6,8 @@
 #include "PlayerCharacter.h"
 #include "MonsterAIController.h"
 #include "Engine/DamageEvents.h"
+#include "IngameGameMode.h"
+#include "JUtility.h"
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
@@ -19,6 +21,15 @@ AEnemyCharacter::AEnemyCharacter()
 
 }
 
+void AEnemyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	
+	AIngameGameMode* IngameGameMode = Cast<AIngameGameMode>(GetWorld()->GetAuthGameMode());
+	JASSERT(IsValid(IngameGameMode), "Ingame game mode is invalid");
+	
+	IngameGameMode->OnMonsterDead();	
+}
 
 void AEnemyCharacter::Attack(ACharacter* PlayerCharacter)
 {
@@ -89,7 +100,14 @@ void AEnemyCharacter::BeginPlay()
 		MinimumDamage = MonsterData->MinimumDamage;
 		PatrolRadius = MonsterData->PatrolRadius;
 	}
+	
+	AIngameGameMode* IngameGameMode 
+		= Cast<AIngameGameMode>( GetWorld()->GetAuthGameMode());
+	JASSERT(IsValid(IngameGameMode), "Ingame game mode is invalid");
+	
+	IngameGameMode->OnMonsterSpawned();	
 }
+
 
 //TODO: 아 맘에 안들어 겁나 화나는 그런 구조네...
 // BT_Attack 
