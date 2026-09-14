@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "EnemyCharacter.h"
@@ -17,14 +17,6 @@ AEnemyCharacter::AEnemyCharacter()
 	//생성시 AI Possess 설정
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	//스탯 초기화
-	Health = 100.0f;
-	Damage = 10.0f;
-	Defense = 5.0f;
-	AttackRange = 0; //공격 사거리
-	MinimumDamage = 1.0f;//몬스터가 받는 최소피해
-
-	PatrolRadius = 1000.0f;
 }
 
 
@@ -77,6 +69,20 @@ void AEnemyCharacter::BeginPlay()
 	PatrolOrigin = this->GetActorLocation();
 
     AnimInstance = GetMesh()->GetAnimInstance();
+
+	const FMonsterData* MonsterData =
+		RowDataTable.GetRow<FMonsterData>(
+			TEXT("AEnemyCharacter::BeginPlay")
+		);
+	if (MonsterData)
+	{
+		AttackRange = MonsterData->AttackRange;
+		Damage = MonsterData->Damage;
+		Defense = MonsterData->Defense;
+		Health = MonsterData->Health;
+		MinimumDamage = MonsterData->MinimumDamage;
+		PatrolRadius = MonsterData->PatrolRadius;
+	}
 }
 
 //TODO: 아 맘에 안들어 겁나 화나는 그런 구조네...
