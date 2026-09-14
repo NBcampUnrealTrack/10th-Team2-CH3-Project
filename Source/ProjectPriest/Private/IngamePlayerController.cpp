@@ -16,7 +16,10 @@ void AIngamePlayerController::BeginPlay()
     Super::BeginPlay();
 
     ULocalPlayer* LocalPlayer = GetLocalPlayer();
-    if (!LocalPlayer) return;
+    if (!LocalPlayer)
+    {
+        return;
+    }
 
     if (HUDWidgetClass)
     {
@@ -72,8 +75,14 @@ TObjectPtr<UInputAction> AIngamePlayerController::GetJumpAction()
 
 void AIngamePlayerController::UnbindCombatHUD()
 {
-    if (HUDPlayer.IsValid()) HUDPlayer->OnCombatChanged.Remove(HealthChangedHandle);
-    if (HUDWeapon.IsValid()) HUDWeapon->OnAmmoChanged.Remove(AmmoChangedHandle);
+    if (HUDPlayer.IsValid())
+    {
+        HUDPlayer->OnCombatChanged.Remove(HealthChangedHandle);
+    }
+    if (HUDWeapon.IsValid())
+    {
+        HUDWeapon->OnAmmoChanged.Remove(AmmoChangedHandle);
+    }
     HUDPlayer.Reset();
     HUDWeapon.Reset();
     HealthChangedHandle.Reset();
@@ -85,7 +94,10 @@ void AIngamePlayerController::HandleCombatPawnChanged(APawn* PreviousPawn, APawn
     UnbindCombatHUD();
     if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
     {
-        if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>()) UI->ResetDamageFeedback();
+        if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>())
+        {
+            UI->ResetDamageFeedback();
+        }
     }
     HUDPlayer = Cast<APlayerCharacter>(NewPawn);
     if (HUDPlayer.IsValid())
@@ -98,19 +110,34 @@ void AIngamePlayerController::HandleCombatPawnChanged(APawn* PreviousPawn, APawn
 void AIngamePlayerController::RefreshCombatHUD()
 {
     ULocalPlayer* LocalPlayer = GetLocalPlayer();
-    if (!LocalPlayer) return;
+    if (!LocalPlayer)
+    {
+        return;
+    }
     UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>();
-    if (!UI) return;
+    if (!UI)
+    {
+        return;
+    }
 
     APlayerCharacter* CombatCharacter = HUDPlayer.Get();
     AWeaponItem* Weapon = CombatCharacter ? CombatCharacter->GetEquippedWeapon() : nullptr;
-    if (!IsValid(Weapon)) Weapon = nullptr;
+    if (!IsValid(Weapon))
+    {
+        Weapon = nullptr;
+    }
     if (HUDWeapon.Get() != Weapon)
     {
-        if (HUDWeapon.IsValid()) HUDWeapon->OnAmmoChanged.Remove(AmmoChangedHandle);
+        if (HUDWeapon.IsValid())
+        {
+            HUDWeapon->OnAmmoChanged.Remove(AmmoChangedHandle);
+        }
         HUDWeapon = Weapon;
         AmmoChangedHandle.Reset();
-        if (Weapon) AmmoChangedHandle = Weapon->OnAmmoChanged.AddUObject(this, &AIngamePlayerController::RefreshCombatHUD);
+        if (Weapon)
+        {
+            AmmoChangedHandle = Weapon->OnAmmoChanged.AddUObject(this, &AIngamePlayerController::RefreshCombatHUD);
+        }
     }
     UI->UpdateCombatHUD(
         CombatCharacter ? CombatCharacter->GetCurrentHealth() : 0.0f,
@@ -140,10 +167,16 @@ void AIngamePlayerController::ClientNotifyHitConfirmed_Implementation(float Appl
 
 void AIngamePlayerController::ClientNotifyPlayerDamaged_Implementation(APawn* DamagedPawn)
 {
-    if (!DamagedPawn || DamagedPawn != GetPawn()) return;
+    if (!DamagedPawn || DamagedPawn != GetPawn())
+    {
+        return;
+    }
     if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
     {
-        if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>()) UI->NotifyPlayerDamaged();
+        if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>())
+        {
+            UI->NotifyPlayerDamaged();
+        }
     }
 }
 
@@ -151,6 +184,9 @@ void AIngamePlayerController::ClientNotifyEnemyKilled_Implementation()
 {
     if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
     {
-        if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>()) UI->NotifyEnemyKilled();
+        if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>())
+        {
+            UI->NotifyEnemyKilled();
+        }
     }
 }

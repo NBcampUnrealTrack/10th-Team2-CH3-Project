@@ -1,24 +1,6 @@
 #include "PriestDamageNumberWidget.h"
-#include "Blueprint/WidgetTree.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/TextBlock.h"
-
-TSharedRef<SWidget> UPriestDamageNumberWidget::RebuildWidget()
-{
-    if (!WidgetTree->RootWidget)
-    {
-        DamageText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DamageText"));
-        WidgetTree->RootWidget = DamageText;
-        FSlateFontInfo Font = DamageText->GetFont();
-        Font.Size = 28;
-        DamageText->SetFont(Font);
-        DamageText->SetColorAndOpacity(FLinearColor(1.0f, 0.85f, 0.25f));
-        DamageText->SetShadowColorAndOpacity(FLinearColor::Black);
-        DamageText->SetShadowOffset(FVector2D(1.0f, 1.0f));
-        DamageText->SetJustification(ETextJustify::Center);
-    }
-    return Super::RebuildWidget();
-}
 
 void UPriestDamageNumberWidget::InitializeDamage(float Amount, const FVector& Location)
 {
@@ -30,7 +12,10 @@ void UPriestDamageNumberWidget::InitializeDamage(float Amount, const FVector& Lo
 
 void UPriestDamageNumberWidget::RefreshText()
 {
-    if (!DamageText) return;
+    if (!DamageText)
+    {
+        return;
+    }
     FNumberFormattingOptions Format;
     Format.SetMaximumFractionalDigits(1);
     Format.SetMinimumFractionalDigits(0);

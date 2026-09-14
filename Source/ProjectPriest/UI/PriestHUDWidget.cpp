@@ -2,14 +2,12 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "MvcControl.h"
-#include "Rendering/DrawElements.h"
-#include "Styling/CoreStyle.h"
-#include "Framework/Application/SlateApplication.h"
-#include "Fonts/FontMeasure.h"
 
 void UPriestHUDWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+    ResetDamageFeedback();
+    ResetKillNotification();
 	Refresh();
 }
 
@@ -39,7 +37,10 @@ void UPriestHUDWidget::SetCombatData(float Health, float Maximum, const FText& N
 void UPriestHUDWidget::Refresh()
 {
 	// 데이터가 화면 생성보다 먼저 들어오면 보관만 하고, 생성 후 다시 반영한다.
-	if (!HealthBar || !HealthText || !WeaponText || !MissionText) return;
+	if (!HealthBar || !HealthText || !WeaponText || !MissionText)
+	{
+	    return;
+	}
 	// 비정상 수치와 체력 범위를 표시 단계에서 보정하고, 최대 체력 0의 나눗셈을 방지한다.
 	const float Maximum = FMath::IsFinite(Data.MaxHealth) ? FMath::Max(0.0f, Data.MaxHealth) : 0.0f;
 	const float Health = FMath::IsFinite(Data.Health) ? FMath::Clamp(Data.Health, 0.0f, Maximum) : 0.0f;
@@ -66,15 +67,18 @@ void UPriestHUDWidget::InvokeViewEvent(EViewEventType EventName, UEventParameter
 }
 void UPriestHUDWidget::ShowDamageFeedback()
 {
-    if (!bEnableDamageFeedback) return;
+    if (!bEnableDamageFeedback)
+    {
+        return;
+    }
     DamageFeedbackRemaining = FMath::Max(0.05f, DamageFeedbackDuration);
-    InvalidateLayoutAndVolatility();
+    UpdateFeedbackOpacity();
 }
 
 void UPriestHUDWidget::ResetDamageFeedback()
 {
     DamageFeedbackRemaining = 0.0f;
-    InvalidateLayoutAndVolatility();
+    UpdateFeedbackOpacity();
 }
 
 void UPriestHUDWidget::NativeTick(const FGeometry& Geometry, float DeltaTime)
@@ -83,77 +87,39 @@ void UPriestHUDWidget::NativeTick(const FGeometry& Geometry, float DeltaTime)
     if (KillNotificationRemaining > 0.0f)
     {
         KillNotificationRemaining = FMath::Max(0.0f, KillNotificationRemaining - DeltaTime);
-        InvalidateLayoutAndVolatility();
+        UpdateFeedbackOpacity();
     }
     if (DamageFeedbackRemaining > 0.0f)
     {
         DamageFeedbackRemaining = FMath::Max(0.0f, DamageFeedbackRemaining - DeltaTime);
-        InvalidateLayoutAndVolatility();
+        UpdateFeedbackOpacity();
     }
 }
 
-int32 UPriestHUDWidget::NativePaint(const FPaintArgs& Args, const FGeometry& Geometry,
-    const FSlateRect& CullingRect, FSlateWindowElementList& OutDrawElements,
-    int32 LayerId, const FWidgetStyle& Style, bool bParentEnabled) const
+void UPriestHUDWidget::UpdateFeedbackOpacity()
 {
-    int32 TopLayer = Super::NativePaint(Args, Geometry, CullingRect, OutDrawElements, LayerId, Style, bParentEnabled);
-    if (KillNotificationRemaining > 0.0f && !KillNotificationText.IsEmpty())
+    if (DamageFeedback)
     {
-        const FSlateFontInfo Font = FCoreStyle::GetDefaultFontStyle("Bold", FMath::Clamp(KillNotificationFontSize, 8, 120));
-        const FString Text = KillNotificationText.ToString();
-        const FVector2D TextSize = FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->Measure(Text, Font);
-        const FVector2D ScreenSize = Geometry.GetLocalSize();
-        const FVector2D Position = FVector2D(ScreenSize.X * FMath::Clamp(KillNotificationPosition.X, 0.0, 1.0),
-            ScreenSize.Y * FMath::Clamp(KillNotificationPosition.Y, 0.0, 1.0)) - TextSize * 0.5;
-        FLinearColor Color = KillNotificationColor;
-        // 마지막 0.3초에만 페이드아웃한다.
-        Color.A *= FMath::Clamp(KillNotificationRemaining / FMath::Min(0.3f, FMath::Max(0.1f, KillNotificationDuration)), 0.0f, 1.0f)
-            * Style.GetColorAndOpacityTint().A;
-        FSlateDrawElement::MakeText(OutDrawElements, ++TopLayer,
-            Geometry.ToPaintGeometry(FVector2f(TextSize), FSlateLayoutTransform(FVector2f(Position + FVector2D(1, 1)))),
-            Text, Font, ESlateDrawEffect::None, FLinearColor(0, 0, 0, Color.A));
-        FSlateDrawElement::MakeText(OutDrawElements, ++TopLayer,
-            Geometry.ToPaintGeometry(FVector2f(TextSize), FSlateLayoutTransform(FVector2f(Position))),
-            Text, Font, ESlateDrawEffect::None, Color);
+        const float Opacity = bEnableDamageFeedback
+            ? FMath::Clamp(DamageFeedbackRemaining / FMath::Max(0.05f, DamageFeedbackDuration), 0.0f, 1.0f)
+            : 0.0f;
+        DamageFeedback->SetRenderOpacity(Opacity);
     }
-    if (!bEnableDamageFeedback || DamageFeedbackRemaining <= 0.0f) return TopLayer;
-    const FVector2D Size = Geometry.GetLocalSize();
-    const float Width = FMath::Min(Size.X, Size.Y) * FMath::Clamp(DamageFeedbackWidth, 0.01f, 0.45f);
-    if (Width <= 0.0f) return TopLayer;
-    const float Fade = FMath::Clamp(DamageFeedbackRemaining / FMath::Max(0.05f, DamageFeedbackDuration), 0.0f, 1.0f);
-    const FSlateBrush* Brush = FCoreStyle::Get().GetBrush("WhiteBrush");
-    const int32 EffectLayer = TopLayer + 1;
-    // 서로 겹치지 않는 사각 고리로 중앙이 투명한 가장자리 그라데이션을 만든다.
-    constexpr int32 Steps = 32;
-    for (int32 Index = 0; Index < Steps; ++Index)
+    if (KillNotification)
     {
-        const float Inset = Width * Index / Steps;
-        const float Thickness = Width / Steps;
-        FLinearColor Color = DamageFeedbackColor;
-        const float Edge = 1.0f - (Index + 0.5f) / Steps;
-        Color.A *= Edge * Edge * Fade * Style.GetColorAndOpacityTint().A;
-        auto Draw = [&](FVector2D Position, FVector2D Extent)
-        {
-            FSlateDrawElement::MakeBox(OutDrawElements, EffectLayer,
-                Geometry.ToPaintGeometry(FVector2f(Extent), FSlateLayoutTransform(FVector2f(Position))),
-                Brush, ESlateDrawEffect::None, Color);
-        };
-        Draw({Inset, Inset}, {Size.X - 2 * Inset, Thickness});
-        Draw({Inset, Size.Y - Inset - Thickness}, {Size.X - 2 * Inset, Thickness});
-        Draw({Inset, Inset + Thickness}, {Thickness, Size.Y - 2 * (Inset + Thickness)});
-        Draw({Size.X - Inset - Thickness, Inset + Thickness}, {Thickness, Size.Y - 2 * (Inset + Thickness)});
+        const float FadeDuration = FMath::Min(0.3f, FMath::Max(0.1f, KillNotificationDuration));
+        KillNotification->SetRenderOpacity(FMath::Clamp(KillNotificationRemaining / FadeDuration, 0.0f, 1.0f));
     }
-    return EffectLayer;
 }
 
 void UPriestHUDWidget::ShowKillNotification()
 {
     KillNotificationRemaining = FMath::Max(0.1f, KillNotificationDuration);
-    InvalidateLayoutAndVolatility();
+    UpdateFeedbackOpacity();
 }
 
 void UPriestHUDWidget::ResetKillNotification()
 {
     KillNotificationRemaining = 0.0f;
-    InvalidateLayoutAndVolatility();
+    UpdateFeedbackOpacity();
 }
