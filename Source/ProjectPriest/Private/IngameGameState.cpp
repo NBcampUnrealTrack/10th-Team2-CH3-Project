@@ -1,4 +1,5 @@
 ﻿#include "IngameGameState.h"
+#include "IngamePlayerController.h"
 
 AIngameGameState::AIngameGameState()
 {
@@ -26,3 +27,19 @@ void AIngameGameState::SetElapsedTime(float NewElapsedTime)
 {
     ElapsedTime = NewElapsedTime;
 }       
+
+void AIngameGameState::OnGameOver()
+{
+    APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+    AIngamePlayerController* IngamePlayerController = Cast<AIngamePlayerController>(PlayerController);
+
+    if (!IngamePlayerController)
+    {
+        return;
+    }
+
+    IngamePlayerController->SetPause(true);
+
+    //게임 오버 HUD 표시
+    //ex) IngamePlayerController->ShowGameOverWidget();
+}

@@ -17,6 +17,8 @@ public:
 
     void SetStartTime(float NewStartTime);
     void SetElapsedTime(float NewElapsedTime);
+    
+    void OnGameOver();
 
 protected:
     float StartTime;
