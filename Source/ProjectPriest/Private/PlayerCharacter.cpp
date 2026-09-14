@@ -1,4 +1,4 @@
-#include "PlayerCharacter.h"
+﻿#include "PlayerCharacter.h"
 #include "IngamePlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -133,7 +133,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
     EnhancedInput->BindAction(
         PlayerController->GetThrowAction(),
-        ETriggerEvent::Triggered,
+        ETriggerEvent::Started,
         this,
         &APlayerCharacter::OnThrowInputted
     );
