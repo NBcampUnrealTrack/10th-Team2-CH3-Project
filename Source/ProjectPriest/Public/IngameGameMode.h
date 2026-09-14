@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
@@ -14,10 +14,13 @@ class PROJECTPRIEST_API AIngameGameMode : public AGameModeBase
 	
 public:
     virtual void BeginPlay() override;
-
+    virtual void InitGameState() override;
+    
     void OnPlayerDead();
     void OnOpenBossRoomDoor();
-    
+    void OnMonsterSpawned();
+	void OnMonsterDead();
+
 protected:
     TSoftObjectPtr<UWorld> LobbyLevel;
     TObjectPtr< AIngameGameState> IngameState;
