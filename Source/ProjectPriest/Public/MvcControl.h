@@ -13,8 +13,14 @@ public:
     void SetView(IMvcView* View);
     void SetModel(IMvcModel* Model);
     virtual void Disconnect();
-    template<class T> T* GetView() { return Cast<T>(ViewObject.Get()); }
-    template<class T> T* GetModel() { return Cast<T>(ModelObject.Get()); }
+    template<class T> T* GetView()
+    {
+        return Cast<T>(ViewObject.Get());
+    }
+    template<class T> T* GetModel()
+    {
+        return Cast<T>(ModelObject.Get());
+    }
     virtual void HandleViewEvent(IMvcView* InView, EViewEventType EventType, UEventParameterBase* Parameter) PURE_VIRTUAL(UMvcControl::HandleViewEvent, return;);
     virtual void HandleModelChanged(IMvcModel* InModel, uint8 PropertyName) PURE_VIRTUAL(UMvcControl::HandleModelChanged, return;);
 protected:

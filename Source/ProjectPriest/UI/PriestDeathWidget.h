@@ -11,7 +11,10 @@ class PROJECTPRIEST_API UPriestDeathRequest : public UEventParameterBase
 {
     GENERATED_BODY()
 public:
-    UPriestDeathRequest() { EventType = EViewEventType::ButtonClicked; }
+    UPriestDeathRequest()
+    {
+        EventType = EViewEventType::ButtonClicked;
+    }
     bool bRestart = true;
 };
 

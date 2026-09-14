@@ -91,8 +91,14 @@ FDelegateHandle AIngameGameState::AddListener(UMvcControl* Control)
 {
     return OnMissionChanged.AddUObject(Control, &UMvcControl::HandleModelChanged);
 }
-void AIngameGameState::RemoveListener(FDelegateHandle Handle) { OnMissionChanged.Remove(Handle); }
-void AIngameGameState::InvokePropertyChanged(uint8 PropertyName) { OnMissionChanged.Broadcast(this, PropertyName); }
+void AIngameGameState::RemoveListener(FDelegateHandle Handle)
+{
+    OnMissionChanged.Remove(Handle);
+}
+void AIngameGameState::InvokePropertyChanged(uint8 PropertyName)
+{
+    OnMissionChanged.Broadcast(this, PropertyName);
+}
 
 bool AIngameGameState::TryCompleteStage(float ClearSeconds)
 {

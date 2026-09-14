@@ -51,9 +51,18 @@ void UPriestStageClearWidget::RequestMainMenu()
     TStrongObjectPtr<UPriestStageClearRequest> Request(NewObject<UPriestStageClearRequest>());
     InvokeViewEvent(EViewEventType::ButtonClicked, Request.Get());
 }
-FDelegateHandle UPriestStageClearWidget::AddListener(UMvcControl* Control) { return Listener.AddUObject(Control, &UMvcControl::HandleViewEvent); }
-void UPriestStageClearWidget::RemoveListener(FDelegateHandle Handle) { Listener.Remove(Handle); }
-void UPriestStageClearWidget::InvokeViewEvent(EViewEventType EventType, UEventParameterBase* Parameter) { Listener.Broadcast(this, EventType, Parameter); }
+FDelegateHandle UPriestStageClearWidget::AddListener(UMvcControl* Control)
+{
+    return Listener.AddUObject(Control, &UMvcControl::HandleViewEvent);
+}
+void UPriestStageClearWidget::RemoveListener(FDelegateHandle Handle)
+{
+    Listener.Remove(Handle);
+}
+void UPriestStageClearWidget::InvokeViewEvent(EViewEventType EventType, UEventParameterBase* Parameter)
+{
+    Listener.Broadcast(this, EventType, Parameter);
+}
 
 FText UPriestStageClearWidget::FormatClearTime(float Seconds)
 {

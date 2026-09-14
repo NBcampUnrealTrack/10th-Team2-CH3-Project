@@ -54,14 +54,29 @@ void UPriestDeathWidget::FocusRestart()
         RestartButton->SetUserFocus(GetOwningPlayer());
     }
 }
-void UPriestDeathWidget::RequestRestart() { SendRequest(true); }
-void UPriestDeathWidget::RequestMainMenu() { SendRequest(false); }
+void UPriestDeathWidget::RequestRestart()
+{
+    SendRequest(true);
+}
+void UPriestDeathWidget::RequestMainMenu()
+{
+    SendRequest(false);
+}
 void UPriestDeathWidget::SendRequest(bool bRestart)
 {
     TStrongObjectPtr<UPriestDeathRequest> Request(NewObject<UPriestDeathRequest>());
     Request->bRestart = bRestart;
     InvokeViewEvent(EViewEventType::ButtonClicked, Request.Get());
 }
-FDelegateHandle UPriestDeathWidget::AddListener(UMvcControl* Control) { return Listener.AddUObject(Control, &UMvcControl::HandleViewEvent); }
-void UPriestDeathWidget::RemoveListener(FDelegateHandle Handle) { Listener.Remove(Handle); }
-void UPriestDeathWidget::InvokeViewEvent(EViewEventType EventType, UEventParameterBase* Parameter) { Listener.Broadcast(this, EventType, Parameter); }
+FDelegateHandle UPriestDeathWidget::AddListener(UMvcControl* Control)
+{
+    return Listener.AddUObject(Control, &UMvcControl::HandleViewEvent);
+}
+void UPriestDeathWidget::RemoveListener(FDelegateHandle Handle)
+{
+    Listener.Remove(Handle);
+}
+void UPriestDeathWidget::InvokeViewEvent(EViewEventType EventType, UEventParameterBase* Parameter)
+{
+    Listener.Broadcast(this, EventType, Parameter);
+}

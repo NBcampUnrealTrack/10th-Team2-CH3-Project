@@ -11,7 +11,10 @@ class PROJECTPRIEST_API UPriestStageClearRequest : public UEventParameterBase
 {
     GENERATED_BODY()
 public:
-    UPriestStageClearRequest() { EventType = EViewEventType::ButtonClicked; }
+    UPriestStageClearRequest()
+    {
+        EventType = EViewEventType::ButtonClicked;
+    }
 };
 
 // Layout, labels and button styles belong to the child Widget Blueprint.

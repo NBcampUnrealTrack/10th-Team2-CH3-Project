@@ -64,9 +64,18 @@ FPriestHUDData UPriestCombatModel::GetCombatData() const
     Data.ReserveAmmo = Weapon.IsValid() ? Weapon->GetReserveAmmo() : 0;
     return Data;
 }
-FDelegateHandle UPriestCombatModel::AddListener(UMvcControl* Control) { return Changed.AddUObject(Control, &UMvcControl::HandleModelChanged); }
-void UPriestCombatModel::RemoveListener(FDelegateHandle Handle) { Changed.Remove(Handle); }
-void UPriestCombatModel::InvokePropertyChanged(uint8 PropertyName) { Changed.Broadcast(this, PropertyName); }
+FDelegateHandle UPriestCombatModel::AddListener(UMvcControl* Control)
+{
+    return Changed.AddUObject(Control, &UMvcControl::HandleModelChanged);
+}
+void UPriestCombatModel::RemoveListener(FDelegateHandle Handle)
+{
+    Changed.Remove(Handle);
+}
+void UPriestCombatModel::InvokePropertyChanged(uint8 PropertyName)
+{
+    Changed.Broadcast(this, PropertyName);
+}
 
 bool UPriestCombatModel::IsPlayerDead() const
 {

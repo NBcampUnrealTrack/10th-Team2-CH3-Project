@@ -19,11 +19,26 @@ void UPriestMainMenuWidget::NativeConstruct()
 	}
 }
 
-void UPriestMainMenuWidget::ShowTitle() { SendRequest(EPriestMenuAction::Title); }
-void UPriestMainMenuWidget::ShowRegions() { SendRequest(EPriestMenuAction::Regions); }
-void UPriestMainMenuWidget::ShowEquipment() { SendRequest(EPriestMenuAction::Equipment); }
-void UPriestMainMenuWidget::ShowCredits() { SendRequest(EPriestMenuAction::Credits); }
-void UPriestMainMenuWidget::SwitchLobbyTab() { SendRequest(EPriestMenuAction::SwitchTab); }
+void UPriestMainMenuWidget::ShowTitle()
+{
+    SendRequest(EPriestMenuAction::Title);
+}
+void UPriestMainMenuWidget::ShowRegions()
+{
+    SendRequest(EPriestMenuAction::Regions);
+}
+void UPriestMainMenuWidget::ShowEquipment()
+{
+    SendRequest(EPriestMenuAction::Equipment);
+}
+void UPriestMainMenuWidget::ShowCredits()
+{
+    SendRequest(EPriestMenuAction::Credits);
+}
+void UPriestMainMenuWidget::SwitchLobbyTab()
+{
+    SendRequest(EPriestMenuAction::SwitchTab);
+}
 void UPriestMainMenuWidget::ApplyMenuState(EPriestMenuPage Page, EPriestLobbyTab Tab)
 {
     CurrentPage = Page;
@@ -44,8 +59,14 @@ void UPriestMainMenuWidget::RefreshPage()
 	OnMenuStateChanged(CurrentPage, CurrentTab);
 }
 
-bool UPriestMainMenuWidget::StartStageOne() { return SendRequest(EPriestMenuAction::StartStage); }
-void UPriestMainMenuWidget::QuitGame() { SendRequest(EPriestMenuAction::Quit); }
+bool UPriestMainMenuWidget::StartStageOne()
+{
+    return SendRequest(EPriestMenuAction::StartStage);
+}
+void UPriestMainMenuWidget::QuitGame()
+{
+    SendRequest(EPriestMenuAction::Quit);
+}
 bool UPriestMainMenuWidget::SendRequest(EPriestMenuAction Action)
 {
     TStrongObjectPtr<UPriestMenuRequest> Request(NewObject<UPriestMenuRequest>());
@@ -53,9 +74,18 @@ bool UPriestMainMenuWidget::SendRequest(EPriestMenuAction Action)
     InvokeViewEvent(EViewEventType::ButtonClicked, Request.Get());
     return Request->bAccepted;
 }
-FDelegateHandle UPriestMainMenuWidget::AddListener(UMvcControl* Control) { return Listener.AddUObject(Control, &UMvcControl::HandleViewEvent); }
-void UPriestMainMenuWidget::RemoveListener(FDelegateHandle Handle) { Listener.Remove(Handle); }
-void UPriestMainMenuWidget::InvokeViewEvent(EViewEventType EventType, UEventParameterBase* Parameter) { Listener.Broadcast(this, EventType, Parameter); }
+FDelegateHandle UPriestMainMenuWidget::AddListener(UMvcControl* Control)
+{
+    return Listener.AddUObject(Control, &UMvcControl::HandleViewEvent);
+}
+void UPriestMainMenuWidget::RemoveListener(FDelegateHandle Handle)
+{
+    Listener.Remove(Handle);
+}
+void UPriestMainMenuWidget::InvokeViewEvent(EViewEventType EventType, UEventParameterBase* Parameter)
+{
+    Listener.Broadcast(this, EventType, Parameter);
+}
 void UPriestMainMenuWidget::ShowStatusMessage(const FText& Message)
 {
 	if (MenuStatusText)

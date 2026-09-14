@@ -18,10 +18,16 @@ public:
 
     float GetStartTime();
     float GetElapsedTime();
-    bool HasStageCleared() const { return bStageCleared; }
+    bool HasStageCleared() const
+    {
+        return bStageCleared;
+    }
     bool TryCompleteStage(float ClearSeconds);
     int GetMonsterCount() const;
-    bool IsExitAvailable() const { return DoorVisibility; }
+    bool IsExitAvailable() const
+    {
+        return DoorVisibility;
+    }
     virtual FDelegateHandle AddListener(UMvcControl* Control) override;
     virtual void RemoveListener(FDelegateHandle Handle) override;
     virtual void InvokePropertyChanged(uint8 PropertyName) override;

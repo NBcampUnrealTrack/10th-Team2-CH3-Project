@@ -6,9 +6,18 @@ void UPriestMenuModel::SetState(EPriestMenuPage NewPage, EPriestLobbyTab NewTab)
     Tab = NewTab;
     InvokePropertyChanged(0);
 }
-FDelegateHandle UPriestMenuModel::AddListener(UMvcControl* Control) { return Changed.AddUObject(Control, &UMvcControl::HandleModelChanged); }
-void UPriestMenuModel::RemoveListener(FDelegateHandle Handle) { Changed.Remove(Handle); }
-void UPriestMenuModel::InvokePropertyChanged(uint8 PropertyName) { Changed.Broadcast(this, PropertyName); }
+FDelegateHandle UPriestMenuModel::AddListener(UMvcControl* Control)
+{
+    return Changed.AddUObject(Control, &UMvcControl::HandleModelChanged);
+}
+void UPriestMenuModel::RemoveListener(FDelegateHandle Handle)
+{
+    Changed.Remove(Handle);
+}
+void UPriestMenuModel::InvokePropertyChanged(uint8 PropertyName)
+{
+    Changed.Broadcast(this, PropertyName);
+}
 void UPriestMenuController::HandleModelChanged(IMvcModel* InModel, uint8 PropertyName)
 {
     UPriestMenuModel* Model = GetModel<UPriestMenuModel>();
