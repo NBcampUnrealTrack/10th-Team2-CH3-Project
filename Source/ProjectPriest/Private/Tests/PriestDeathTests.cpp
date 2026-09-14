@@ -42,9 +42,9 @@ bool FPriestDeathModelTest::RunTest(const FString& Parameters)
     TStrongObjectPtr<UPriestDeathController> DeathController(NewObject<UPriestDeathController>());
     AIngamePlayerController* Owner = World->SpawnActor<AIngamePlayerController>();
     DeathController->Initialize(Model.Get(), nullptr, Owner);
-    TestTrue(TEXT("Explicit executor receives failure subscription"), Owner->OnDeathTravelFailed.IsBoundToObject(DeathController.Get()));
+    TestTrue(TEXT("Explicit executor receives failure subscription"), Owner->OnResultTravelFailed.IsBoundToObject(DeathController.Get()));
     DeathController->Disconnect();
-    TestFalse(TEXT("Disconnect removes executor subscription"), Owner->OnDeathTravelFailed.IsBoundToObject(DeathController.Get()));
+    TestFalse(TEXT("Disconnect removes executor subscription"), Owner->OnResultTravelFailed.IsBoundToObject(DeathController.Get()));
     // State transitions work independently of a UIManager Outer and optional presentation.
     DeathController->Initialize(Model.Get(), nullptr, nullptr);
     TestFalse(TEXT("Controller initially observes alive state"), DeathController->IsDeathActive());

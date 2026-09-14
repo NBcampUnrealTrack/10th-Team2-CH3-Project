@@ -11,7 +11,7 @@ void UPriestDeathController::Initialize(UPriestCombatModel* Model, UPriestUIMana
     PlayerController = InPlayerController;
     if (PlayerController.IsValid())
     {
-        TravelFailedHandle = PlayerController->OnDeathTravelFailed.AddUObject(this, &UPriestDeathController::HandleTravelFailed);
+        TravelFailedHandle = PlayerController->OnResultTravelFailed.AddUObject(this, &UPriestDeathController::HandleTravelFailed);
     }
     SetModel(Model);
     HandleModelChanged(Model, 0);
@@ -19,7 +19,7 @@ void UPriestDeathController::Initialize(UPriestCombatModel* Model, UPriestUIMana
 
 void UPriestDeathController::Disconnect()
 {
-    if (PlayerController.IsValid()) PlayerController->OnDeathTravelFailed.Remove(TravelFailedHandle);
+    if (PlayerController.IsValid()) PlayerController->OnResultTravelFailed.Remove(TravelFailedHandle);
     TravelFailedHandle.Reset();
     LeaveDeath(false);
     Super::Disconnect();
@@ -48,7 +48,7 @@ void UPriestDeathController::EnterDeath()
         View = UIManager->ShowDeathScreen(PlayerController.Get());
     }
     SetView(View);
-    if (PlayerController.IsValid()) PlayerController->SetDeathInput(true, View);
+    if (PlayerController.IsValid()) PlayerController->SetResultInput(true, View);
     if (View)
     {
         View->SetBusy(false);
@@ -64,7 +64,7 @@ void UPriestDeathController::LeaveDeath(bool bRestorePreviousHUD)
     bTravelPending = false;
     SetView(nullptr);
     if (UIManager.IsValid()) UIManager->HideDeathScreen();
-    if (PlayerController.IsValid()) PlayerController->SetDeathInput(false, nullptr);
+    if (PlayerController.IsValid()) PlayerController->SetResultInput(false, nullptr);
     if (bRestorePreviousHUD && bRestoreHUD && UIManager.IsValid()) UIManager->RestoreHUD();
     bRestoreHUD = false;
 }
@@ -78,9 +78,9 @@ void UPriestDeathController::HandleViewEvent(IMvcView* InView, EViewEventType Ev
         || !Request || EventType != EViewEventType::ButtonClicked || !PlayerController.IsValid()) return;
 
     bTravelPending = true;
-    PresentTravelStatus(true, NSLOCTEXT("PriestDeath", "Loading", "불러오는 중..."));
+    PresentTravelStatus(true, NSLOCTEXT("PriestDeath", "Loading", "Loading..."));
     FText Error;
-    if (!PlayerController->ExecuteDeathTravel(Request->bRestart, Error)) HandleTravelFailed(Error);
+    if (!PlayerController->ExecuteResultTravel(Request->bRestart, Error)) HandleTravelFailed(Error);
 }
 
 void UPriestDeathController::HandleTravelFailed(const FText& Message)

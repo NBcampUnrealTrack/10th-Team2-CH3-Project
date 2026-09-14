@@ -123,3 +123,9 @@ void UPriestHUDWidget::ResetKillNotification()
     KillNotificationRemaining = 0.0f;
     UpdateFeedbackOpacity();
 }
+
+void UPriestHUDWidget::SetMissionObjective(const FText& Objective)
+{
+    Data.MissionObjective = Objective;
+    if (MissionText) MissionText->SetText(Data.MissionObjective);
+}

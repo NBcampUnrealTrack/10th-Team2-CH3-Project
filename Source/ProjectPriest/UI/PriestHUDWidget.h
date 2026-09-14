@@ -42,6 +42,7 @@ public:
 	void SetHUDData(const FPriestHUDData& InData);
     UFUNCTION(BlueprintCallable, Category="Priest|UI")
     void SetHealth(int CurrentHealth, int MaxHealth);
+    void SetMissionObjective(const FText& Objective);
     void SetCombatData(float Health, float Maximum, const FText& Name, int32 Ammo, int32 Reserve);
 
     virtual FDelegateHandle AddListener(UMvcControl* Control) override;

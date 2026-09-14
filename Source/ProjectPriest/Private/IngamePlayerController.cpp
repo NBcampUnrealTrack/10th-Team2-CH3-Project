@@ -1,4 +1,6 @@
 #include "IngamePlayerController.h"
+#include "IngameGameState.h"
+#include "../UI/PriestStageClearWidget.h"
 #include "../UI/PriestDeathWidget.h"
 #include "Engine/Engine.h"
 #include "GameFramework/PlayerInput.h"
@@ -34,10 +36,11 @@ void AIngamePlayerController::BeginPlay()
     if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>())
     {
         UI->SetDeathWidgetClass(DeathWidgetClass);
+        UI->SetStageClearWidgetClass(StageClearWidgetClass);
     }
     if (GEngine)
     {
-        DeathTravelFailureHandle = GEngine->OnTravelFailure().AddUObject(this, &AIngamePlayerController::HandleDeathTravelFailure);
+        ResultTravelFailureHandle = GEngine->OnTravelFailure().AddUObject(this, &AIngamePlayerController::HandleResultTravelFailure);
     }
 
     if (HUDWidgetClass)
@@ -48,6 +51,9 @@ void AIngamePlayerController::BeginPlay()
             UI->ShowHUD(InitialHUDData);
         }
     }
+
+    MissionGameStateHandle = GetWorld()->GameStateSetEvent.AddUObject(this, &AIngamePlayerController::HandleMissionGameStateChanged);
+    HandleMissionGameStateChanged(GetWorld()->GetGameState());
 
     OnPossessedPawnChanged.AddDynamic(this, &AIngamePlayerController::HandleCombatPawnChanged);
     HandleCombatPawnChanged(nullptr, GetPawn());
@@ -109,8 +115,10 @@ void AIngamePlayerController::HandleCombatPawnChanged(APawn* PreviousPawn, APawn
 }
 void AIngamePlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-    if (GEngine) GEngine->OnTravelFailure().Remove(DeathTravelFailureHandle);
-    DeathTravelFailureHandle.Reset();
+    if (GEngine) GEngine->OnTravelFailure().Remove(ResultTravelFailureHandle);
+    ResultTravelFailureHandle.Reset();
+    if (GetWorld()) GetWorld()->GameStateSetEvent.Remove(MissionGameStateHandle);
+    MissionGameStateHandle.Reset();
     OnPossessedPawnChanged.RemoveDynamic(this, &AIngamePlayerController::HandleCombatPawnChanged);
     if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
     {
@@ -159,14 +167,14 @@ void AIngamePlayerController::ClientNotifyEnemyKilled_Implementation()
     }
 }
 
-void AIngamePlayerController::SetDeathInput(bool bActive, UPriestDeathWidget* Widget)
+void AIngamePlayerController::SetResultInput(bool bActive, UUserWidget* Widget)
 {
     if (!IsLocalController()) return;
-    if (bDeathInputActive != bActive)
+    if (bResultInputActive != bActive)
     {
         SetIgnoreMoveInput(bActive);
         SetIgnoreLookInput(bActive);
-        bDeathInputActive = bActive;
+        bResultInputActive = bActive;
     }
     if (PlayerInput) PlayerInput->FlushPressedKeys();
     bShowMouseCursor = bActive;
@@ -180,23 +188,23 @@ void AIngamePlayerController::SetDeathInput(bool bActive, UPriestDeathWidget* Wi
     }
     else
     {
-        bDeathTravelRequested = false;
+        bResultTravelRequested = false;
         SetInputMode(FInputModeGameOnly());
     }
 }
 
-bool AIngamePlayerController::ExecuteDeathTravel(bool bRestart, FText& OutError)
+bool AIngamePlayerController::ExecuteResultTravel(bool bRestart, FText& OutError)
 {
     OutError = FText::GetEmpty();
-    // This is the engine-side executor. Death eligibility and view updates belong to MVC.
-    if (!IsLocalController() || !bDeathInputActive || bDeathTravelRequested || !GetWorld())
+    // This is the engine-side executor. Result eligibility and view updates belong to MVC.
+    if (!IsLocalController() || !bResultInputActive || bResultTravelRequested || !GetWorld())
     {
-        OutError = NSLOCTEXT("PriestDeath", "Unavailable", "현재 맵 이동을 요청할 수 없습니다.");
+        OutError = NSLOCTEXT("PriestDeath", "Unavailable", "Map travel is currently unavailable.");
         return false;
     }
     if (GetNetMode() != NM_Standalone)
     {
-        OutError = NSLOCTEXT("PriestDeath", "LocalOnly", "현재 재시작은 싱글 플레이에서만 지원합니다.");
+        OutError = NSLOCTEXT("PriestDeath", "LocalOnly", "Map travel is only supported in single player.");
         return false;
     }
     // Keep the full asset path for package lookup; PIE only changes the map name prefix.
@@ -205,19 +213,27 @@ bool AIngamePlayerController::ExecuteDeathTravel(bool bRestart, FText& OutError)
         : MainMenuMap.ToSoftObjectPath().GetLongPackageName();
     if (Package.IsEmpty() || !FPackageName::DoesPackageExist(Package))
     {
-        OutError = NSLOCTEXT("PriestDeath", "MissingMap", "이동할 맵을 찾을 수 없습니다. 맵 설정을 확인해 주세요.");
+        OutError = NSLOCTEXT("PriestDeath", "MissingMap", "Map not found. Check the map settings.");
         UE_LOG(LogTemp, Warning, TEXT("Priest Death UI: Map does not exist: %s"), *Package);
         return false;
     }
-    bDeathTravelRequested = true;
+    bResultTravelRequested = true;
     UGameplayStatics::OpenLevel(this, FName(*Package));
     return true;
 }
 
-void AIngamePlayerController::HandleDeathTravelFailure(UWorld* World, ETravelFailure::Type FailureType, const FString& ErrorString)
+void AIngamePlayerController::HandleResultTravelFailure(UWorld* World, ETravelFailure::Type FailureType, const FString& ErrorString)
 {
-    if (World != GetWorld() || !bDeathTravelRequested) return;
-    bDeathTravelRequested = false;
+    if (World != GetWorld() || !bResultTravelRequested) return;
+    bResultTravelRequested = false;
     UE_LOG(LogTemp, Warning, TEXT("Priest Death UI: Travel failed (%d): %s"), static_cast<int32>(FailureType), *ErrorString);
-    OnDeathTravelFailed.Broadcast(NSLOCTEXT("PriestDeath", "TravelFailed", "맵 이동에 실패했습니다. 다시 시도해 주세요."));
+    OnResultTravelFailed.Broadcast(NSLOCTEXT("PriestDeath", "TravelFailed", "Map travel failed. Please try again."));
+}
+
+void AIngamePlayerController::HandleMissionGameStateChanged(AGameStateBase* State)
+{
+    if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
+    {
+        if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>()) UI->SetMissionState(Cast<AIngameGameState>(State), this);
+    }
 }

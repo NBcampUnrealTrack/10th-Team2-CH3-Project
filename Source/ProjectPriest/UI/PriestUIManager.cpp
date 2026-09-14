@@ -1,5 +1,9 @@
 #include "PriestUIManager.h"
+#include "PriestMissionController.h"
+#include "IngameGameState.h"
 #include "PriestDeathWidget.h"
+#include "PriestStageClearWidget.h"
+#include "PriestStageClearController.h"
 #include "PriestDeathController.h"
 #include "IngamePlayerController.h"
 #include "PriestCombatModel.h"
@@ -17,6 +21,7 @@ void UPriestUIManager::SetHUDWidgetClass(TSubclassOf<UPriestHUDWidget> WidgetCla
     }
     HideHUD();
     if (CombatController) CombatController->SetView(nullptr);
+    if (MissionController) MissionController->SetView(nullptr);
     HUD = nullptr;
     HUDWidgetClass = WidgetClass;
 }
@@ -24,6 +29,7 @@ void UPriestUIManager::SetHUDWidgetClass(TSubclassOf<UPriestHUDWidget> WidgetCla
 bool UPriestUIManager::ShowHUD(const FPriestHUDData& Data)
 {
     if (DeathController && DeathController->IsDeathActive()) return false;
+    if (StageClearController && StageClearController->IsStageClearActive()) return false;
     if (!HUDWidgetClass || HUDWidgetClass->HasAnyClassFlags(CLASS_Abstract))
     {
         UE_LOG(LogTemp, Warning, TEXT("Priest HUD: Set a concrete Widget Blueprint class before ShowHUD."));
@@ -39,6 +45,7 @@ bool UPriestUIManager::ShowHUD(const FPriestHUDData& Data)
 	{
 		HideHUD();
 		if (CombatController) CombatController->SetView(nullptr);
+		if (MissionController) MissionController->SetView(nullptr);
 		HUD = nullptr;
 	}
 	if (!HUD)
@@ -179,6 +186,11 @@ void UPriestUIManager::SetCombatPawn(APawn* Pawn, AIngamePlayerController* Owner
 
 void UPriestUIManager::ConnectCombatView()
 {
+    if (MissionController)
+    {
+        MissionController->SetView(HUD);
+        MissionController->HandleModelChanged(MissionController->GetModel<AIngameGameState>(), 0);
+    }
     if (CombatController && CombatModel)
     {
         CombatController->SetView(HUD);
@@ -188,6 +200,11 @@ void UPriestUIManager::ConnectCombatView()
 
 void UPriestUIManager::DisconnectCombatHUD()
 {
+    if (StageClearController) StageClearController->Disconnect();
+    HideStageClearScreen();
+    StageClearController = nullptr;
+    if (MissionController) MissionController->Disconnect();
+    MissionController = nullptr;
     if (DeathController) DeathController->Disconnect();
     HideDeathScreen();
     DeathController = nullptr;
@@ -240,4 +257,43 @@ void UPriestUIManager::RestoreHUD()
         ConnectCombatView();
         HUD->AddToPlayerScreen(0);
     }
+}
+
+void UPriestUIManager::SetMissionState(AIngameGameState* State, AIngamePlayerController* Owner)
+{
+    if (!StageClearController) StageClearController = NewObject<UPriestStageClearController>(this);
+    StageClearController->Initialize(State, this, Owner);
+    if (!MissionController) MissionController = NewObject<UPriestMissionController>(this);
+    MissionController->SetModel(State);
+    MissionController->SetView(HUD);
+    MissionController->HandleModelChanged(State, 0);
+}
+
+void UPriestUIManager::SetStageClearWidgetClass(TSubclassOf<UPriestStageClearWidget> WidgetClass)
+{
+    StageClearWidgetClass = WidgetClass;
+}
+
+UPriestStageClearWidget* UPriestUIManager::ShowStageClearScreen(APlayerController* Owner)
+{
+    if (!IsValid(Owner)) return nullptr;
+    if (StageClearWidget && StageClearWidget->GetOwningPlayer() != Owner) HideStageClearScreen();
+    if (!StageClearWidget && StageClearWidgetClass && !StageClearWidgetClass->HasAnyClassFlags(CLASS_Abstract))
+    {
+        StageClearWidget = CreateWidget<UPriestStageClearWidget>(Owner, StageClearWidgetClass);
+    }
+    if (StageClearWidget && (StageClearWidget->IsInViewport() || StageClearWidget->AddToPlayerScreen(100)))
+    {
+        StageClearWidget->SetVisibility(ESlateVisibility::Visible);
+        return StageClearWidget;
+    }
+    HideStageClearScreen();
+    UE_LOG(LogTemp, Error, TEXT("Priest StageClear UI: Set StageClearWidgetClass to a configured stage clear Widget Blueprint in the ingame PlayerController."));
+    return nullptr;
+}
+
+void UPriestUIManager::HideStageClearScreen()
+{
+    if (StageClearWidget) StageClearWidget->RemoveFromParent();
+    StageClearWidget = nullptr;
 }

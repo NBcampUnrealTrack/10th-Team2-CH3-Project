@@ -6,7 +6,11 @@
 #include "PriestUIManager.generated.h"
 
 class UPriestHUDWidget;
+class AIngameGameState;
+class UPriestMissionController;
 class UPriestDeathWidget;
+class UPriestStageClearWidget;
+class UPriestStageClearController;
 class UPriestDeathController;
 class UPriestCombatModel;
 class UMvcCharacterStatController;
@@ -21,6 +25,10 @@ class PROJECTPRIEST_API UPriestUIManager : public ULocalPlayerSubsystem
 {
 	GENERATED_BODY()
 public:
+    void SetMissionState(AIngameGameState* State, AIngamePlayerController* Owner);
+    void SetStageClearWidgetClass(TSubclassOf<UPriestStageClearWidget> WidgetClass);
+    UPriestStageClearWidget* ShowStageClearScreen(APlayerController* Owner);
+    void HideStageClearScreen();
     void SetDeathWidgetClass(TSubclassOf<UPriestDeathWidget> WidgetClass);
     UPriestDeathWidget* ShowDeathScreen(APlayerController* Owner);
     void HideDeathScreen();
@@ -47,6 +55,10 @@ public:
 
 private:
     void ConnectCombatView();
+    UPROPERTY(Transient) TObjectPtr<UPriestStageClearController> StageClearController;
+    UPROPERTY(Transient) TObjectPtr<UPriestStageClearWidget> StageClearWidget;
+    UPROPERTY(Transient) TSubclassOf<UPriestStageClearWidget> StageClearWidgetClass;
+    UPROPERTY(Transient) TObjectPtr<UPriestMissionController> MissionController;
     UPROPERTY(Transient) TObjectPtr<UPriestDeathController> DeathController;
     UPROPERTY(Transient) TObjectPtr<UPriestDeathWidget> DeathWidget;
     UPROPERTY(Transient) TSubclassOf<UPriestDeathWidget> DeathWidgetClass;

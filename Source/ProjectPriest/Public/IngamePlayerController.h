@@ -6,14 +6,17 @@
 #include "../UI/PriestHUDData.h"
 #include "IngamePlayerController.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FPriestDeathTravelFailed, const FText&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FPriestResultTravelFailed, const FText&);
 
 class UInputMappingContext;
 class UInputAction;
 class UPriestHUDWidget;
 class UPriestDeathWidget;
+class UPriestStageClearWidget;
+class UUserWidget;
 class APlayerCharacter;
 class AWeaponItem;
+class AGameStateBase;
 
 UCLASS()
 class PROJECTPRIEST_API AIngamePlayerController : public APlayerController
@@ -22,9 +25,9 @@ class PROJECTPRIEST_API AIngamePlayerController : public APlayerController
 	
 public:
     AIngamePlayerController();
-    void SetDeathInput(bool bActive, UPriestDeathWidget* Widget);
-    bool ExecuteDeathTravel(bool bRestart, FText& OutError);
-    FPriestDeathTravelFailed OnDeathTravelFailed;
+    void SetResultInput(bool bActive, UUserWidget* Widget);
+    bool ExecuteResultTravel(bool bRestart, FText& OutError);
+    FPriestResultTravelFailed OnResultTravelFailed;
     UFUNCTION(Client, Reliable)
     void ClientNotifyEnemyKilled();
     UFUNCTION(Client, Unreliable)
@@ -46,15 +49,19 @@ public:
     TObjectPtr<UInputAction> GetJumpAction();
     TObjectPtr<UInputAction> GetInteractAction();
 private:
-    void HandleDeathTravelFailure(UWorld* World, ETravelFailure::Type FailureType, const FString& ErrorString);
-    FDelegateHandle DeathTravelFailureHandle;
-    bool bDeathInputActive = false;
-    bool bDeathTravelRequested = false;
+    void HandleMissionGameStateChanged(AGameStateBase* State);
+    FDelegateHandle MissionGameStateHandle;
+    void HandleResultTravelFailure(UWorld* World, ETravelFailure::Type FailureType, const FString& ErrorString);
+    FDelegateHandle ResultTravelFailureHandle;
+    bool bResultInputActive = false;
+    bool bResultTravelRequested = false;
     UFUNCTION()
     void HandleCombatPawnChanged(APawn* PreviousPawn, APawn* NewPawn);
 
 
 protected:
+    UPROPERTY(EditDefaultsOnly, Category="Priest|Stage Clear UI")
+    TSubclassOf<UPriestStageClearWidget> StageClearWidgetClass;
     UPROPERTY(EditDefaultsOnly, Category="Priest|Death UI")
     TSubclassOf<UPriestDeathWidget> DeathWidgetClass;
     UPROPERTY(EditDefaultsOnly, Category="Priest|Death UI")
