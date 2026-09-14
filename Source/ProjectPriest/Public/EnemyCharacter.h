@@ -123,4 +123,8 @@ protected:
     TObjectPtr<ACharacter> AttackTarget;
 
     EAttackAnimationState AttackAnimationeState;
+
+    FTimerHandle DeathTimerHandle;
+
+    void DestroyEnemy();
 };

@@ -45,7 +45,18 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const&
 
 void AEnemyCharacter::Die()
 {
-	Destroy();
+	if (bIsDead)
+		return;
+
+	bIsDead = true;
+
+	GetWorldTimerManager().SetTimer(
+		DeathTimerHandle,
+		this,
+		&AEnemyCharacter::DestroyEnemy,//bool형을 반환하지 않는 함수를 다시 정의
+		5.0f,
+		false
+	);
 }
 
 void AEnemyCharacter::BeginPlay()
@@ -113,6 +124,11 @@ void AEnemyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AEnemyCharacter::DestroyEnemy()
+{
+	Destroy();
 }
 
 FVector AEnemyCharacter::GetPatrolOrigin()
