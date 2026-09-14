@@ -5,7 +5,9 @@
 #include "PlayerCharacter.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FPlayerCombatChanged);
+DECLARE_MULTICAST_DELEGATE_OneParam(FCanInteractChangedDelegate, bool);
 
+class USphereComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
@@ -62,7 +64,28 @@ public:
     AWeaponItem* GetEquippedWeapon() const { return WeaponInstance.Get(); }
 
     const FVector GetMuzzleLocation();
+    /////////////////////////////////////
+    /// START INTERACTION
+    /////////////////////////////////////
 
+    UFUNCTION()
+    void OnSensorOverlapBegin(class UPrimitiveComponent* OverlappedComp
+        , class AActor* OtherActor
+        , class UPrimitiveComponent* OtherComp
+        , int32 OtherBodyIndex
+        , bool bFromSweep
+        , const FHitResult& SweepResult);
+
+    UFUNCTION()
+    void OnSensorOverlapEnd(class UPrimitiveComponent* OverlappedComp
+        , class AActor* OtherActor
+        , class UPrimitiveComponent* OtherComp
+        , int32 OtherBodyIndex);
+    
+    FCanInteractChangedDelegate GetOnCanInteractDelegate();
+    /////////////////////////////////////
+    /// END INTERACTION
+    /////////////////////////////////////
     UFUNCTION()
     void OnMoveInputted(const FInputActionInstance& InputValue);
     
@@ -80,6 +103,9 @@ public:
 
     UFUNCTION()
     void OnThrowInputted(const FInputActionValue& value);
+    
+    UFUNCTION()
+    void OnInteractInputted(const FInputActionValue& value);
 
 
 protected:
@@ -96,6 +122,9 @@ protected:
  
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Components")
     TObjectPtr<UCameraComponent> Camera;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Components")
+    TObjectPtr<USphereComponent> InteractionSensor;;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Properties")
     float MovingSpeed = 800.0f;
@@ -140,6 +169,12 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Weapon")
     TObjectPtr<AWeaponItem> WeaponInstance;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Interacting")
+    bool CanInteract;
+    
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Interacting")
+    FCanInteractChangedDelegate OnCanInteractChanged;
+    
 protected:
     bool bCanThrow = true;
 
