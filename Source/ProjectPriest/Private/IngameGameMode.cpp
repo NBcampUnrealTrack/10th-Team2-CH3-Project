@@ -15,6 +15,13 @@ void AIngameGameMode::BeginPlay()
 void AIngameGameMode::OnPlayerDead()
 {
     JError("플레이어 사망 화면을 구현하세요");
+
+    // 사망 상태 처리
+    AIngameGameState* IngameGameState = GetWorld() ? GetWorld()->GetGameState<AIngameGameState>() : nullptr;
+    if (IngameGameState)
+    {
+        IngameGameState->OnGameOver();
+    }
 }
 
 void AIngameGameMode::OnOpenBossRoomDoor()
