@@ -21,6 +21,10 @@ void AIngamePlayerController::BeginPlay()
         return;
     }
 
+    // 메뉴에서 넘어온 뷰포트의 UI 전용 입력 상태를 게임 입력으로 되돌린다.
+    SetInputMode(FInputModeGameOnly());
+    bShowMouseCursor = false;
+
     if (HUDWidgetClass)
     {
         if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>())
