@@ -7,6 +7,7 @@
 #include "MonsterAIController.h"
 #include "Engine/DamageEvents.h"
 #include "IngameGameMode.h"
+#include "Components/CapsuleComponent.h"
 #include "JUtility.h"
 
 // Sets default values
@@ -69,6 +70,12 @@ void AEnemyCharacter::Die()
 		return;
 
 	bIsDead = true;
+
+	AMonsterAIController* AiController = Cast<AMonsterAIController>(GetController());
+
+	GetCapsuleComponent()->SetCollisionEnabled(
+		ECollisionEnabled::NoCollision
+	);
 
 	GetWorldTimerManager().SetTimer(
 		DeathTimerHandle,
