@@ -1,4 +1,4 @@
-ï»¿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "MonsterAIController.h"
@@ -17,25 +17,23 @@ AMonsterAIController::AMonsterAIController()
 
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
 
-	//ê°ì§€ì‹œì‘ ê±°ë¦¬
+	//°¨Áö½ÃÀÛ °Å¸®
 	SightConfig->SightRadius = 1500.0f;
-	//ê°ì§€ ë ê±°ë¦¬
+	//°¨Áö ³¡ °Å¸®
 	SightConfig->LoseSightRadius = 2000.0f;
-	//ì‹œì•¼ê°
+	//½Ã¾ß°¢
 	SightConfig->PeripheralVisionAngleDegrees = 90.0f;
-	//ê°ì§€ ì§€ì†ì‹œê°„
+	//°¨Áö Áö¼Ó½Ã°£
 	SightConfig->SetMaxAge(5.0f);
-	//ì  ê°ì§€
+	//Àû °¨Áö
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
-	//ì¤‘ë§† ê°ì§€
+	//Áß  °¨Áö
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
-	//ì•„êµ° ê°ì§€
+	//¾Æ±º °¨Áö
 	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
-	//ë§ˆì§€ë§‰ìœ¼ë¡œ ë³¸ ìœ„ì¹˜ì—ì„œ ë²”ìœ„ ìë™ ì„±ê³µ
-	SightConfig->AutoSuccessRangeFromLastSeenLocation = 300.0f;
-	//ì„¤ì • ì ìš©
+	//¼³Á¤ Àû¿ë
 	AIPerception->ConfigureSense(*SightConfig);
-	//ì‹œê°ì»´í¼ë„ŒíŠ¸ë¥¼ ìš°ì„  ì‚¬ìš©
+	//½Ã°¢ÄÄÆÛ³ÍÆ®¸¦ ¿ì¼± »ç¿ë
 	AIPerception->SetDominantSense(SightConfig->GetSenseImplementation());
 }
 
@@ -57,7 +55,7 @@ void AMonsterAIController::BeginPlay()
 
 	if (AIPerception)
 	{
-		//í•¨ìˆ˜ ë°”ì¸ë”©
+		//ÇÔ¼ö ¹ÙÀÎµù
 		AIPerception->OnTargetPerceptionUpdated.AddDynamic(
 			this,
 			&AMonsterAIController::OnPerceptionUpdated
@@ -69,14 +67,15 @@ void AMonsterAIController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimul
 {
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		//ê°ì§€ëœ ì •ë³´ ì €ì¥
+		//°¨ÁöµÈ Á¤º¸ ÀúÀå
 		DetectedPlayer = Actor;
-		//DetectedPlayerLocation = Stimulus.StimulusLocation;
+		DetectedPlayerLocation = Stimulus.StimulusLocation;
 	}
 	else
 	{
+		//½Ã°£ Á¾·á½Ã Áö¿ï°Ç°¡ Áö¿ì´Â Å×ÀÌºíÀ» µû·Î ¸¸µé°Ç°¡
 		DetectedPlayer = nullptr;
-		//DetectedPlayerLocation = FVector::ZeroVector;
+		DetectedPlayerLocation = FVector::ZeroVector;
 	}
 }
 
@@ -85,7 +84,7 @@ AActor* AMonsterAIController::GetDetectedPlayer()
 	return DetectedPlayer;
 }
 
-//FVector AMonsterAIController::GetDetectedPlayerLocation()
-//{
-//	return DetectedPlayerLocation;
-//}
+FVector AMonsterAIController::GetDetectedPlayerLocation()
+{
+	return DetectedPlayerLocation;
+}

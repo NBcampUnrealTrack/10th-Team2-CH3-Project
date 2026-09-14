@@ -1,79 +1,72 @@
-ï»¿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "EnemyCharacter.h"
-#include "IngamePlayerController.h"
-#include "PlayerCharacter.h"
+//ÃßÈÄ ÇÃ·¹ÀÌ¾î Ä³¸¯ÅÍ ÀÎÅ¬·çµå  
+//#include "PlayerCharacter.h"
 #include "MonsterAIController.h"
-#include "Engine/DamageEvents.h"
-#include "IngameGameMode.h"
-#include "JUtility.h"
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	//AI ì»¨íŠ¸ë¡¤ëŸ¬ class ì„¤ì •
+	//AI ÄÁÆ®·Ñ·¯ class ¼³Á¤
 	AIControllerClass = AMonsterAIController::StaticClass();
-	//ìƒì„±ì‹œ AI Possess ì„¤ì •
+	//»ı¼º½Ã AI Possess ¼³Á¤
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	//ìŠ¤íƒ¯ ì´ˆê¸°í™”
+	//½ºÅÈ ÃÊ±âÈ­
 	Health = 100.0f;
 	Damage = 10.0f;
 	Defense = 5.0f;
-	AttackRange = 0; //ê³µê²© ì‚¬ê±°ë¦¬
-	MinimumDamage = 1.0f;//ëª¬ìŠ¤í„°ê°€ ë°›ëŠ” ìµœì†Œí”¼í•´
+	MinimumDamage = 1.0f;//¸ó½ºÅÍ°¡ ¹Ş´Â ÃÖ¼ÒÇÇÇØ
 
 	PatrolRadius = 1000.0f;
 }
 
-void AEnemyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	Super::EndPlay(EndPlayReason);
-	
-	AIngameGameMode* IngameGameMode = Cast<AIngameGameMode>(GetWorld()->GetAuthGameMode());
-	JASSERT(IsValid(IngameGameMode), "Ingame game mode is invalid");
-	
-	IngameGameMode->OnMonsterDead();	
-}
 
 void AEnemyCharacter::Attack(ACharacter* PlayerCharacter)
 {
+    float MontagePlayResult = AnimInstance->Montage_Play(MontageToPlaying, 1.0f);
+    if (FMath::IsNearlyZero(MontagePlayResult))
+    {
+        //TODO: Error what to do
+        AttackMontageState = EAttackMontageState::Error;
+        return;
+    }
+
+    FOnMontageEnded EndDelegate;
+    EndDelegate.BindUObject(this, &AEnemyCharacter::OnMontageEnded);
+
+    AnimInstance->Montage_SetEndDelegate(EndDelegate, MontageToPlaying);
+    AttackMontageState = EAttackMontageState::InProgress;
 }
 
-float AEnemyCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+void AEnemyCharacter::TakeDamage(float DamageAmount)
 {
-    if (!FMath::IsFinite(DamageAmount) || DamageAmount <= 0.0f || Health <= 0.0f || bIsDead || IsActorBeingDestroyed())
-    {
-        return 0.0f;
-    }
-    const float ActualDamage = FMath::Min(Health, FMath::Max(0.0f, FMath::Max(DamageAmount - Defense, MinimumDamage)));
-    if (ActualDamage <= 0.0f)
-    {
-        return 0.0f;
-    }
-    Health -= ActualDamage;
-    if (AIngamePlayerController* AttackingController = Cast<AIngamePlayerController>(EventInstigator))
-    {
-        AttackingController->ClientNotifyHitConfirmed(ActualDamage, GetActorLocation() + FVector(0.0f, 0.0f, 100.0f));
-        if (Health <= 0.0f)
-        {
-            AttackingController->ClientNotifyEnemyKilled();
-        }
-    }
-	UE_LOG(LogTemp, Warning, TEXT("ëª¬ìŠ¤í„°ê°€ ë°›ì€ ë°ë¯¸ì§€: %.1f / ëª¬ìŠ¤í„° í˜„ì¬ HP: %.1f"), ActualDamage, Health);
+	float ActualDamage = FMath::Max(DamageAmount - Defense, MinimumDamage);
+	Health -= ActualDamage;
 	if (Health <= 0)
 	{
 		Die();
 	}
-	return ActualDamage;
 }
 
 void AEnemyCharacter::Die()
 {
 	Destroy();
+}
+void AEnemyCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+    if (bInterrupted)
+    {
+        AttackMontageState = EAttackMontageState::Interrupted;
+    }
+    else
+    {
+        AttackMontageState = EAttackMontageState::Finished;
+    }
 }
 
 void AEnemyCharacter::BeginPlay()
@@ -83,16 +76,9 @@ void AEnemyCharacter::BeginPlay()
 	PatrolOrigin = this->GetActorLocation();
 
     AnimInstance = GetMesh()->GetAnimInstance();
-	
-	AIngameGameMode* IngameGameMode 
-		= Cast<AIngameGameMode>( GetWorld()->GetAuthGameMode());
-	JASSERT(IsValid(IngameGameMode), "Ingame game mode is invalid");
-	
-	IngameGameMode->OnMonsterSpawned();	
 }
 
-
-//TODO: ì•„ ë§˜ì— ì•ˆë“¤ì–´ ê²ë‚˜ í™”ë‚˜ëŠ” ê·¸ëŸ° êµ¬ì¡°ë„¤...
+//TODO: ¾Æ ¸¾¿¡ ¾Èµé¾î °Ì³ª È­³ª´Â ±×·± ±¸Á¶³×...
 // BT_Attack 
 // -> AEnemyCharacter::Attack() 
 // -> Play Montage 
@@ -100,18 +86,9 @@ void AEnemyCharacter::BeginPlay()
 // -> AEnemyCharacter::OnNotifyApplyDamage
 // -> BT_Attack.OnApplyDamage;
 
-float AEnemyCharacter::GetAttackRange()
-{
-	return AttackRange;
-}
-
 void AEnemyCharacter::OnNotifyApplyDamage()
 {
-    FDamageEvent DummyDelegate;
-    this->AttackTarget->TakeDamage(Damage
-        , DummyDelegate
-        , this->GetController()
-        , this);
+    ApplyAttackDelegate.ExecuteIfBound();
 }
 
 bool AEnemyCharacter::GetIsDead()
@@ -129,19 +106,24 @@ bool AEnemyCharacter::HitThisFrame()
     return bHitThisFrame;
 }
 
+EAttackMontageState AEnemyCharacter::GetAttackMontageState() const
+{
+    return AttackMontageState;
+}
+
 float AEnemyCharacter::GetDamage()
 {
     return Damage;
 }
 
-void AEnemyCharacter::SetAttackTarget(ACharacter* Target)
+void AEnemyCharacter::SetApplyAttackDelegate(FApplyAttackDelegte& Delegate)
 {
-    AttackTarget = Target;
+    ApplyAttackDelegate = Delegate;
 }
 
-EAttackAnimationState AEnemyCharacter::GetAttackAnimationeState()
+void AEnemyCharacter::UnbindApplyAttackDelegate()
 {
-    return AttackAnimationeState;
+    ApplyAttackDelegate.Unbind();
 }
 
 void AEnemyCharacter::Tick(float DeltaTime)
