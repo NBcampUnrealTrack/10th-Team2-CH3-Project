@@ -38,9 +38,18 @@ void AMonsterSpawner::BeginPlay()
     for (int i = 0; i < MonsterSpawnCount; ++i)
     {
         //GetRandom Posistion from box
-        FVector RandomPosition = FMath::RandPointInBox(BoxComponent->Bounds.GetBox());
-        FNavLocation NavgatableRandomPosition;
-        if (!NavSystem->GetRandomPoint(NavgatableRandomPosition))
+
+        const FVector Extent = BoxComponent->GetUnscaledBoxExtent();
+        const FVector LocalRandomPoint(
+            FMath::FRandRange(-Extent.X , Extent.X)
+            , FMath::FRandRange(-Extent.Y, Extent.Y)
+            , FMath::FRandRange(-Extent.Z, Extent.Z));
+
+        FVector RandomPosition 
+            = BoxComponent->GetComponentTransform().TransformPosition(LocalRandomPoint);
+
+        FNavLocation NavigatableRandomPosition;
+        if (!NavSystem->ProjectPointToNavigation(RandomPosition, NavigatableRandomPosition))
         {
             JError("Can not found random location : %f, %f, %f"
                 , RandomPosition.X, RandomPosition.Y, RandomPosition.Z);
@@ -54,7 +63,7 @@ void AMonsterSpawner::BeginPlay()
         AEnemyCharacter* SpawnedActor
             = GetWorld()->SpawnActor<AEnemyCharacter>(
                 ToSpawnClass
-                , NavgatableRandomPosition.Location
+                , NavigatableRandomPosition.Location
                 , FRotator::ZeroRotator
                 , SpawnParameter);
 
