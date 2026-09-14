@@ -1,4 +1,6 @@
 #include "PriestUIManager.h"
+#include "PriestCombatModel.h"
+#include "MvcCharacterStatController.h"
 #include "PriestHUDWidget.h"
 #include "PriestDamageNumberWidget.h"
 #include "Engine/LocalPlayer.h"
@@ -11,6 +13,7 @@ void UPriestUIManager::SetHUDWidgetClass(TSubclassOf<UPriestHUDWidget> WidgetCla
         return;
     }
     HideHUD();
+    if (CombatController) CombatController->SetView(nullptr);
     HUD = nullptr;
     HUDWidgetClass = WidgetClass;
 }
@@ -31,6 +34,7 @@ bool UPriestUIManager::ShowHUD(const FPriestHUDData& Data)
 	if (HUD && HUD->GetOwningPlayer() != Controller)
 	{
 		HideHUD();
+		if (CombatController) CombatController->SetView(nullptr);
 		HUD = nullptr;
 	}
 	if (!HUD)
@@ -42,6 +46,7 @@ bool UPriestUIManager::ShowHUD(const FPriestHUDData& Data)
 	    return false;
 	}
 	HUD->SetHUDData(Data);
+    ConnectCombatView();
 	// HUD와 자식 위젯이 마우스 입력을 가로채지 않도록 표시 전용으로 설정한다.
 	HUD->SetVisibility(ESlateVisibility::HitTestInvisible);
 	// 중복 추가를 막는다. ZOrder 0은 기본 HUD 레이어다.
@@ -58,14 +63,6 @@ void UPriestUIManager::UpdateHUD(const FPriestHUDData& Data)
 	{
 	    HUD->SetHUDData(Data);
 	}
-}
-
-void UPriestUIManager::UpdateCombatHUD(float Health, float Maximum, const FText& Name, int32 Ammo, int32 Reserve)
-{
-    if (HUD)
-    {
-        HUD->SetCombatData(Health, Maximum, Name, Ammo, Reserve);
-    }
 }
 
 void UPriestUIManager::NotifyHitConfirmed(float AppliedDamage, const FVector& DamageLocation)
@@ -128,7 +125,7 @@ void UPriestUIManager::HideHUD()
 void UPriestUIManager::Deinitialize()
 {
 	// 서브시스템 종료 시 화면과 보유 참조를 정리한다.
-	HideHUD();
+    DisconnectCombatHUD();
 	HUD = nullptr;
 	HUDWidgetClass = nullptr;
 	Super::Deinitialize();
@@ -159,4 +156,32 @@ void UPriestUIManager::NotifyEnemyKilled()
     {
         HUD->ShowKillNotification();
     }
+}
+
+void UPriestUIManager::SetCombatPawn(APawn* Pawn)
+{
+    if (!CombatModel) CombatModel = NewObject<UPriestCombatModel>(this);
+    if (!CombatController) CombatController = NewObject<UMvcCharacterStatController>(this);
+    CombatController->SetModel(CombatModel);
+    CombatController->SetView(HUD);
+    ResetDamageFeedback();
+    CombatModel->SetPawn(Pawn);
+}
+
+void UPriestUIManager::ConnectCombatView()
+{
+    if (CombatController && CombatModel)
+    {
+        CombatController->SetView(HUD);
+        CombatController->HandleModelChanged(CombatModel, 0);
+    }
+}
+
+void UPriestUIManager::DisconnectCombatHUD()
+{
+    if (CombatController) CombatController->Disconnect();
+    if (CombatModel) CombatModel->Disconnect();
+    CombatController = nullptr;
+    CombatModel = nullptr;
+    HideHUD();
 }

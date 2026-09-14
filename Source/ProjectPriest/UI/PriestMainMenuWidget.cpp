@@ -2,14 +2,15 @@
 #include "PriestMainMenuPlayerController.h"
 #include "Components/TextBlock.h"
 #include "Components/WidgetSwitcher.h"
-#include "Kismet/KismetSystemLibrary.h"
+#include "PriestMenuMvc.h"
+#include "UObject/StrongObjectPtr.h"
 
 void UPriestMainMenuWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	SetIsFocusable(true);
 	ShowStatusMessage(FText::GetEmpty());
-	ShowTitle();
+	RefreshPage();
 
 	if (!MenuSwitcher || MenuSwitcher->GetNumWidgets() != 3
 		|| !LobbySwitcher || LobbySwitcher->GetNumWidgets() != 2)
@@ -18,50 +19,17 @@ void UPriestMainMenuWidget::NativeConstruct()
 	}
 }
 
-void UPriestMainMenuWidget::ShowTitle()
+void UPriestMainMenuWidget::ShowTitle() { SendRequest(EPriestMenuAction::Title); }
+void UPriestMainMenuWidget::ShowRegions() { SendRequest(EPriestMenuAction::Regions); }
+void UPriestMainMenuWidget::ShowEquipment() { SendRequest(EPriestMenuAction::Equipment); }
+void UPriestMainMenuWidget::ShowCredits() { SendRequest(EPriestMenuAction::Credits); }
+void UPriestMainMenuWidget::SwitchLobbyTab() { SendRequest(EPriestMenuAction::SwitchTab); }
+void UPriestMainMenuWidget::ApplyMenuState(EPriestMenuPage Page, EPriestLobbyTab Tab)
 {
-	CurrentPage = EPriestMenuPage::Title;
-	CurrentTab = EPriestLobbyTab::Region;
-	RefreshPage();
+    CurrentPage = Page;
+    CurrentTab = Tab;
+    RefreshPage();
 }
-
-void UPriestMainMenuWidget::ShowRegions()
-{
-	CurrentPage = EPriestMenuPage::Lobby;
-	CurrentTab = EPriestLobbyTab::Region;
-	RefreshPage();
-}
-
-void UPriestMainMenuWidget::ShowEquipment()
-{
-	CurrentPage = EPriestMenuPage::Lobby;
-	CurrentTab = EPriestLobbyTab::Equipment;
-	RefreshPage();
-}
-
-void UPriestMainMenuWidget::ShowCredits()
-{
-	CurrentPage = EPriestMenuPage::Credits;
-	RefreshPage();
-}
-
-void UPriestMainMenuWidget::SwitchLobbyTab()
-{
-	if (CurrentPage != EPriestMenuPage::Lobby)
-	{
-		return;
-	}
-
-	if (CurrentTab == EPriestLobbyTab::Region)
-	{
-		ShowEquipment();
-	}
-	else
-	{
-		ShowRegions();
-	}
-}
-
 void UPriestMainMenuWidget::RefreshPage()
 {
 	if (MenuSwitcher)
@@ -76,31 +44,18 @@ void UPriestMainMenuWidget::RefreshPage()
 	OnMenuStateChanged(CurrentPage, CurrentTab);
 }
 
-bool UPriestMainMenuWidget::StartStageOne()
+bool UPriestMainMenuWidget::StartStageOne() { return SendRequest(EPriestMenuAction::StartStage); }
+void UPriestMainMenuWidget::QuitGame() { SendRequest(EPriestMenuAction::Quit); }
+bool UPriestMainMenuWidget::SendRequest(EPriestMenuAction Action)
 {
-	if (CurrentPage != EPriestMenuPage::Lobby || CurrentTab != EPriestLobbyTab::Region)
-	{
-		return false;
-	}
-
-	APriestMainMenuPlayerController* Controller = Cast<APriestMainMenuPlayerController>(GetOwningPlayer());
-	if (!Controller)
-	{
-		return false;
-	}
-	return Controller->StartStageOne();
+    TStrongObjectPtr<UPriestMenuRequest> Request(NewObject<UPriestMenuRequest>());
+    Request->Action = Action;
+    InvokeViewEvent(EViewEventType::ButtonClicked, Request.Get());
+    return Request->bAccepted;
 }
-
-void UPriestMainMenuWidget::QuitGame()
-{
-	APlayerController* Controller = GetOwningPlayer();
-	if (!Controller)
-	{
-		return;
-	}
-	UKismetSystemLibrary::QuitGame(this, Controller, EQuitPreference::Quit, false);
-}
-
+FDelegateHandle UPriestMainMenuWidget::AddListener(UMvcControl* Control) { return Listener.AddUObject(Control, &UMvcControl::HandleViewEvent); }
+void UPriestMainMenuWidget::RemoveListener(FDelegateHandle Handle) { Listener.Remove(Handle); }
+void UPriestMainMenuWidget::InvokeViewEvent(EViewEventType EventType, UEventParameterBase* Parameter) { Listener.Broadcast(this, EventType, Parameter); }
 void UPriestMainMenuWidget::ShowStatusMessage(const FText& Message)
 {
 	if (MenuStatusText)

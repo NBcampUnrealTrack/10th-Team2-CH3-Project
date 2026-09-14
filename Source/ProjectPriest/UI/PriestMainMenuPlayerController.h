@@ -6,6 +6,8 @@
 #include "PriestMainMenuPlayerController.generated.h"
 
 class UPriestMainMenuWidget;
+class UPriestMenuModel;
+class UPriestMenuController;
 
 UCLASS()
 class PROJECTPRIEST_API APriestMainMenuPlayerController : public APlayerController
@@ -15,6 +17,8 @@ class PROJECTPRIEST_API APriestMainMenuPlayerController : public APlayerControll
 public:
 	APriestMainMenuPlayerController();
 	bool StartStageOne();
+    bool CanProcessMenuRequest() const { return IsLocalController() && !bTravelRequested; }
+    void RequestQuitGame();
 
 protected:
 	virtual void BeginPlay() override;
@@ -27,6 +31,8 @@ protected:
 	TSoftObjectPtr<UWorld> StageOneMap;
 
 private:
+    UPROPERTY(Transient) TObjectPtr<UPriestMenuModel> MenuModel;
+    UPROPERTY(Transient) TObjectPtr<UPriestMenuController> MenuController;
 	void HandleTravelFailure(UWorld* World, ETravelFailure::Type FailureType, const FString& ErrorString);
 
 	UPROPERTY(Transient)

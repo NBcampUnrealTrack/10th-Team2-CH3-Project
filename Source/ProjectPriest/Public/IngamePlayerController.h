@@ -41,12 +41,7 @@ public:
 private:
     UFUNCTION()
     void HandleCombatPawnChanged(APawn* PreviousPawn, APawn* NewPawn);
-    void RefreshCombatHUD();
-    void UnbindCombatHUD();
-    TWeakObjectPtr<APlayerCharacter> HUDPlayer;
-    TWeakObjectPtr<AWeaponItem> HUDWeapon;
-    FDelegateHandle HealthChangedHandle;
-    FDelegateHandle AmmoChangedHandle;
+
 
 protected:
     // BP_IngamePlayerController의 Class Defaults에서 WBP_PriestHUD를 지정한다.

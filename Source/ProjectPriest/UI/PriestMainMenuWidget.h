@@ -2,8 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "MvcView.h"
 #include "PriestMainMenuWidget.generated.h"
 
+enum class EPriestMenuAction : uint8;
 class UTextBlock;
 class UWidgetSwitcher;
 
@@ -26,11 +28,15 @@ enum class EPriestLobbyTab : uint8
 
 // 배치, 버튼 스타일, 문구는 WBP Designer에서 구성한다.
 UCLASS(Abstract)
-class PROJECTPRIEST_API UPriestMainMenuWidget : public UUserWidget
+class PROJECTPRIEST_API UPriestMainMenuWidget : public UUserWidget, public IMvcView
 {
 	GENERATED_BODY()
 
 public:
+    void ApplyMenuState(EPriestMenuPage Page, EPriestLobbyTab Tab);
+    virtual FDelegateHandle AddListener(UMvcControl* Control) override;
+    virtual void RemoveListener(FDelegateHandle Handle) override;
+    virtual void InvokeViewEvent(EViewEventType EventType, UEventParameterBase* Parameter) override;
 	UFUNCTION(BlueprintCallable, Category = "Priest|Menu")
 	void ShowTitle();
 
@@ -69,6 +75,8 @@ protected:
 	EPriestLobbyTab CurrentTab = EPriestLobbyTab::Region;
 
 private:
+    bool SendRequest(EPriestMenuAction Action);
+    FViewEventRaisedDelegate Listener;
 	void RefreshPage();
 
 	UPROPERTY(meta = (BindWidget))

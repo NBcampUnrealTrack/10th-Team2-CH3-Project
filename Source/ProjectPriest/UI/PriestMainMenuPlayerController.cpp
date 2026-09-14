@@ -1,5 +1,7 @@
 #include "PriestMainMenuPlayerController.h"
 #include "PriestMainMenuWidget.h"
+#include "PriestMenuMvc.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "PriestUIManager.h"
 #include "Engine/Engine.h"
 #include "Engine/LocalPlayer.h"
@@ -22,7 +24,7 @@ void APriestMainMenuPlayerController::BeginPlay()
 
 	if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>())
 	{
-		UI->HideHUD();
+		UI->DisconnectCombatHUD();
 	}
 	if (!MainMenuWidgetClass || MainMenuWidgetClass->HasAnyClassFlags(CLASS_Abstract))
 	{
@@ -31,12 +33,20 @@ void APriestMainMenuPlayerController::BeginPlay()
 	}
 
 	MainMenu = CreateWidget<UPriestMainMenuWidget>(this, MainMenuWidgetClass);
-	if (!MainMenu || !MainMenu->AddToPlayerScreen(0))
+	if (MainMenu)
+    {
+        MenuModel = NewObject<UPriestMenuModel>(this);
+        MenuController = NewObject<UPriestMenuController>(this);
+        MenuController->SetModel(MenuModel);
+        MenuController->SetView(MainMenu);
+    }
+    if (!MainMenu || !MainMenu->AddToPlayerScreen(0))
 	{
 		UE_LOG(LogTemp, Error, TEXT("Priest Menu: Could not create or display the menu."));
 		return;
 	}
 
+    MenuController->HandleModelChanged(MenuModel, 0);
 	bShowMouseCursor = true;
 	FInputModeUIOnly InputMode;
 	InputMode.SetWidgetToFocus(MainMenu->TakeWidget());
@@ -93,10 +103,18 @@ void APriestMainMenuPlayerController::EndPlay(const EEndPlayReason::Type EndPlay
 		GEngine->OnTravelFailure().Remove(TravelFailureHandle);
 	}
 	TravelFailureHandle.Reset();
+    if (MenuController) MenuController->Disconnect();
+    MenuController = nullptr;
+    MenuModel = nullptr;
 	if (MainMenu)
 	{
 		MainMenu->RemoveFromParent();
 		MainMenu = nullptr;
 	}
 	Super::EndPlay(EndPlayReason);
+}
+
+void APriestMainMenuPlayerController::RequestQuitGame()
+{
+    if (CanProcessMenuRequest()) UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
 }

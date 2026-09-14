@@ -1,6 +1,4 @@
 #include "IngamePlayerController.h"
-#include "PlayerCharacter.h"
-#include "WeaponItem.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "Engine/LocalPlayer.h"
@@ -21,7 +19,7 @@ void AIngamePlayerController::BeginPlay()
         return;
     }
 
-    // 메뉴에서 넘어온 뷰포트의 UI 전용 입력 상태를 게임 입력으로 되돌린다.
+    // 메뉴의 UI 전용 입력을 전투 입력으로 복원한다.
     SetInputMode(FInputModeGameOnly());
     bShowMouseCursor = false;
 
@@ -82,84 +80,26 @@ TObjectPtr<UInputAction> AIngamePlayerController::GetInteractAction()
     return InteractAction;
 }
 
-void AIngamePlayerController::UnbindCombatHUD()
-{
-    if (HUDPlayer.IsValid())
-    {
-        HUDPlayer->OnCombatChanged.Remove(HealthChangedHandle);
-    }
-    if (HUDWeapon.IsValid())
-    {
-        HUDWeapon->OnAmmoChanged.Remove(AmmoChangedHandle);
-    }
-    HUDPlayer.Reset();
-    HUDWeapon.Reset();
-    HealthChangedHandle.Reset();
-    AmmoChangedHandle.Reset();
-}
-
 void AIngamePlayerController::HandleCombatPawnChanged(APawn* PreviousPawn, APawn* NewPawn)
 {
-    UnbindCombatHUD();
     if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
     {
         if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>())
         {
-            UI->ResetDamageFeedback();
+            UI->SetCombatPawn(NewPawn);
         }
     }
-    HUDPlayer = Cast<APlayerCharacter>(NewPawn);
-    if (HUDPlayer.IsValid())
-    {
-        HealthChangedHandle = HUDPlayer->OnCombatChanged.AddUObject(this, &AIngamePlayerController::RefreshCombatHUD);
-    }
-    RefreshCombatHUD();
 }
-
-void AIngamePlayerController::RefreshCombatHUD()
-{
-    ULocalPlayer* LocalPlayer = GetLocalPlayer();
-    if (!LocalPlayer)
-    {
-        return;
-    }
-    UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>();
-    if (!UI)
-    {
-        return;
-    }
-
-    APlayerCharacter* CombatCharacter = HUDPlayer.Get();
-    AWeaponItem* Weapon = CombatCharacter ? CombatCharacter->GetEquippedWeapon() : nullptr;
-    if (!IsValid(Weapon))
-    {
-        Weapon = nullptr;
-    }
-    if (HUDWeapon.Get() != Weapon)
-    {
-        if (HUDWeapon.IsValid())
-        {
-            HUDWeapon->OnAmmoChanged.Remove(AmmoChangedHandle);
-        }
-        HUDWeapon = Weapon;
-        AmmoChangedHandle.Reset();
-        if (Weapon)
-        {
-            AmmoChangedHandle = Weapon->OnAmmoChanged.AddUObject(this, &AIngamePlayerController::RefreshCombatHUD);
-        }
-    }
-    UI->UpdateCombatHUD(
-        CombatCharacter ? CombatCharacter->GetCurrentHealth() : 0.0f,
-        CombatCharacter ? CombatCharacter->GetMaxHealth() : 0.0f,
-        Weapon ? Weapon->GetWeaponName() : NSLOCTEXT("PriestHUD", "NoWeapon", "Unarmed"),
-        Weapon ? Weapon->GetCurrentAmmo() : 0,
-        Weapon ? Weapon->GetReserveAmmo() : 0);
-}
-
 void AIngamePlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     OnPossessedPawnChanged.RemoveDynamic(this, &AIngamePlayerController::HandleCombatPawnChanged);
-    UnbindCombatHUD();
+    if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
+    {
+        if (UPriestUIManager* UI = LocalPlayer->GetSubsystem<UPriestUIManager>())
+        {
+            UI->DisconnectCombatHUD();
+        }
+    }
     Super::EndPlay(EndPlayReason);
 }
 
