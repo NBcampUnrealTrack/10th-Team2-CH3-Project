@@ -6,16 +6,13 @@
 class ABaseItem;
 
 USTRUCT(BlueprintType)
-struct PROJECTPRIEST_API FDropItemData : public FTableRowBase
+struct PROJECTPRIEST_API FDropItemData
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<ABaseItem> ItemClass = nullptr;
+	TSubclassOf<ABaseItem> MaterialItemClass = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 MinQuantity = 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 MaxQuantity = 1;
+	TSubclassOf<ABaseItem> AmmoItemClass = nullptr;
 };
