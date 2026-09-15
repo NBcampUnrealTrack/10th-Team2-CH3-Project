@@ -36,7 +36,11 @@ void APriestMainMenuPlayerController::BeginPlay()
 	JASSERT((MainMenuWidgetClass && !MainMenuWidgetClass->HasAnyClassFlags(CLASS_Abstract)), "Priest Menu: Set MainMenuWidgetClass in the menu PlayerController Blueprint.");
 	if (bGrantPreviewInventory)
 	{
-		GetGameInstance()->GetSubsystem<UPriestInventorySubsystem>()->GrantPreviewItemsOnce();
+		UGameInstance* Instance = GetGameInstance();
+		JASSERT(IsValid(Instance), "%hs: GameInstance가 없습니다.", __FUNCTION__);
+		UPriestInventorySubsystem* Inventory = Instance->GetSubsystem<UPriestInventorySubsystem>();
+		JASSERT(IsValid(Inventory), "%hs: InventorySubsystem 연결에 실패했습니다.", __FUNCTION__);
+		Inventory->GrantPreviewItemsOnce();
 	}
 
 	MainMenu = CreateWidget<UPriestMainMenuWidget>(this, MainMenuWidgetClass);

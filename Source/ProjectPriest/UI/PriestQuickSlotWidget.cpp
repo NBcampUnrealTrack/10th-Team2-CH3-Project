@@ -2,6 +2,8 @@
 #include "PriestInventorySubsystem.h"
 #include "Components/TextBlock.h"
 #include "Engine/GameInstance.h"
+#include "Engine/Engine.h"
+#include "JUtility.h"
 
 void UPriestQuickSlotWidget::NativePreConstruct()
 {
@@ -19,15 +21,13 @@ void UPriestQuickSlotWidget::NativeConstruct()
 {
     Super::NativeConstruct();
     DisconnectInventory();
-    if (UGameInstance* Instance = GetGameInstance())
-    {
-        Inventory = Instance->GetSubsystem<UPriestInventorySubsystem>();
-    }
-    if (IsValid(Inventory))
-    {
-        Inventory->OnInventoryChanged.AddUniqueDynamic(this, &UPriestQuickSlotWidget::RefreshQuickSlot);
-        Inventory->OnQuickSlotsChanged.AddUniqueDynamic(this, &UPriestQuickSlotWidget::RefreshQuickSlot);
-    }
+    UGameInstance* Instance = GetGameInstance();
+    JASSERT(IsValid(Instance), "%hs [%s]: GameInstance가 없습니다.", __FUNCTION__, *GetNameSafe(this));
+    Inventory = Instance->GetSubsystem<UPriestInventorySubsystem>();
+    JASSERT(IsValid(Inventory), "%hs [%s]: InventorySubsystem 연결에 실패했습니다.", __FUNCTION__, *GetNameSafe(this));
+    JASSERT(SlotIndex >= 0 && SlotIndex <= 1, "%hs [%s]: SlotIndex=%d, 허용 범위는 0~1입니다.", __FUNCTION__, *GetNameSafe(this), SlotIndex);
+    Inventory->OnInventoryChanged.AddUniqueDynamic(this, &UPriestQuickSlotWidget::RefreshQuickSlot);
+    Inventory->OnQuickSlotsChanged.AddUniqueDynamic(this, &UPriestQuickSlotWidget::RefreshQuickSlot);
     RefreshQuickSlot();
 }
 
@@ -49,20 +49,16 @@ void UPriestQuickSlotWidget::DisconnectInventory()
 
 void UPriestQuickSlotWidget::SetSlotIndex(int32 InSlotIndex)
 {
-    if (InSlotIndex < 0 || InSlotIndex > 1)
-    {
-        return;
-    }
+    JASSERT(InSlotIndex >= 0 && InSlotIndex <= 1, "%hs [%s]: SlotIndex=%d, 허용 범위는 0~1입니다.", __FUNCTION__, *GetNameSafe(this), InSlotIndex);
     SlotIndex = InSlotIndex;
     RefreshQuickSlot();
 }
 
 void UPriestQuickSlotWidget::RefreshQuickSlot()
 {
-    if (!KeyText || !ItemNameText || !QuantityText)
-    {
-        return;
-    }
+    JASSERT(IsValid(KeyText), "%hs [%s]: KeyText 바인딩이 유효하지 않습니다. WBP의 Text Block 이름과 타입을 확인하세요.", __FUNCTION__, *GetNameSafe(this));
+    JASSERT(IsValid(ItemNameText), "%hs [%s]: ItemNameText 바인딩이 유효하지 않습니다. WBP의 Text Block 이름과 타입을 확인하세요.", __FUNCTION__, *GetNameSafe(this));
+    JASSERT(IsValid(QuantityText), "%hs [%s]: QuantityText 바인딩이 유효하지 않습니다. WBP의 Text Block 이름과 타입을 확인하세요.", __FUNCTION__, *GetNameSafe(this));
 
     KeyText->SetText(FText::AsNumber(SlotIndex + 1));
     const FName ItemId = IsValid(Inventory)

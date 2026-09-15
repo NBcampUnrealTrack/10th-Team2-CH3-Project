@@ -519,20 +519,15 @@ EPotionUseResult APlayerCharacter::TryUsePotion(FName ItemId)
 
     UGameInstance* GameInstance = GetGameInstance();
 
-    if (!IsValid(GameInstance))
-    {
-        return EPotionUseResult::Unavailable;
-    }
+    JASSERT_RETURN((IsValid(GameInstance)), EPotionUseResult::Unavailable, "%hs [%s]: GameInstance가 없습니다.", __FUNCTION__, *GetNameSafe(this));
 
     UPriestInventorySubsystem* Inventory =
         GameInstance->GetSubsystem<UPriestInventorySubsystem>();
 
-    if (!IsValid(Inventory))
-    {
-        return EPotionUseResult::Unavailable;
-    }
+    JASSERT_RETURN((IsValid(Inventory)), EPotionUseResult::Unavailable, "%hs [%s]: InventorySubsystem이 없습니다.", __FUNCTION__, *GetNameSafe(this));
 
-    if (ItemId.IsNone() || !IsValid(PotionDefinitions))
+    JASSERT_RETURN((IsValid(PotionDefinitions)), EPotionUseResult::InvalidPotion, "%hs [%s]: PotionDefinitions를 플레이어 BP에 지정하세요.", __FUNCTION__, *GetNameSafe(this));
+    if (ItemId.IsNone())
     {
         return EPotionUseResult::InvalidPotion;
     }
@@ -544,10 +539,14 @@ EPotionUseResult APlayerCharacter::TryUsePotion(FName ItemId)
             false
         );
 
-    if (!Definition
-        || !FMath::IsFinite(Definition->HealAmount)
+    if (!Definition)
+    {
+        return EPotionUseResult::InvalidPotion;
+    }
+    if (!FMath::IsFinite(Definition->HealAmount)
         || Definition->HealAmount <= 0.0f)
     {
+        JError("%hs: 잘못된 회복량. ItemId=%s, HealAmount=%f", __FUNCTION__, *ItemId.ToString(), Definition->HealAmount);
         return EPotionUseResult::InvalidPotion;
     }
 
@@ -555,6 +554,7 @@ EPotionUseResult APlayerCharacter::TryUsePotion(FName ItemId)
         || !FMath::IsFinite(MaxHealth)
         || MaxHealth <= 0.0f)
     {
+        JError("%hs [%s]: 잘못된 체력 설정. CurrentHealth=%f, MaxHealth=%f", __FUNCTION__, *GetNameSafe(this), CurrentHealth, MaxHealth);
         return EPotionUseResult::Unavailable;
     }
 
@@ -605,18 +605,12 @@ EPotionUseResult APlayerCharacter::TryUseQuickSlot(
 {
     UGameInstance* GameInstance = GetGameInstance();
 
-    if (!IsValid(GameInstance))
-    {
-        return EPotionUseResult::Unavailable;
-    }
+    JASSERT_RETURN((IsValid(GameInstance)), EPotionUseResult::Unavailable, "%hs [%s]: GameInstance가 없습니다.", __FUNCTION__, *GetNameSafe(this));
 
     UPriestInventorySubsystem* Inventory =
         GameInstance->GetSubsystem<UPriestInventorySubsystem>();
 
-    if (!IsValid(Inventory))
-    {
-        return EPotionUseResult::Unavailable;
-    }
+    JASSERT_RETURN((IsValid(Inventory)), EPotionUseResult::Unavailable, "%hs [%s]: InventorySubsystem이 없습니다.", __FUNCTION__, *GetNameSafe(this));
 
     const FName ItemId =
         Inventory->GetQuickSlotItemId(SlotIndex);

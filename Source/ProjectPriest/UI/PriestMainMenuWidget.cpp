@@ -34,11 +34,11 @@ void UPriestMainMenuWidget::NativeConstruct()
         return;
     }
 	SetIsFocusable(true);
-	Inventory = GetGameInstance()->GetSubsystem<UPriestInventorySubsystem>();
-	if (Inventory)
-	{
-		Inventory->OnInventoryChanged.AddUniqueDynamic(this, &UPriestMainMenuWidget::RefreshInventory);
-	}
+	UGameInstance* Instance = GetGameInstance();
+	JASSERT(IsValid(Instance), "%hs [%s]: GameInstance가 없습니다.", __FUNCTION__, *GetNameSafe(this));
+	Inventory = Instance->GetSubsystem<UPriestInventorySubsystem>();
+	JASSERT(IsValid(Inventory), "%hs [%s]: InventorySubsystem 연결에 실패했습니다.", __FUNCTION__, *GetNameSafe(this));
+	Inventory->OnInventoryChanged.AddUniqueDynamic(this, &UPriestMainMenuWidget::RefreshInventory);
 	RefreshInventory();
 	ShowStatusMessage(FText::GetEmpty());
 	RefreshPage();
@@ -86,6 +86,10 @@ void UPriestMainMenuWidget::RefreshInventory()
         {
             SlotWidget->SetItem(Items[Index]);
             InventoryGrid->AddChildToUniformGrid(SlotWidget, Index / Columns, Index % Columns);
+        }
+        else
+        {
+            JError("%hs: 슬롯 생성 실패. ItemId=%s, Class=%s", __FUNCTION__, *Items[Index].ItemId.ToString(), *GetNameSafe(InventorySlotClass.Get()));
         }
     }
 }
