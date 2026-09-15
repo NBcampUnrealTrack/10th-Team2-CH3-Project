@@ -93,11 +93,7 @@ void AIngameGameState::OnGameOver()
     APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
     AIngamePlayerController* IngamePlayerController = Cast<AIngamePlayerController>(PlayerController);
 
-    if (!ensure(IngamePlayerController))
-    {
-        JError("플레이어 컨트롤러가 존재하지 않습니다.");
-        return;
-    }
+    JASSERT(IngamePlayerController, "AIngamePlayerController가 없습니다.");
 
     IngamePlayerController->SetPause(true);
 
