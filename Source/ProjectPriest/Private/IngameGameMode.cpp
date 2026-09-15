@@ -30,11 +30,7 @@ void AIngameGameMode::OnPlayerDead()
     // 사망 상태 처리
     AIngameGameState* IngameGameState = GetWorld()->GetGameState<AIngameGameState>();
 
-    if (!ensure(IngameGameState))
-    {
-        JError("게임 모드에서 올바른 게임 스테이트를 사용 중인지 확인하세요");
-        return;
-    }
+    JASSERT(IngameGameState, "IngameGameState가 없습니다.");
 
     IngameGameState->OnGameOver();
 }
