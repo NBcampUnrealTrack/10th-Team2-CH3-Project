@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
@@ -15,6 +15,7 @@ struct PROJECTPRIEST_API FPriestOwnedItem
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPriestInventoryChanged);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPriestQuickSlotsChanged);
 
 // Shared by the menu and gameplay worlds. Disk persistence is a separate concern.
 UCLASS()
@@ -42,7 +43,22 @@ public:
     UPROPERTY(BlueprintAssignable, Category="Priest|Inventory")
     FPriestInventoryChanged OnInventoryChanged;
 
+    UFUNCTION(BlueprintPure, Category = "Priest|Inventory|QuickSlot")
+    FName GetQuickSlotItemId(int32 SlotIndex) const;
+
+    UFUNCTION(BlueprintCallable, Category = "Priest|Inventory|QuickSlot")
+    bool AssignQuickSlot(int32 SlotIndex, FName ItemId);
+
+    UFUNCTION(BlueprintCallable, Category = "Priest|Inventory|QuickSlot")
+    bool ClearQuickSlot(int32 SlotIndex);
+
+    UPROPERTY(BlueprintAssignable, Category = "Priest|Inventory|QuickSlot")
+    FPriestQuickSlotsChanged OnQuickSlotsChanged;
+
 private:
     UPROPERTY(Transient) TArray<FPriestOwnedItem> OwnedItems;
     bool bPreviewItemsGranted = false;
+
+    UPROPERTY(Transient)
+    TArray<FName> QuickSlotItemIds = { NAME_None, NAME_None };
 };

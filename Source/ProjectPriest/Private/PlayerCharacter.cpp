@@ -598,3 +598,33 @@ EPotionUseResult APlayerCharacter::TryUsePotion(FName ItemId)
 
     return EPotionUseResult::Success;
 }
+
+EPotionUseResult APlayerCharacter::TryUseQuickSlot(
+    int32 SlotIndex
+)
+{
+    UGameInstance* GameInstance = GetGameInstance();
+
+    if (!IsValid(GameInstance))
+    {
+        return EPotionUseResult::Unavailable;
+    }
+
+    UPriestInventorySubsystem* Inventory =
+        GameInstance->GetSubsystem<UPriestInventorySubsystem>();
+
+    if (!IsValid(Inventory))
+    {
+        return EPotionUseResult::Unavailable;
+    }
+
+    const FName ItemId =
+        Inventory->GetQuickSlotItemId(SlotIndex);
+
+    if (ItemId.IsNone())
+    {
+        return EPotionUseResult::Unavailable;
+    }
+
+    return TryUsePotion(ItemId);
+}

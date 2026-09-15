@@ -112,6 +112,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Items|Potion")
     EPotionUseResult TryUsePotion(FName ItemId);
 
+    UFUNCTION(BlueprintCallable, Category = "Items|QuickSlot")
+    EPotionUseResult TryUseQuickSlot(int32 SlotIndex);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

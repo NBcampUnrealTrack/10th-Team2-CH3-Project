@@ -1,4 +1,4 @@
-#include "PriestInventorySubsystem.h"
+﻿#include "PriestInventorySubsystem.h"
 
 bool UPriestInventorySubsystem::AddItem(FName ItemId, FText DisplayName, int32 Quantity)
 {
@@ -63,4 +63,60 @@ void UPriestInventorySubsystem::GrantPreviewItemsOnce()
     AddItem(TEXT("Potion.Health.Large"), NSLOCTEXT("PriestInventory", "LargeHealthPotion", "상급 회복 포션"), 2);
     AddItem(TEXT("Material.Herb"), NSLOCTEXT("PriestInventory", "Herb", "약초"), 12);
     AddItem(TEXT("Material.Essence"), NSLOCTEXT("PriestInventory", "Essence", "정수"), 4);
+
+    AssignQuickSlot(0, TEXT("Potion.Health"));
+    AssignQuickSlot(1, TEXT("Potion.Health.Large"));
+}
+
+FName UPriestInventorySubsystem::GetQuickSlotItemId(
+    int32 SlotIndex
+) const
+{
+    if (!QuickSlotItemIds.IsValidIndex(SlotIndex))
+    {
+        return NAME_None;
+    }
+
+    return QuickSlotItemIds[SlotIndex];
+}
+
+bool UPriestInventorySubsystem::AssignQuickSlot(
+    int32 SlotIndex,
+    FName ItemId
+)
+{
+    if (!QuickSlotItemIds.IsValidIndex(SlotIndex)
+        || ItemId.IsNone()
+        || GetQuantity(ItemId) <= 0)
+    {
+        return false;
+    }
+
+    if (QuickSlotItemIds[SlotIndex] == ItemId)
+    {
+        return true;
+    }
+
+    QuickSlotItemIds[SlotIndex] = ItemId;
+    OnQuickSlotsChanged.Broadcast();
+
+    return true;
+}
+
+bool UPriestInventorySubsystem::ClearQuickSlot(int32 SlotIndex)
+{
+    if (!QuickSlotItemIds.IsValidIndex(SlotIndex))
+    {
+        return false;
+    }
+
+    if (QuickSlotItemIds[SlotIndex].IsNone())
+    {
+        return true;
+    }
+
+    QuickSlotItemIds[SlotIndex] = NAME_None;
+    OnQuickSlotsChanged.Broadcast();
+
+    return true;
 }
