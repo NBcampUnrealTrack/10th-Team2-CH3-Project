@@ -30,7 +30,7 @@ void ABossRoomOpenInteractor::BeginPlay()
 	IngameGameState->GetOnDoorVisibiliyChangedDelegate()
 		.AddUObject(this, &ABossRoomOpenInteractor::OnDoorVisibilityChanged);
 	
-	OnDoorVisibilityChanged(false);
+	OnDoorVisibilityChanged(IngameGameState->IsExitAvailable());
 }
 
 // Called every frame

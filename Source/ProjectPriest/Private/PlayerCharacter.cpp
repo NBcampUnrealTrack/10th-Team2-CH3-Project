@@ -1,5 +1,6 @@
 ﻿#include "PlayerCharacter.h"
 #include "IngamePlayerController.h"
+#include "IngameGameMode.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
@@ -12,6 +13,7 @@
 #include "Components/SphereComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "IngameGameMode.h"
+#include "IngameGameState.h"
 #include  "JUtility.h"
 
 // Sets default values
@@ -78,7 +80,23 @@ void APlayerCharacter::ResetThrowCoolTime()
     bCanThrow = true;
 }
 
-// Called every frame
+void APlayerCharacter::OnDeath()
+{
+    if (bIsDead)
+    {
+        return;
+    }
+
+    bIsDead = true;
+
+    // 게임 모드 호출
+    AIngameGameMode* IngameGameMode = GetWorld()->GetAuthGameMode<AIngameGameMode>();
+
+    JASSERT(IngameGameMode, "IngameGameMode가 없습니다.");
+
+    IngameGameMode->OnPlayerDead();
+}
+
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -153,6 +171,13 @@ float APlayerCharacter::TakeDamage(
     AController* EventInstigator,
     AActor* DamageCauser)
 {
+    if (const AIngameGameState* State = GetWorld()->GetGameState<AIngameGameState>())
+    {
+        if (State->HasStageCleared())
+        {
+            return 0.0f;
+        }
+    }
     const float ActualDamage = Super::TakeDamage(
         DamageAmount,
         DamageEvent,
@@ -175,7 +200,7 @@ float APlayerCharacter::TakeDamage(
 
     if (CurrentHealth <= 0.0f)
     {
-        // 사망 함수 호출
+        OnDeath();
     }
 
     return ActualDamage;
@@ -274,8 +299,6 @@ void APlayerCharacter::OnAttackInputted(const FInputActionValue& value)
         WeaponInstance->Reload();
     }
     
-    
-
     //GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Attack"));
 
     /*
@@ -454,11 +477,8 @@ void APlayerCharacter::OnInteractInputted(const FInputActionValue& value)
 {
     JLog("Intract inputted");
     
-    if (!bCanInteract)
-    {
-        JLog("Can not interact at this moment");
-        return;
-    }
+    // The GameMode checks the actual objective overlap; the generic sensor flag
+    // can be cleared when another overlapping actor leaves the sensor.
         
     
     AIngameGameMode* IngameGameMode 
@@ -466,7 +486,7 @@ void APlayerCharacter::OnInteractInputted(const FInputActionValue& value)
     
     JASSERT(IsValid(IngameGameMode), "Game mode is not IngameGameMode or nullptr");
     
-    IngameGameMode->OnOpenBossRoomDoor();
+    IngameGameMode->OnOpenBossRoomDoor(this);
 }
 
 void APlayerCharacter::OnSprintInputted(const FInputActionInstance& InputValue)

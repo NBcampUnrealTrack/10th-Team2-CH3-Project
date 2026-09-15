@@ -19,17 +19,23 @@ EBTNodeResult::Type UBTTask_FindPlayer::ExecuteTask(UBehaviorTreeComponent& Owne
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 
 	if (!BlackboardComp)
+	{
 		return EBTNodeResult::Failed;
+	}
 
 	APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);//불러올 곳, 불러올 플레이어의 번호
 
-	if (!playerPawn) 
+	if (!playerPawn)
+	{
 		return EBTNodeResult::Failed;
+	}
 
 	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
 
 	if (!NavSystem)
+	{
 		return EBTNodeResult::Failed;
+	}
 
 	FNavLocation ProjectedLocation;
 
@@ -40,7 +46,9 @@ EBTNodeResult::Type UBTTask_FindPlayer::ExecuteTask(UBehaviorTreeComponent& Owne
 	);
 
 	if (!bFoundNavigationLocation)
+	{
 		return EBTNodeResult::Failed;
+	}
 
 	BlackboardComp->SetValueAsVector(TEXT("PlayerVector"), ProjectedLocation.Location);
 

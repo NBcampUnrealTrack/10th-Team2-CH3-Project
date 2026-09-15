@@ -104,7 +104,8 @@ void AHolyGenerade::Explode()
 
 	for (AActor* Actor : OverlappingActors)
 	{
-		if (Actor && Actor->ActorHasTag("Monster")) {
+		if (Actor && Actor->ActorHasTag("Monster"))
+		{
 			UGameplayStatics::ApplyDamage(
 				Actor,
 				ExplosionDamage,

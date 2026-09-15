@@ -14,6 +14,7 @@ void UPriestDamageNumberWidget::RefreshText()
 {
     if (!DamageText)
     {
+        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Missing required DamageText binding. Check the Widget Blueprint."), __FUNCTION__, *GetNameSafe(this));
         return;
     }
     FNumberFormattingOptions Format;

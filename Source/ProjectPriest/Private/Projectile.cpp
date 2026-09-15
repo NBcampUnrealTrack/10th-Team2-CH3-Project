@@ -42,7 +42,9 @@ void AProjectile::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if (ReservedDestroying)
+	{
 		return;
+	}
 	
     FVector NextVelocity = GetActorForwardVector() * MoveSpeed * DeltaTime;
     

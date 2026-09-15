@@ -65,7 +65,8 @@ void AMeleeEnemyCharacter::OnNotifyApplyDamage()
         TEXT("=== OnNotifyApplyDamage ===")
     );
     for (AActor* Actor : OverlappingActors) {
-        if (Actor && Actor->ActorHasTag("Player")) {
+        if (Actor && Actor->ActorHasTag("Player"))
+        {
             UGameplayStatics::ApplyDamage(
                 Actor,
                 Damage,
