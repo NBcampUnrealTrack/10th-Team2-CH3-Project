@@ -2,6 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Engine/DataTable.h"   
+#include "MonsterData.h"
+
 #include "EnemyCharacter.generated.h"
 
 class APlayerCharacter;
@@ -85,28 +88,32 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI|Patrol")
 	FVector PatrolOrigin;
 
+    //몬스터 스탯 테이블
+    UPROPERTY(EditAnywhere, Category = "Stats|DataTable")
+    FDataTableRowHandle RowDataTable;
+
 	//몬스터의 순찰반경
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Patrol")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI|Patrol")
 	float PatrolRadius;
 
 	//몬스터 체력
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Stats")
 	float Health;
 
 	//몬스터 공격력
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Stats")
 	float Damage;
 
 	//몬스터 최소 피해량
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	float MinimumDamage;
 
     //몬스터 사거리
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
     float AttackRange;
 
     //몬스터 방어력
-    //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")
+    //UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Stats")
     float Defense;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Enemy Character ===|For anim blueprint")
@@ -124,4 +131,10 @@ protected:
     TObjectPtr<ACharacter> AttackTarget;
 
     EAttackAnimationState AttackAnimationeState;
+
+    FTimerHandle DeathTimerHandle;
+
+    void DropItem();
+
+    void DestroyEnemy();
 };
