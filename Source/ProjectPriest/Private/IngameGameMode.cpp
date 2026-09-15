@@ -1,4 +1,4 @@
-#include "IngameGameMode.h"
+﻿#include "IngameGameMode.h"
 #include "IngameGameState.h"
 #include "PlayerCharacter.h"
 #include "BossRoomOpenInteractor.h"
@@ -28,7 +28,7 @@ void AIngameGameMode::OnPlayerDead()
     JError("플레이어 사망 화면을 구현하세요");
 
     // 사망 상태 처리
-    AIngameGameState* IngameGameState = GetWorld() ? GetWorld()->GetGameState<AIngameGameState>() : nullptr;
+    AIngameGameState* IngameGameState = GetWorld()->GetGameState<AIngameGameState>();
     if (IngameGameState)
     {
         IngameGameState->OnGameOver();
