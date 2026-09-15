@@ -74,6 +74,14 @@ void AEnemyCharacter::Die()
 	bIsDead = true;
 
 	AMonsterAIController* AiController = Cast<AMonsterAIController>(GetController());
+	if (!AiController)
+	{
+		return;
+	}
+
+	AiController->StopMovement();
+
+	AiController->UnPossess();
 
 	GetCapsuleComponent()->SetCollisionEnabled(
 		ECollisionEnabled::NoCollision
