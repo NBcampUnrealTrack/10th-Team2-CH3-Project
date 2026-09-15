@@ -4,14 +4,8 @@
 #include "BaseItem.h"
 #include "MaterialItem.generated.h"
 
-UENUM(BlueprintType)
-enum class EMaterialType : uint8
-{
-	// 임의로 지은 이름, 차후 수정
-	None,
-	WhisperDropItem,
-	GhostDropItem
-};
+class UDataTable;
+struct FMaterialTable;
 
 UCLASS()
 class PROJECTPRIEST_API AMaterialItem : public ABaseItem
@@ -22,9 +16,13 @@ public:
 	AMaterialItem();
 
 protected:
+	// Data Table
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "===Material===|Data")
+	TObjectPtr<UDataTable> MaterialDataTable;
+
 	// Properties
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Material===|Properties")
-	EMaterialType MaterialType = EMaterialType::None;
+	FName MaterialID = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Material===|Properties")
 	int32 Quantity = 1;
@@ -32,4 +30,6 @@ protected:
 protected:
 	// Internal Functions
 	virtual void ActivateItem(AActor* Activator) override;
+
+	const FMaterialTable* GetMaterialData() const;
 };
