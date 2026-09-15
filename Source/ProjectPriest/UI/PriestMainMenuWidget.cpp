@@ -6,6 +6,10 @@
 #include "Components/WidgetSwitcher.h"
 #include "PriestMenuMvc.h"
 #include "UObject/StrongObjectPtr.h"
+#include "PriestInventorySubsystem.h"
+#include "Engine/GameInstance.h"
+#include "PriestInventorySlotWidget.h"
+#include "Components/UniformGridPanel.h"
 
 bool UPriestMainMenuWidget::Initialize()
 {
@@ -30,11 +34,61 @@ void UPriestMainMenuWidget::NativeConstruct()
         return;
     }
 	SetIsFocusable(true);
+	Inventory = GetGameInstance()->GetSubsystem<UPriestInventorySubsystem>();
+	if (Inventory)
+	{
+		Inventory->OnInventoryChanged.AddUniqueDynamic(this, &UPriestMainMenuWidget::RefreshInventory);
+	}
+	RefreshInventory();
 	ShowStatusMessage(FText::GetEmpty());
 	RefreshPage();
 
 }
 
+void UPriestMainMenuWidget::NativeDestruct()
+{
+    if (Inventory)
+    {
+        Inventory->OnInventoryChanged.RemoveDynamic(this, &UPriestMainMenuWidget::RefreshInventory);
+        Inventory = nullptr;
+    }
+    Super::NativeDestruct();
+}
+
+void UPriestMainMenuWidget::RefreshInventory()
+{
+    if (!Inventory)
+    {
+        return;
+    }
+    const TArray<FPriestOwnedItem> Items = Inventory->GetOwnedItems();
+    if (InventorySummary)
+    {
+        InventorySummary->SetText(Items.IsEmpty()
+            ? NSLOCTEXT("PriestInventory", "Empty", "보유 중인 아이템이 없습니다.")
+            : FText::Format(NSLOCTEXT("PriestInventory", "Kinds", "총 {0}종"), FText::AsNumber(Items.Num())));
+    }
+    if (!InventoryGrid)
+    {
+        return;
+    }
+    InventoryGrid->ClearChildren();
+    if (!InventorySlotClass || InventorySlotClass->HasAnyClassFlags(CLASS_Abstract))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Main menu: Set InventorySlotClass to WBP_InventorySlot in Class Defaults."));
+        return;
+    }
+    const int32 Columns = FMath::Max(1, InventoryColumns);
+    for (int32 Index = 0; Index < Items.Num(); ++Index)
+    {
+        UPriestInventorySlotWidget* SlotWidget = CreateWidget<UPriestInventorySlotWidget>(GetOwningPlayer(), InventorySlotClass);
+        if (SlotWidget)
+        {
+            SlotWidget->SetItem(Items[Index]);
+            InventoryGrid->AddChildToUniformGrid(SlotWidget, Index / Columns, Index % Columns);
+        }
+    }
+}
 void UPriestMainMenuWidget::ShowTitle()
 {
     SendRequest(EPriestMenuAction::Title);

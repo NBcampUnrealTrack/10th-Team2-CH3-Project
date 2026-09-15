@@ -8,6 +8,9 @@
 enum class EPriestMenuAction : uint8;
 class UTextBlock;
 class UWidgetSwitcher;
+class UUniformGridPanel;
+class UPriestInventorySubsystem;
+class UPriestInventorySlotWidget;
 
 // 값은 WBP의 MenuSwitcher 자식 순서와 일치해야 한다.
 UENUM(BlueprintType)
@@ -67,7 +70,14 @@ public:
 	void ShowStatusMessage(const FText& Message);
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Priest|Inventory")
+	TSubclassOf<UPriestInventorySlotWidget> InventorySlotClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Priest|Inventory", meta = (ClampMin = "1"))
+	int32 InventoryColumns = 5;
+
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
 	// 선택 탭의 색상 변경이나 버튼 포커스는 WBP에서 필요에 따라 구현한다.
 	UFUNCTION(BlueprintImplementableEvent, Category = "Priest|Menu")
@@ -80,6 +90,11 @@ protected:
 	EPriestLobbyTab CurrentTab = EPriestLobbyTab::Region;
 
 private:
+    UFUNCTION() void RefreshInventory();
+    UPROPERTY(Transient) TObjectPtr<UPriestInventorySubsystem> Inventory;
+    // Designer owns layout. Optional so menus without inventory still work.
+    UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UUniformGridPanel> InventoryGrid;
+    UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UTextBlock> InventorySummary;
     bool bBindingsReady = false;
     bool SendRequest(EPriestMenuAction Action);
     FViewEventRaisedDelegate Listener;

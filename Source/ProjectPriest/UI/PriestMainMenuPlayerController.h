@@ -24,6 +24,10 @@ public:
     void RequestQuitGame();
 
 protected:
+	// Temporary inventory preview. Disable when crafting/rewards supply real items.
+	UPROPERTY(EditDefaultsOnly, Category = "Priest|Inventory")
+	bool bGrantPreviewInventory = true;
+
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

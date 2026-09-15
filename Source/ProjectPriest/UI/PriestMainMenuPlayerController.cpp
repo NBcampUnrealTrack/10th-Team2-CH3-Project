@@ -1,4 +1,4 @@
-#include "PriestMainMenuPlayerController.h"
+﻿#include "PriestMainMenuPlayerController.h"
 #include "JUtility.h"
 #include "PriestMainMenuWidget.h"
 #include "PriestMenuMvc.h"
@@ -8,6 +8,8 @@
 #include "Engine/LocalPlayer.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/PackageName.h"
+#include "PriestInventorySubsystem.h"
+#include "Engine/GameInstance.h"
 
 APriestMainMenuPlayerController::APriestMainMenuPlayerController()
 {
@@ -32,6 +34,10 @@ void APriestMainMenuPlayerController::BeginPlay()
 		JError("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed.", __FUNCTION__, *GetNameSafe(this));
 	}
 	JASSERT((MainMenuWidgetClass && !MainMenuWidgetClass->HasAnyClassFlags(CLASS_Abstract)), "Priest Menu: Set MainMenuWidgetClass in the menu PlayerController Blueprint.");
+	if (bGrantPreviewInventory)
+	{
+		GetGameInstance()->GetSubsystem<UPriestInventorySubsystem>()->GrantPreviewItemsOnce();
+	}
 
 	MainMenu = CreateWidget<UPriestMainMenuWidget>(this, MainMenuWidgetClass);
     JASSERT((IsValid(MainMenu)), "Could not create MainMenuWidgetClass");
