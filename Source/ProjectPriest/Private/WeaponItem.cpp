@@ -1,4 +1,4 @@
-﻿#include "WeaponItem.h"
+#include "WeaponItem.h"
 #include "IngamePlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/PlayerCameraManager.h"
@@ -23,6 +23,7 @@ void AWeaponItem::Attack()
 	}
 
 	CurrentAmmo--;
+    OnAmmoChanged.Broadcast();
 
 	bCanFire = false;
 
@@ -123,6 +124,7 @@ void AWeaponItem::CompleteReload()
 
 	CurrentAmmo += ReloadAmount;
 	ReserveAmmo -= ReloadAmount;
+    OnAmmoChanged.Broadcast();
 
 	bIsReloading = false;
 
@@ -267,7 +269,7 @@ void AWeaponItem::PerformTraceTPS(
 	{
 		AActor* HitActor = ShotHitResult.GetActor();
 
-		if (HitActor)
+		if (HitActor && HitActor->ActorHasTag("Monster"))
 		{
 			// 총구에서 피격 지점까지 디버그 라인 생성
 			DrawDebugLine(
@@ -289,6 +291,8 @@ void AWeaponItem::PerformTraceTPS(
 				OwnerActor,
 				nullptr
 			);
+
+			JLog("몬스터에게 %.1f 데미지를 입힘", Damage);
 		}
 	}
 	else
