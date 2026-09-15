@@ -1,4 +1,5 @@
 ﻿#include "InventoryComponent.h"
+#include "JUtility.h"
 
 UInventoryComponent::UInventoryComponent()
 {
@@ -15,6 +16,12 @@ bool UInventoryComponent::AddItem(FName ItemID, int32 Quantity)
 	// 동일한 아이템이 인벤토리에 존재할 때 수량을 증가
 	for (FInventoryItem& Item : Items)
 	{
+		if (Item.ItemID.IsNone())
+		{
+			JError("Inventory에 ItemID가 None인 아이템이 존재합니다.");
+			return false;
+		}
+
 		if (Item.ItemID == ItemID)
 		{
 			Item.Quantity += Quantity;
