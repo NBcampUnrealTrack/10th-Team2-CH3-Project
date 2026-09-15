@@ -1,24 +1,17 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Engine/DataTable.h"   
+#include "MonsterData.h"
+
 #include "EnemyCharacter.generated.h"
 
 class APlayerCharacter;
 class USphereComponent;
 
-//UENUM(BlueprintType)
-//enum class EAnimationFinishedReason : uint8
-//{
-//    Finshed     UMETA(DisplayName = "Finished"),
-//    Abort       UMETA(DisplayName = "Abort")
-//    //TODO: ¹¹... ³ªÁß¿¡ ´õ Ãß°¡ÇÒ¼öµµ?
-//};
-
 UENUM(Blueprinttype)
-enum class EAttackMontageState : uint8
+enum class EAttackAnimationState : uint8
 {
     InProgress      UMETA(DisplayName = "InProgress"),
     Finished        UMETA(DisplayName = "Finished"),
@@ -26,9 +19,9 @@ enum class EAttackMontageState : uint8
     Error           UMETA(DisplayName = "Error")
 };
 
-DECLARE_DELEGATE(FApplyAttackDelegte);
+DECLARE_DELEGATE(FApplyAttackDelegate);
 
-//TODO: ¸ó½ºÅÍ ½ºÅÈÀ» Å×ÀÌºí·Î ÇØ¾ßÇÑ´Ù
+//TODO: ëª¬ìŠ¤í„° ìŠ¤íƒ¯ì„ í…Œì´ë¸”ë¡œ í•´ì•¼í•œë‹¤
 UCLASS()
 class PROJECTPRIEST_API AEnemyCharacter : public ACharacter
 {
@@ -36,33 +29,32 @@ class PROJECTPRIEST_API AEnemyCharacter : public ACharacter
 
 public:
 	AEnemyCharacter();
-
-	//¸ó½ºÅÍÀÇ ±âÁØÀ§Ä¡
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
+	//ëª¬ìŠ¤í„°ì˜ ê¸°ì¤€ìœ„ì¹˜
 	UFUNCTION(BlueprintCallable)
 	FVector GetPatrolOrigin();
 
-	//¸ó½ºÅÍÀÇ ¼øÂû¹İ°æ
+	//ëª¬ìŠ¤í„°ì˜ ìˆœì°°ë°˜ê²½
 	UFUNCTION(BlueprintCallable)
 	float GetPatrolRadius();
-protected:
-	virtual void BeginPlay() override;
 
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+    //ì‚¬ê±°ë¦¬
+	UFUNCTION(BlueprintCallable)
+    float GetAttackRange();
 
     UFUNCTION(BlueprintCallable)
     virtual void OnNotifyApplyDamage();
 
-    //¸ó½ºÅÍ °ø°İ
+    //ëª¬ìŠ¤í„° ê³µê²©
     UFUNCTION(BlueprintCallable)
     virtual void Attack(ACharacter* PlayerCharacter);
 
-    //¸ó½ºÅÍ ÇÇ°İ
+    //ëª¬ìŠ¤í„° í”¼ê²©
     UFUNCTION(BlueprintCallable)
-    virtual void TakeDamage(float DamageAmount);
+    virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
-    //¸ó½ºÅÍ »ç¸Á
+    //ëª¬ìŠ¤í„° ì‚¬ë§
     UFUNCTION(BlueprintCallable)
     virtual void Die();
 
@@ -77,44 +69,51 @@ public:
 
     UFUNCTION(BlueprintPure)
     virtual bool HitThisFrame();
-
-    UFUNCTION(BlueprintCallable)
-    void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-
-    EAttackMontageState GetAttackMontageState() const;
+  
     float GetDamage();
 
-    void SetApplyAttackDelegate(FApplyAttackDelegte& Delegate);
-    void UnbindApplyAttackDelegate();
+    void SetAttackTarget(ACharacter* Target);
+
+    virtual EAttackAnimationState GetAttackAnimationeState();
+
+protected:
+    virtual void BeginPlay() override;
+
+    // Called every frame
+    virtual void Tick(float DeltaTime) override;
 
 protected:
 
-	////½ºÇÇ¾î ÄÄÆÛ³ÍÆ®
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	//USphereComponent* SphereComponent;
-
-	//¸ó½ºÅÍÀÇ ±âÁØÀ§Ä¡
+	//ëª¬ìŠ¤í„°ì˜ ê¸°ì¤€ìœ„ì¹˜
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI|Patrol")
 	FVector PatrolOrigin;
 
-	//¸ó½ºÅÍÀÇ ¼øÂû¹İ°æ
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Patrol")
+    //ëª¬ìŠ¤í„° ìŠ¤íƒ¯ í…Œì´ë¸”
+    UPROPERTY(EditAnywhere, Category = "Stats|DataTable")
+    FDataTableRowHandle RowDataTable;
+
+	//ëª¬ìŠ¤í„°ì˜ ìˆœì°°ë°˜ê²½
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI|Patrol")
 	float PatrolRadius;
 
-	//¸ó½ºÅÍ Ã¼·Â
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")
+	//ëª¬ìŠ¤í„° ì²´ë ¥
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Stats")
 	float Health;
 
-	//¸ó½ºÅÍ °ø°İ·Â
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")
+	//ëª¬ìŠ¤í„° ê³µê²©ë ¥
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Stats")
 	float Damage;
 
-	//¸ó½ºÅÍ ÃÖ¼Ò ÇÇÇØ·®
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	//ëª¬ìŠ¤í„° ìµœì†Œ í”¼í•´ëŸ‰
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	float MinimumDamage;
 
-    //¸ó½ºÅÍ ¹æ¾î·Â
-    //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stats")
+    //ëª¬ìŠ¤í„° ì‚¬ê±°ë¦¬
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
+    float AttackRange;
+
+    //ëª¬ìŠ¤í„° ë°©ì–´ë ¥
+    //UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Stats")
     float Defense;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Enemy Character ===|For anim blueprint")
@@ -127,14 +126,15 @@ protected:
     bool bShouldAttack;
     
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Enemy Character ===|For anim blueprint")
-    TObjectPtr<UAnimMontage> MontageToPlaying;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Enemy Character ===|For anim blueprint")
     TObjectPtr<UAnimInstance> AnimInstance;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Enemy Character ===|For BT")
-    FName TargetValueName;    
+    TObjectPtr<ACharacter> AttackTarget;
 
-    EAttackMontageState AttackMontageState;
-    FApplyAttackDelegte ApplyAttackDelegate;
+    EAttackAnimationState AttackAnimationeState;
+
+    FTimerHandle DeathTimerHandle;
+
+    void DropItem();
+
+    void DestroyEnemy();
 };
