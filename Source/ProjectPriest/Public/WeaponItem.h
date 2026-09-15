@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "BaseItem.h"
@@ -40,6 +40,7 @@ protected:
 	// 데미지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Weapon===|Properties")
 	float Damage = 20.0f;
+	float BaseDamage = 20.0f;
 
 	// 사거리
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Weapon===|Properties")
@@ -48,13 +49,14 @@ protected:
 	// 탄창에 들어가는 총알 수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Weapon===|Properties")
 	int32 MagazineSize = 12;
+	int32 BaseMagazineSize = 12;
 
 	// 현재 탄약 수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Weapon===|Properties")
 	int32 CurrentAmmo = 12;
 
 	// 예비 탄약 수
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Weapon===|Properties")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "	===Weapon===|Properties")
 	int32 ReserveAmmo = 60;
 
 	// 연사 속도 간격
