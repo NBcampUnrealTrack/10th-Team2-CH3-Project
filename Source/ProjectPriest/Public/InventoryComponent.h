@@ -25,7 +25,7 @@ public:
 	UInventoryComponent();
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "===Inventory===|Items")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "===Inventory===|Items")
 	TArray<FInventoryItem> Items;
 		
 public:
