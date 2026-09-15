@@ -92,10 +92,13 @@ void APlayerCharacter::OnDeath()
     // 게임 모드 호출
     AIngameGameMode* IngameGameMode = GetWorld()->GetAuthGameMode<AIngameGameMode>();
 
-    if (IngameGameMode)
+    if (!ensure(IngameGameMode))
     {
-        IngameGameMode->OnPlayerDead();
+        JError("올바른 게임 모드를 사용 중인지 확인하세요");
+        return;
     }
+
+    IngameGameMode->OnPlayerDead();
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
