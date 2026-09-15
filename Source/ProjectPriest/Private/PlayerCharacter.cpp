@@ -14,6 +14,10 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "IngameGameMode.h"
 #include "IngameGameState.h"
+#include "PriestInventorySubsystem.h"
+#include "Engine/GameInstance.h"
+#include "Engine/DataTable.h"
+#include "Templates/UnrealTemplate.h"
 #include  "JUtility.h"
 
 // Sets default values
@@ -502,4 +506,95 @@ void APlayerCharacter::OnSprintInputted(const FInputActionInstance& InputValue)
     default:
         break;
     }
+}
+
+EPotionUseResult APlayerCharacter::TryUsePotion(FName ItemId)
+{
+    if (bIsUsingPotion || IsActorBeingDestroyed())
+    {
+        return EPotionUseResult::Unavailable;
+    }
+
+    TGuardValue<bool> UseGuard(bIsUsingPotion, true);
+
+    UGameInstance* GameInstance = GetGameInstance();
+
+    if (!IsValid(GameInstance))
+    {
+        return EPotionUseResult::Unavailable;
+    }
+
+    UPriestInventorySubsystem* Inventory =
+        GameInstance->GetSubsystem<UPriestInventorySubsystem>();
+
+    if (!IsValid(Inventory))
+    {
+        return EPotionUseResult::Unavailable;
+    }
+
+    if (ItemId.IsNone() || !IsValid(PotionDefinitions))
+    {
+        return EPotionUseResult::InvalidPotion;
+    }
+
+    const FPotionDefinition* Definition =
+        PotionDefinitions->FindRow<FPotionDefinition>(
+            ItemId,
+            TEXT("TryUsePotion"),
+            false
+        );
+
+    if (!Definition
+        || !FMath::IsFinite(Definition->HealAmount)
+        || Definition->HealAmount <= 0.0f)
+    {
+        return EPotionUseResult::InvalidPotion;
+    }
+
+    if (!FMath::IsFinite(CurrentHealth)
+        || !FMath::IsFinite(MaxHealth)
+        || MaxHealth <= 0.0f)
+    {
+        return EPotionUseResult::Unavailable;
+    }
+
+    if (bIsDead || CurrentHealth <= 0.0f)
+    {
+        return EPotionUseResult::Dead;
+    }
+
+    if (CurrentHealth >= MaxHealth)
+    {
+        return EPotionUseResult::FullHealth;
+    }
+
+    if (Inventory->GetQuantity(ItemId) < 1)
+    {
+        return EPotionUseResult::NotOwned;
+    }
+
+    const float PreviousHealth = CurrentHealth;
+    const float MissingHealth = MaxHealth - CurrentHealth;
+    const float ActualHeal =
+        FMath::Min(Definition->HealAmount, MissingHealth);
+
+    const float NewHealth =
+        FMath::Min(CurrentHealth + ActualHeal, MaxHealth);
+
+    if (NewHealth <= PreviousHealth)
+    {
+        return EPotionUseResult::Unavailable;
+    }
+
+    CurrentHealth = NewHealth;
+
+    if (!Inventory->RemoveItem(ItemId, 1))
+    {
+        CurrentHealth = PreviousHealth;
+        return EPotionUseResult::NotOwned;
+    }
+
+    OnCombatChanged.Broadcast();
+
+    return EPotionUseResult::Success;
 }

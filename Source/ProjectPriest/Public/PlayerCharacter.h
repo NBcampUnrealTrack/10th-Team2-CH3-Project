@@ -1,7 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "PotionTypes.h"
 #include "PlayerCharacter.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FPlayerCombatChanged);
@@ -13,6 +14,7 @@ class UCameraComponent;
 class UInputAction;
 class AHolyGenerade;
 class AWeaponItem;
+class UDataTable;
 struct FInputActionInstance;
 struct FInputActionValue;
 
@@ -107,6 +109,8 @@ public:
     UFUNCTION()
     void OnInteractInputted(const FInputActionValue& value);
 
+    UFUNCTION(BlueprintCallable, Category = "Items|Potion")
+    EPotionUseResult TryUsePotion(FName ItemId);
 
 protected:
 	// Called when the game starts or when spawned
@@ -183,4 +187,14 @@ protected:
     bool bIsDead = false;
 
     FTimerHandle ThrowCoolTimeTimerHandle;
+
+    UPROPERTY(
+        EditDefaultsOnly,
+        BlueprintReadOnly,
+        Category = "Items|Potion"
+    )
+    TObjectPtr<UDataTable> PotionDefinitions;
+
+private:
+    bool bIsUsingPotion = false;
 };
