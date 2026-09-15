@@ -29,10 +29,14 @@ void AIngameGameMode::OnPlayerDead()
 
     // 사망 상태 처리
     AIngameGameState* IngameGameState = GetWorld()->GetGameState<AIngameGameState>();
-    if (IngameGameState)
+
+    if (!ensure(IngameGameState))
     {
-        IngameGameState->OnGameOver();
+        JError("게임 모드에서 올바른 게임 스테이트를 사용 중인지 확인하세요");
+        return;
     }
+
+    IngameGameState->OnGameOver();
 }
 
 void AIngameGameMode::OnOpenBossRoomDoor(APlayerCharacter* Player)
