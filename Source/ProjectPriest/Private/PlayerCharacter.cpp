@@ -90,7 +90,7 @@ void APlayerCharacter::OnDeath()
     bIsDead = true;
 
     // 게임 모드 호출
-    AIngameGameMode* IngameGameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AIngameGameMode>() : nullptr;
+    AIngameGameMode* IngameGameMode = GetWorld()->GetAuthGameMode<AIngameGameMode>();
 
     if (IngameGameMode)
     {
