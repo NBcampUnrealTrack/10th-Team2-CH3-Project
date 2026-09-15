@@ -35,6 +35,9 @@ public:
     
     void SetStartTime(float NewStartTime);
     void SetElapsedTime(float NewElapsedTime);
+    
+    void OnGameOver();
+
     void SetMonsterCount(int NewCount);
     void SetDoorVisibility(bool Visibility);
     

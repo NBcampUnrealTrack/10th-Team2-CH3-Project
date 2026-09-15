@@ -1,4 +1,5 @@
-#include "IngameGameState.h"
+﻿#include "IngameGameState.h"
+#include "IngamePlayerController.h"
 #include "JUtility.h"
 #include "MvcControl.h"
 
@@ -87,14 +88,29 @@ void AIngameGameState::DecreaseMosnterCount()
     JLog("DecreaseSpawnedMosnterCount %d", MonsterCount);    
 }
 
+void AIngameGameState::OnGameOver()
+{
+    APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+    AIngamePlayerController* IngamePlayerController = Cast<AIngamePlayerController>(PlayerController);
+
+    JASSERT(IngamePlayerController, "AIngamePlayerController가 없습니다.");
+
+    IngamePlayerController->SetPause(true);
+
+    //게임 오버 HUD 표시
+    //ex) IngamePlayerController->ShowGameOverWidget();
+}
+
 FDelegateHandle AIngameGameState::AddListener(UMvcControl* Control)
 {
     return OnMissionChanged.AddUObject(Control, &UMvcControl::HandleModelChanged);
 }
+
 void AIngameGameState::RemoveListener(FDelegateHandle Handle)
 {
     OnMissionChanged.Remove(Handle);
 }
+
 void AIngameGameState::InvokePropertyChanged(uint8 PropertyName)
 {
     OnMissionChanged.Broadcast(this, PropertyName);
