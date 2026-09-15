@@ -43,6 +43,7 @@ bool UInventoryComponent::RemoveItem(FName ItemID, int32 Quantity)
 {
 	if (ItemID.IsNone() || Quantity <= 0)
 	{
+		JError("유효하지 않은 삭제입니다.");
 		return false;
 	}
 
