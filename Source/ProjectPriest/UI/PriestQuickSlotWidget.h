@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
@@ -6,6 +6,7 @@
 
 class UPriestInventorySubsystem;
 class UTextBlock;
+class UDragDropOperation;
 
 // WBP owns layout and styling; this class owns inventory observation and text updates.
 UCLASS(Abstract, Blueprintable)
@@ -32,6 +33,12 @@ protected:
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> KeyText;
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> ItemNameText;
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> QuantityText;
+
+    virtual bool NativeOnDrop(
+        const FGeometry& InGeometry,
+        const FDragDropEvent& InDragDropEvent,
+        UDragDropOperation* InOperation
+    ) override;
 
 private:
     UFUNCTION() void RefreshQuickSlot();

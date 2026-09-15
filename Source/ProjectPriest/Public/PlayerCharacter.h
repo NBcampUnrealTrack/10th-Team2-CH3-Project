@@ -191,13 +191,6 @@ protected:
 
     FTimerHandle ThrowCoolTimeTimerHandle;
 
-    UPROPERTY(
-        EditDefaultsOnly,
-        BlueprintReadOnly,
-        Category = "Items|Potion"
-    )
-    TObjectPtr<UDataTable> PotionDefinitions;
-
 private:
     bool bIsUsingPotion = false;
 };

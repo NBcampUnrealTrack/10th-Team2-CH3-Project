@@ -1,5 +1,6 @@
-#include "PriestQuickSlotWidget.h"
+﻿#include "PriestQuickSlotWidget.h"
 #include "PriestInventorySubsystem.h"
+#include "PriestInventoryDragDropOperation.h"
 #include "Components/TextBlock.h"
 #include "Engine/GameInstance.h"
 #include "Engine/Engine.h"
@@ -91,4 +92,31 @@ void UPriestQuickSlotWidget::RefreshQuickSlot()
     ItemNameText->SetText(LastItemName.IsEmpty() ? FText::FromName(ItemId) : LastItemName);
     QuantityText->SetText(FText::Format(NSLOCTEXT("PriestQuickSlot", "Quantity", "× {0}"), FText::AsNumber(Quantity)));
     SetRenderOpacity(Quantity > 0 ? 1.0f : EmptyOpacity);
+}
+
+bool UPriestQuickSlotWidget::NativeOnDrop(
+    const FGeometry& InGeometry,
+    const FDragDropEvent& InDragDropEvent,
+    UDragDropOperation* InOperation
+)
+{
+    UPriestInventoryDragDropOperation* InventoryOperation =
+        Cast<UPriestInventoryDragDropOperation>(InOperation);
+
+    if (!IsValid(InventoryOperation))
+    {
+        return false;
+    }
+
+    JASSERT_BOOL(
+        (IsValid(Inventory)),
+        "%hs [%s]: InventorySubsystem이 없습니다.",
+        __FUNCTION__,
+        *GetNameSafe(this)
+    );
+
+    return Inventory->AssignQuickSlot(
+        SlotIndex,
+        InventoryOperation->ItemId
+    );
 }

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
@@ -6,6 +6,7 @@
 #include "PriestInventorySlotWidget.generated.h"
 
 class UTextBlock;
+class UDragDropOperation;
 
 // Create WBP_InventorySlot from this parent. All appearance belongs to its Designer.
 UCLASS(Abstract, Blueprintable)
@@ -29,6 +30,17 @@ protected:
 
     UFUNCTION(BlueprintImplementableEvent, Category = "Priest|Inventory")
     void OnItemChanged(const FPriestOwnedItem& InItem);
+
+    virtual FReply NativeOnMouseButtonDown(
+        const FGeometry& InGeometry,
+        const FPointerEvent& InMouseEvent
+    ) override;
+
+    virtual void NativeOnDragDetected(
+        const FGeometry& InGeometry,
+        const FPointerEvent& InMouseEvent,
+        UDragDropOperation*& OutOperation
+    ) override;
 
 private:
     void RefreshItem();

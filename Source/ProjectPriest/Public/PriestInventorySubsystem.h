@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "PotionTypes.h"
 #include "PriestInventorySubsystem.generated.h"
 
 USTRUCT(BlueprintType)
@@ -55,10 +56,29 @@ public:
     UPROPERTY(BlueprintAssignable, Category = "Priest|Inventory|QuickSlot")
     FPriestQuickSlotsChanged OnQuickSlotsChanged;
 
+    virtual void Initialize(
+        FSubsystemCollectionBase& Collection
+    ) override;
+
+    UFUNCTION(BlueprintPure, Category = "Priest|Inventory|Potion")
+    bool TryGetPotionDefinition(
+        FName ItemId,
+        FPotionDefinition& OutDefinition
+    ) const;
+
+    UFUNCTION(BlueprintPure, Category = "Priest|Inventory|QuickSlot")
+    bool CanAssignQuickSlot(
+        int32 SlotIndex,
+        FName ItemId
+    ) const;
+
 private:
     UPROPERTY(Transient) TArray<FPriestOwnedItem> OwnedItems;
     bool bPreviewItemsGranted = false;
 
     UPROPERTY(Transient)
     TArray<FName> QuickSlotItemIds = { NAME_None, NAME_None };
+
+    UPROPERTY(Transient)
+    TObjectPtr<UDataTable> PotionDefinitions;
 };

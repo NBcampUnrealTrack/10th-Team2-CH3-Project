@@ -526,27 +526,9 @@ EPotionUseResult APlayerCharacter::TryUsePotion(FName ItemId)
 
     JASSERT_RETURN((IsValid(Inventory)), EPotionUseResult::Unavailable, "%hs [%s]: InventorySubsystem이 없습니다.", __FUNCTION__, *GetNameSafe(this));
 
-    JASSERT_RETURN((IsValid(PotionDefinitions)), EPotionUseResult::InvalidPotion, "%hs [%s]: PotionDefinitions를 플레이어 BP에 지정하세요.", __FUNCTION__, *GetNameSafe(this));
-    if (ItemId.IsNone())
+    FPotionDefinition Definition;
+    if (!Inventory->TryGetPotionDefinition(ItemId, Definition))
     {
-        return EPotionUseResult::InvalidPotion;
-    }
-
-    const FPotionDefinition* Definition =
-        PotionDefinitions->FindRow<FPotionDefinition>(
-            ItemId,
-            TEXT("TryUsePotion"),
-            false
-        );
-
-    if (!Definition)
-    {
-        return EPotionUseResult::InvalidPotion;
-    }
-    if (!FMath::IsFinite(Definition->HealAmount)
-        || Definition->HealAmount <= 0.0f)
-    {
-        JError("%hs: 잘못된 회복량. ItemId=%s, HealAmount=%f", __FUNCTION__, *ItemId.ToString(), Definition->HealAmount);
         return EPotionUseResult::InvalidPotion;
     }
 
@@ -576,7 +558,7 @@ EPotionUseResult APlayerCharacter::TryUsePotion(FName ItemId)
     const float PreviousHealth = CurrentHealth;
     const float MissingHealth = MaxHealth - CurrentHealth;
     const float ActualHeal =
-        FMath::Min(Definition->HealAmount, MissingHealth);
+        FMath::Min(Definition.HealAmount, MissingHealth);
 
     const float NewHealth =
         FMath::Min(CurrentHealth + ActualHeal, MaxHealth);

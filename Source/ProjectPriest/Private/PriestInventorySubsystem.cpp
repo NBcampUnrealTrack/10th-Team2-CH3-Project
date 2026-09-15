@@ -1,5 +1,7 @@
-#include "PriestInventorySubsystem.h"
+﻿#include "PriestInventorySubsystem.h"
 #include "Engine/Engine.h"
+#include "Engine/DataTable.h"
+#include "UObject/UObjectGlobals.h"
 #include "JUtility.h"
 
 bool UPriestInventorySubsystem::AddItem(FName ItemId, FText DisplayName, int32 Quantity)
@@ -91,9 +93,15 @@ bool UPriestInventorySubsystem::AssignQuickSlot(
     FName ItemId
 )
 {
-    JASSERT_BOOL((QuickSlotItemIds.IsValidIndex(SlotIndex)), "%hs: 잘못된 퀵 슬롯 인덱스 %d. 슬롯 수=%d", __FUNCTION__, SlotIndex, QuickSlotItemIds.Num());
-    if (ItemId.IsNone()
-        || GetQuantity(ItemId) <= 0)
+    JASSERT_BOOL(
+        (QuickSlotItemIds.IsValidIndex(SlotIndex)),
+        "%hs: 잘못된 퀵 슬롯 인덱스 %d. 슬롯 수=%d",
+        __FUNCTION__,
+        SlotIndex,
+        QuickSlotItemIds.Num()
+    );
+
+    if (!CanAssignQuickSlot(SlotIndex, ItemId))
     {
         return false;
     }
@@ -122,4 +130,94 @@ bool UPriestInventorySubsystem::ClearQuickSlot(int32 SlotIndex)
     OnQuickSlotsChanged.Broadcast();
 
     return true;
+}
+
+void UPriestInventorySubsystem::Initialize(
+    FSubsystemCollectionBase& Collection
+)
+{
+    Super::Initialize(Collection);
+
+    PotionDefinitions = LoadObject<UDataTable>(
+        nullptr,
+        TEXT(
+            "/Game/01_PP/DataTable/"
+            "DT_PotionDefinitions.DT_PotionDefinitions"
+        )
+    );
+
+    JASSERT(
+        IsValid(PotionDefinitions),
+        "%hs: DT_PotionDefinitions 로드에 실패했습니다. "
+        "에셋 경로를 확인하세요.",
+        __FUNCTION__
+    );
+
+    JASSERT(
+        PotionDefinitions->GetRowStruct()
+        == FPotionDefinition::StaticStruct(),
+        "%hs: 포션 DataTable의 Row Structure가 "
+        "PotionDefinition이 아닙니다.",
+        __FUNCTION__
+    );
+}
+
+bool UPriestInventorySubsystem::TryGetPotionDefinition(
+    FName ItemId,
+    FPotionDefinition& OutDefinition
+) const
+{
+    OutDefinition = FPotionDefinition{};
+
+    if (ItemId.IsNone())
+    {
+        return false;
+    }
+
+    JASSERT_BOOL(
+        (IsValid(PotionDefinitions)),
+        "%hs: 포션 DataTable이 준비되지 않았습니다.",
+        __FUNCTION__
+    );
+
+    const FPotionDefinition* Definition =
+        PotionDefinitions->FindRow<FPotionDefinition>(
+            ItemId,
+            TEXT("TryGetPotionDefinition"),
+            false
+        );
+
+    if (!Definition)
+    {
+        return false;
+    }
+
+    JASSERT_BOOL(
+        (FMath::IsFinite(Definition->HealAmount)
+            && Definition->HealAmount > 0.0f),
+        "%hs: 포션 회복량이 잘못되었습니다. "
+        "ItemId=%s, HealAmount=%f",
+        __FUNCTION__,
+        *ItemId.ToString(),
+        Definition->HealAmount
+    );
+
+    OutDefinition = *Definition;
+    return true;
+}
+
+bool UPriestInventorySubsystem::CanAssignQuickSlot(
+    int32 SlotIndex,
+    FName ItemId
+) const
+{
+    if (!QuickSlotItemIds.IsValidIndex(SlotIndex)
+        || ItemId.IsNone()
+        || GetQuantity(ItemId) <= 0)
+    {
+        return false;
+    }
+
+    FPotionDefinition Definition;
+    return TryGetPotionDefinition(ItemId, Definition);
 }
