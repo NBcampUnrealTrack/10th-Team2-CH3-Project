@@ -16,7 +16,10 @@ public:
     virtual void Disconnect() override;
     virtual void HandleModelChanged(IMvcModel* InModel, uint8 PropertyName) override;
     virtual void HandleViewEvent(IMvcView* InView, EViewEventType EventType, UEventParameterBase* Parameter) override;
-    bool IsDeathActive() const { return bDeathActive; }
+    bool IsDeathActive() const
+    {
+        return bDeathActive;
+    }
 private:
     void EnterDeath();
     void LeaveDeath(bool bRestorePreviousHUD);

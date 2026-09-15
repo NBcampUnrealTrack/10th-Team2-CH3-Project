@@ -1,4 +1,5 @@
-#include "PriestMainMenuPlayerController.h"
+﻿#include "PriestMainMenuPlayerController.h"
+#include "JUtility.h"
 #include "PriestMainMenuWidget.h"
 #include "PriestMenuMvc.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -7,6 +8,8 @@
 #include "Engine/LocalPlayer.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/PackageName.h"
+#include "PriestInventorySubsystem.h"
+#include "Engine/GameInstance.h"
 
 APriestMainMenuPlayerController::APriestMainMenuPlayerController()
 {
@@ -28,27 +31,27 @@ void APriestMainMenuPlayerController::BeginPlay()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed."), __FUNCTION__, *GetNameSafe(this));
+		JError("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed.", __FUNCTION__, *GetNameSafe(this));
 	}
-	if (!MainMenuWidgetClass || MainMenuWidgetClass->HasAnyClassFlags(CLASS_Abstract))
+	JASSERT((MainMenuWidgetClass && !MainMenuWidgetClass->HasAnyClassFlags(CLASS_Abstract)), "Priest Menu: Set MainMenuWidgetClass in the menu PlayerController Blueprint.");
+	if (bGrantPreviewInventory)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Priest Menu: Set MainMenuWidgetClass in the menu PlayerController Blueprint."));
-		return;
+		GetGameInstance()->GetSubsystem<UPriestInventorySubsystem>()->GrantPreviewItemsOnce();
 	}
 
 	MainMenu = CreateWidget<UPriestMainMenuWidget>(this, MainMenuWidgetClass);
-	if (MainMenu)
+    JASSERT((IsValid(MainMenu)), "Could not create MainMenuWidgetClass");
+    if (!MainMenu->HasValidBindings())
     {
-        MenuModel = NewObject<UPriestMenuModel>(this);
-        MenuController = NewObject<UPriestMenuController>(this);
-        MenuController->SetModel(MenuModel);
-        MenuController->SetView(MainMenu);
+        JError("Main menu widget initialization failed");
+        MainMenu = nullptr;
+        return;
     }
-    if (!MainMenu || !MainMenu->AddToPlayerScreen(0))
-	{
-		UE_LOG(LogTemp, Error, TEXT("Priest Menu: Could not create or display the menu."));
-		return;
-	}
+    MenuModel = NewObject<UPriestMenuModel>(this);
+    MenuController = NewObject<UPriestMenuController>(this);
+    MenuController->SetModel(MenuModel);
+    MenuController->SetView(MainMenu);
+    JASSERT((MainMenu->AddToPlayerScreen(0)), "Could not display the main menu");
 
     MenuController->HandleModelChanged(MenuModel, 0);
 	bShowMouseCursor = true;
@@ -73,7 +76,7 @@ bool APriestMainMenuPlayerController::StartStageOne()
 	const FString MapPackage = StageOneMap.ToSoftObjectPath().GetLongPackageName();
 	if (StageOneMap.IsNull() || !FPackageName::DoesPackageExist(MapPackage))
 	{
-		UE_LOG(LogTemp, Error, TEXT("Priest Menu: StageOneMap does not exist: %s"), *MapPackage);
+		JError("Priest Menu: StageOneMap does not exist: %s", *MapPackage);
 		MainMenu->ShowStatusMessage(NSLOCTEXT("PriestMenu", "MissingStage", "게임플레이 맵을 찾을 수 없습니다."));
 		return false;
 	}
@@ -92,7 +95,7 @@ void APriestMainMenuPlayerController::HandleTravelFailure(UWorld* World, ETravel
 	}
 
 	bTravelRequested = false;
-	UE_LOG(LogTemp, Error, TEXT("Priest Menu: Travel failed (%d): %s"), static_cast<int32>(FailureType), *ErrorString);
+	JError("Priest Menu: Travel failed (%d): %s", static_cast<int32>(FailureType), *ErrorString);
 	if (MainMenu)
 	{
 		MainMenu->SetIsEnabled(true);

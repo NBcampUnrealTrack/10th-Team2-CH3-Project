@@ -1,26 +1,33 @@
 #include "PriestHUDWidget.h"
+#include "JUtility.h"
+#include "Engine/Engine.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "MvcControl.h"
 
+bool UPriestHUDWidget::Initialize()
+{
+    if (bBindingsReady)
+    {
+        return true;
+    }
+    JASSERT_BOOL((Super::Initialize()), "%hs: Base widget initialization failed", __FUNCTION__);
+    JASSERT_BOOL((IsValid(HealthBar)), "%hs: Missing required HealthBar binding", __FUNCTION__);
+    JASSERT_BOOL((IsValid(HealthText)), "%hs: Missing required HealthText binding", __FUNCTION__);
+    JASSERT_BOOL((IsValid(WeaponText)), "%hs: Missing required WeaponText binding", __FUNCTION__);
+    JASSERT_BOOL((IsValid(MissionText)), "%hs: Missing required MissionText binding", __FUNCTION__);
+    JASSERT_BOOL((IsValid(DamageFeedback)), "%hs: Missing required DamageFeedback binding", __FUNCTION__);
+    JASSERT_BOOL((IsValid(KillNotification)), "%hs: Missing required KillNotification binding", __FUNCTION__);
+    bBindingsReady = true;
+    return true;
+}
+
 void UPriestHUDWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-    if (!IsValid(HealthBar))
+    if (!bBindingsReady)
     {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Missing required HealthBar binding. Check the Widget Blueprint."), __FUNCTION__, *GetNameSafe(this));
-    }
-    if (!IsValid(HealthText))
-    {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Missing required HealthText binding. Check the Widget Blueprint."), __FUNCTION__, *GetNameSafe(this));
-    }
-    if (!IsValid(WeaponText))
-    {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Missing required WeaponText binding. Check the Widget Blueprint."), __FUNCTION__, *GetNameSafe(this));
-    }
-    if (!IsValid(MissionText))
-    {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Missing required MissionText binding. Check the Widget Blueprint."), __FUNCTION__, *GetNameSafe(this));
+        return;
     }
     ResetDamageFeedback();
     ResetKillNotification();
@@ -52,11 +59,11 @@ void UPriestHUDWidget::SetCombatData(float Health, float Maximum, const FText& N
 
 void UPriestHUDWidget::Refresh()
 {
-	// 데이터가 화면 생성보다 먼저 들어오면 보관만 하고, 생성 후 다시 반영한다.
-	if (!HealthBar || !HealthText || !WeaponText || !MissionText)
-	{
-	    return;
-	}
+    // Preserve data supplied before widget initialization.
+    if (!bBindingsReady)
+    {
+        return;
+    }
 	// 비정상 수치와 체력 범위를 표시 단계에서 보정하고, 최대 체력 0의 나눗셈을 방지한다.
 	const float Maximum = FMath::IsFinite(Data.MaxHealth) ? FMath::Max(0.0f, Data.MaxHealth) : 0.0f;
 	const float Health = FMath::IsFinite(Data.Health) ? FMath::Clamp(Data.Health, 0.0f, Maximum) : 0.0f;
@@ -114,18 +121,16 @@ void UPriestHUDWidget::NativeTick(const FGeometry& Geometry, float DeltaTime)
 
 void UPriestHUDWidget::UpdateFeedbackOpacity()
 {
-    if (DamageFeedback)
+    if (!bBindingsReady)
     {
-        const float Opacity = bEnableDamageFeedback
-            ? FMath::Clamp(DamageFeedbackRemaining / FMath::Max(0.05f, DamageFeedbackDuration), 0.0f, 1.0f)
-            : 0.0f;
-        DamageFeedback->SetRenderOpacity(Opacity);
+        return;
     }
-    if (KillNotification)
-    {
-        const float FadeDuration = FMath::Min(0.3f, FMath::Max(0.1f, KillNotificationDuration));
-        KillNotification->SetRenderOpacity(FMath::Clamp(KillNotificationRemaining / FadeDuration, 0.0f, 1.0f));
-    }
+    const float Opacity = bEnableDamageFeedback
+        ? FMath::Clamp(DamageFeedbackRemaining / FMath::Max(0.05f, DamageFeedbackDuration), 0.0f, 1.0f)
+        : 0.0f;
+    DamageFeedback->SetRenderOpacity(Opacity);
+    const float FadeDuration = FMath::Min(0.3f, FMath::Max(0.1f, KillNotificationDuration));
+    KillNotification->SetRenderOpacity(FMath::Clamp(KillNotificationRemaining / FadeDuration, 0.0f, 1.0f));
 }
 
 void UPriestHUDWidget::ShowKillNotification()
@@ -143,7 +148,7 @@ void UPriestHUDWidget::ResetKillNotification()
 void UPriestHUDWidget::SetMissionObjective(const FText& Objective)
 {
     Data.MissionObjective = Objective;
-    if (MissionText)
+    if (bBindingsReady)
     {
         MissionText->SetText(Data.MissionObjective);
     }

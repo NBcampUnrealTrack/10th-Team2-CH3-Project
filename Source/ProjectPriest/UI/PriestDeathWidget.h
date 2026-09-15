@@ -11,7 +11,10 @@ class PROJECTPRIEST_API UPriestDeathRequest : public UEventParameterBase
 {
     GENERATED_BODY()
 public:
-    UPriestDeathRequest() { EventType = EViewEventType::ButtonClicked; }
+    UPriestDeathRequest()
+    {
+        EventType = EViewEventType::ButtonClicked;
+    }
     bool bRestart = true;
 };
 
@@ -21,6 +24,11 @@ class PROJECTPRIEST_API UPriestDeathWidget : public UUserWidget, public IMvcView
 {
     GENERATED_BODY()
 public:
+    virtual bool Initialize() override;
+    bool HasValidBindings() const
+    {
+        return bBindingsReady;
+    }
     virtual FDelegateHandle AddListener(UMvcControl* Control) override;
     virtual void RemoveListener(FDelegateHandle Handle) override;
     virtual void InvokeViewEvent(EViewEventType EventType, UEventParameterBase* Parameter) override;
@@ -28,11 +36,11 @@ public:
     void ShowStatus(const FText& Message);
     void FocusRestart();
 protected:
-    virtual void NativeOnInitialized() override;
     UPROPERTY(meta=(BindWidget)) TObjectPtr<UButton> RestartButton;
     UPROPERTY(meta=(BindWidget)) TObjectPtr<UButton> MainMenuButton;
     UPROPERTY(meta=(BindWidget)) TObjectPtr<UTextBlock> StatusText;
 private:
+    bool bBindingsReady = false;
     UFUNCTION() void RequestRestart();
     UFUNCTION() void RequestMainMenu();
     void SendRequest(bool bRestart);

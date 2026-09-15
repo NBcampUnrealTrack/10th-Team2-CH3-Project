@@ -16,7 +16,10 @@ public:
     virtual void Disconnect() override;
     virtual void HandleModelChanged(IMvcModel* InModel, uint8 PropertyName) override;
     virtual void HandleViewEvent(IMvcView* InView, EViewEventType EventType, UEventParameterBase* Parameter) override;
-    bool IsStageClearActive() const { return bStageClearActive; }
+    bool IsStageClearActive() const
+    {
+        return bStageClearActive;
+    }
 private:
     void EnterStageClear();
     void LeaveStageClear(bool bRestorePreviousHUD);

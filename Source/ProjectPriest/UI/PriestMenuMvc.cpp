@@ -1,4 +1,6 @@
 #include "PriestMenuMvc.h"
+#include "JUtility.h"
+#include "Engine/Engine.h"
 #include "PriestMainMenuPlayerController.h"
 void UPriestMenuModel::SetState(EPriestMenuPage NewPage, EPriestLobbyTab NewTab)
 {
@@ -6,23 +8,24 @@ void UPriestMenuModel::SetState(EPriestMenuPage NewPage, EPriestLobbyTab NewTab)
     Tab = NewTab;
     InvokePropertyChanged(0);
 }
-FDelegateHandle UPriestMenuModel::AddListener(UMvcControl* Control) { return Changed.AddUObject(Control, &UMvcControl::HandleModelChanged); }
-void UPriestMenuModel::RemoveListener(FDelegateHandle Handle) { Changed.Remove(Handle); }
-void UPriestMenuModel::InvokePropertyChanged(uint8 PropertyName) { Changed.Broadcast(this, PropertyName); }
+FDelegateHandle UPriestMenuModel::AddListener(UMvcControl* Control)
+{
+    return Changed.AddUObject(Control, &UMvcControl::HandleModelChanged);
+}
+void UPriestMenuModel::RemoveListener(FDelegateHandle Handle)
+{
+    Changed.Remove(Handle);
+}
+void UPriestMenuModel::InvokePropertyChanged(uint8 PropertyName)
+{
+    Changed.Broadcast(this, PropertyName);
+}
 void UPriestMenuController::HandleModelChanged(IMvcModel* InModel, uint8 PropertyName)
 {
     UPriestMenuModel* Model = GetModel<UPriestMenuModel>();
     UPriestMainMenuWidget* View = GetView<UPriestMainMenuWidget>();
-    if (!IsValid(Model))
-    {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Menu model is invalid. Connect the model before updating the menu."), __FUNCTION__, *GetNameSafe(this));
-        return;
-    }
-    if (!IsValid(View))
-    {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Menu view is invalid. Connect the view before updating the menu."), __FUNCTION__, *GetNameSafe(this));
-        return;
-    }
+    JASSERT((IsValid(Model)), "%hs [%s]: Menu model is invalid. Connect the model before updating the menu.", __FUNCTION__, *GetNameSafe(this));
+    JASSERT((IsValid(View)), "%hs [%s]: Menu view is invalid. Connect the view before updating the menu.", __FUNCTION__, *GetNameSafe(this));
     if (InModel != Model)
     {
         return;
@@ -34,31 +37,15 @@ void UPriestMenuController::HandleViewEvent(IMvcView* InView, EViewEventType Eve
     UPriestMenuModel* Model = GetModel<UPriestMenuModel>();
     UPriestMainMenuWidget* View = GetView<UPriestMainMenuWidget>();
     UPriestMenuRequest* Request = Cast<UPriestMenuRequest>(Parameter);
-    if (!IsValid(Model))
-    {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Menu model is invalid."), __FUNCTION__, *GetNameSafe(this));
-        return;
-    }
-    if (!IsValid(View))
-    {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Menu view is invalid."), __FUNCTION__, *GetNameSafe(this));
-        return;
-    }
+    JASSERT((IsValid(Model)), "%hs [%s]: Menu model is invalid.", __FUNCTION__, *GetNameSafe(this));
+    JASSERT((IsValid(View)), "%hs [%s]: Menu view is invalid.", __FUNCTION__, *GetNameSafe(this));
     if (InView != View || EventType != EViewEventType::ButtonClicked)
     {
         return;
     }
-    if (!IsValid(Request))
-    {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Menu button event requires a PriestMenuRequest parameter."), __FUNCTION__, *GetNameSafe(this));
-        return;
-    }
+    JASSERT((IsValid(Request)), "%hs [%s]: Menu button event requires a PriestMenuRequest parameter.", __FUNCTION__, *GetNameSafe(this));
     APriestMainMenuPlayerController* Owner = Cast<APriestMainMenuPlayerController>(View->GetOwningPlayer());
-    if (!Owner)
-    {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Menu view must be owned by PriestMainMenuPlayerController."), __FUNCTION__, *GetNameSafe(this));
-        return;
-    }
+    JASSERT((IsValid(Owner)), "%hs [%s]: Menu view must be owned by PriestMainMenuPlayerController.", __FUNCTION__, *GetNameSafe(this));
     if (!Owner->CanProcessMenuRequest())
     {
         return;

@@ -6,14 +6,26 @@
 #include "PriestMenuMvc.generated.h"
 
 UENUM()
-enum class EPriestMenuAction : uint8 { Title, Regions, Equipment, Credits, SwitchTab, StartStage, Quit };
+enum class EPriestMenuAction : uint8
+{
+    Title,
+    Regions,
+    Equipment,
+    Credits,
+    SwitchTab,
+    StartStage,
+    Quit
+};
 
 UCLASS()
 class PROJECTPRIEST_API UPriestMenuRequest : public UEventParameterBase
 {
     GENERATED_BODY()
 public:
-    UPriestMenuRequest() { EventType = EViewEventType::ButtonClicked; }
+    UPriestMenuRequest()
+    {
+        EventType = EViewEventType::ButtonClicked;
+    }
     EPriestMenuAction Action = EPriestMenuAction::Title;
     bool bAccepted = false;
 };
@@ -23,8 +35,14 @@ class PROJECTPRIEST_API UPriestMenuModel : public UObject, public IMvcModel
 {
     GENERATED_BODY()
 public:
-    EPriestMenuPage GetPage() const { return Page; }
-    EPriestLobbyTab GetTab() const { return Tab; }
+    EPriestMenuPage GetPage() const
+    {
+        return Page;
+    }
+    EPriestLobbyTab GetTab() const
+    {
+        return Tab;
+    }
     void SetState(EPriestMenuPage NewPage, EPriestLobbyTab NewTab);
     virtual FDelegateHandle AddListener(UMvcControl* Control) override;
     virtual void RemoveListener(FDelegateHandle Handle) override;
