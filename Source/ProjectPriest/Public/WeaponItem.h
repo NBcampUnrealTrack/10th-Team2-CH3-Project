@@ -32,6 +32,12 @@ public:
     FText GetWeaponName() const { return WeaponName; }
     FWeaponAmmoChanged OnAmmoChanged;
 
+	float GetDamage()const { return Damage; }
+	void SetDamage(float SetDamage) { Damage = SetDamage; }
+	int32 GetMagazineSize()const { return MagazineSize; }
+	void SetMagazineSize(int32 SetMagazineSize) { MagazineSize = SetMagazineSize; }
+
+
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="===Weapon===|Properties")
     FText WeaponName = NSLOCTEXT("PriestHUD", "DefaultWeapon", "Weapon");
@@ -40,7 +46,6 @@ protected:
 	// 데미지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Weapon===|Properties")
 	float Damage = 20.0f;
-	float BaseDamage = 20.0f;
 
 	// 사거리
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Weapon===|Properties")
@@ -49,14 +54,13 @@ protected:
 	// 탄창에 들어가는 총알 수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Weapon===|Properties")
 	int32 MagazineSize = 12;
-	int32 BaseMagazineSize = 12;
 
 	// 현재 탄약 수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Weapon===|Properties")
 	int32 CurrentAmmo = 12;
 
 	// 예비 탄약 수
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "	===Weapon===|Properties")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Weapon===|Properties")
 	int32 ReserveAmmo = 60;
 
 	// 연사 속도 간격
