@@ -5,7 +5,6 @@
 #include "IngameGameMode.generated.h"
 
 class UWorld;
-class APlayerCharacter;
 class AIngameGameState;
 
 UCLASS()
@@ -15,13 +14,10 @@ class PROJECTPRIEST_API AIngameGameMode : public AGameModeBase
 	
 public:
     virtual void BeginPlay() override;
-    virtual void InitGameState() override;
-    
-    void OnPlayerDead();
-    void OnOpenBossRoomDoor(APlayerCharacter* Player);
-    void OnMonsterSpawned();
-	void OnMonsterDead();
 
+    void OnPlayerDead();
+    void OnOpenBossRoomDoor();
+    
 protected:
     TSoftObjectPtr<UWorld> LobbyLevel;
     TObjectPtr< AIngameGameState> IngameState;

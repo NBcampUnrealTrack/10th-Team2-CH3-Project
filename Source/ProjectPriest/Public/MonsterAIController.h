@@ -1,4 +1,4 @@
-ï»¿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -22,33 +22,33 @@ public:
 	UFUNCTION()
 	void OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 
-	//BTë¥¼ ì‹œì‘í•˜ëŠ” í•¨ìˆ˜
+	//BT¸¦ ½ÃÀÛÇÏ´Â ÇÔ¼ö
 	void StartBehaviorTree();
 
 	AActor* GetDetectedPlayer();
 
-	//FVector GetDetectedPlayerLocation();
+	FVector GetDetectedPlayerLocation();
 
 
 protected:
-	//AI ê°ì§€ ì»´í¬ë„ŒíŠ¸
+	//AI °¨Áö ÄÄÆ÷³ÍÆ®
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	UAIPerceptionComponent* AIPerception;
 
-	// ì‹œì•¼ ê°ì§€ ì„¤ì •
+	// ½Ã¾ß °¨Áö ¼³Á¤
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	UAISenseConfig_Sight* SightConfig;
 
-	//ê°ì§€ëœ ì•¡í„°
+	//°¨ÁöµÈ ¾×ÅÍ
 	UPROPERTY()
 	AActor* DetectedPlayer = nullptr;
 
-	//ê°ì§€ëœ ìœ„ì¹˜
-	//UPROPERTY()
-	//FVector DetectedPlayerLocation = FVector::ZeroVector;
+	//°¨ÁöµÈ À§Ä¡
+	UPROPERTY()
+	FVector DetectedPlayerLocation = FVector::ZeroVector;
 
 
-	//BT í¬ì¸í„°
+	//BT Æ÷ÀÎÅÍ
 	UPROPERTY(EditAnywhere, Category = "AI")
 	class UBehaviorTree* BehaviorTree;
 

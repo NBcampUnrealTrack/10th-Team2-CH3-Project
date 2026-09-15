@@ -9,11 +9,7 @@
 #include "DrawDebugHelpers.h"
 #include "JUtility.h"
 #include "WeaponItem.h"
-#include "Components/SphereComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
-#include "IngameGameMode.h"
-#include "IngameGameState.h"
-#include  "JUtility.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -28,12 +24,6 @@ APlayerCharacter::APlayerCharacter()
 
     Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
     Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
-    
-    InteractionSensor = CreateDefaultSubobject<USphereComponent>(TEXT("InteractionSensor"));
-    InteractionSensor->SetupAttachment(RootComponent);
-    
-    InteractionSensor->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnSensorOverlapBegin);
-    InteractionSensor->OnComponentEndOverlap.AddDynamic(this, &APlayerCharacter::OnSensorOverlapEnd);
 }
 
 // Called when the game starts or when spawned
@@ -46,17 +36,10 @@ void APlayerCharacter::BeginPlay()
     ChangeWalkingMode(EWalkingMode::Normal);
 
     //주의 현재 무기 메시가 캐릭터 모델에 달려있음
-    if (WeaponClass)
-    {
-        WeaponInstance = GetWorld()->SpawnActor<AWeaponItem>(WeaponClass);
-        if (IsValid(WeaponInstance))
-        {
-            WeaponInstance->SetOwner(this);
-        }
-    }
-    OnCombatChanged.Broadcast();
+    WeaponInstance = Cast<AWeaponItem>(GetWorld()->SpawnActor(WeaponClass));
+    JASSERT(IsValid(WeaponInstance), "WeaponClass is not AWeaponClass");
     
-    bCanInteract = false;
+    WeaponInstance->SetOwner(this);
 }
 
 void APlayerCharacter::ChangeWalkingMode(EWalkingMode WalkingMode)
@@ -138,14 +121,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         this,
         &APlayerCharacter::OnThrowInputted
     );
-    
-    
-    EnhancedInput->BindAction(
-        PlayerController->GetInteractAction(),
-        ETriggerEvent::Started,
-        this,
-        &APlayerCharacter::OnInteractInputted
-    );
 }
 
 float APlayerCharacter::TakeDamage(
@@ -154,13 +129,6 @@ float APlayerCharacter::TakeDamage(
     AController* EventInstigator,
     AActor* DamageCauser)
 {
-    if (const AIngameGameState* State = GetWorld()->GetGameState<AIngameGameState>())
-    {
-        if (State->HasStageCleared())
-        {
-            return 0.0f;
-        }
-    }
     const float ActualDamage = Super::TakeDamage(
         DamageAmount,
         DamageEvent,
@@ -168,18 +136,9 @@ float APlayerCharacter::TakeDamage(
         DamageCauser
     );
 
-    const float PreviousHealth = CurrentHealth;
     CurrentHealth = FMath::Clamp(CurrentHealth - ActualDamage, 0.0f, MaxHealth);
-    if (CurrentHealth < PreviousHealth)
-    {
-        if (AIngamePlayerController* OwningController = Cast<AIngamePlayerController>(GetController()))
-        {
-            OwningController->ClientNotifyPlayerDamaged(this);
-        }
-    }
-    OnCombatChanged.Broadcast();
 
-    JLog("플레이어 데미지: %.1f / 현재 HP: %.1f", ActualDamage, CurrentHealth);
+    //UE_LOG(LogTemp, Warning, TEXT("플레이어 데미지: %.1f / 현재 HP: %.1f"), ActualDamage, CurrentHealth);
 
     if (CurrentHealth <= 0.0f)
     {
@@ -200,29 +159,6 @@ const FVector APlayerCharacter::GetMuzzleLocation()
     }
 
     return GetMesh()->GetSocketLocation(SocketName);
-}
-
-void APlayerCharacter::OnSensorOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor,
-    class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-    bCanInteract = true;
-    
-    JLog("CanInteract : True");
-    OnCanInteractChanged.Broadcast(bCanInteract);
-}
-
-void APlayerCharacter::OnSensorOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor,
-                                    class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-    bCanInteract = false;
-    
-    JLog("CanInteract : False");
-    OnCanInteractChanged.Broadcast(bCanInteract);
-}
-
-FCanInteractChangedDelegate APlayerCharacter::GetOnCanInteractDelegate()
-{
-    return OnCanInteractChanged;
 }
 
 void APlayerCharacter::OnMoveInputted(const FInputActionInstance& InputValue)
@@ -261,10 +197,7 @@ void APlayerCharacter::OnAttackInputted(const FInputActionValue& value)
 {
     //JLog("OnAttackInputted");
 
-    if (!IsValid(WeaponInstance))
-    {
-        return;
-    }
+    JASSERT(IsValid(WeaponInstance), "Weapon is not valid");
 
     if (WeaponInstance->CanFire())
     {
@@ -456,22 +389,6 @@ void APlayerCharacter::OnThrowInputted(const FInputActionValue& value)
         ThrowCoolTime,
         false
     );
-}
-
-void APlayerCharacter::OnInteractInputted(const FInputActionValue& value)
-{
-    JLog("Intract inputted");
-    
-    // The GameMode checks the actual objective overlap; the generic sensor flag
-    // can be cleared when another overlapping actor leaves the sensor.
-        
-    
-    AIngameGameMode* IngameGameMode 
-        = Cast<AIngameGameMode>(GetWorld()->GetAuthGameMode());
-    
-    JASSERT(IsValid(IngameGameMode), "Game mode is not IngameGameMode or nullptr");
-    
-    IngameGameMode->OnOpenBossRoomDoor(this);
 }
 
 void APlayerCharacter::OnSprintInputted(const FInputActionInstance& InputValue)

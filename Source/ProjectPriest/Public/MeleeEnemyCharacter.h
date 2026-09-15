@@ -1,10 +1,14 @@
-ï»¿#pragma once
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
 
 #include "CoreMinimal.h"
 #include "EnemyCharacter.h"
 #include "MeleeEnemyCharacter.generated.h"
 
-
+/**
+ * 
+ */
 UCLASS()
 class PROJECTPRIEST_API AMeleeEnemyCharacter : public AEnemyCharacter
 {
@@ -14,28 +18,8 @@ public:
 	AMeleeEnemyCharacter();
 
 protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat|Collision")
-    USphereComponent* LeftHandCollision;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat|Collision")
-    USphereComponent* RightHandCollision;
-
-	//ëª¬ìŠ¤í„° ê³µê²©
+	//¸ó½ºÅÍ °ø°Ý
 	virtual void Attack(ACharacter* PlayerCharacter) override;
 
-    UFUNCTION(BlueprintCallable)
-    void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
-    virtual void OnNotifyApplyDamage()override;
-
-    const FName& GetRandomSessionName();
-
-protected:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Enemy Character ===|For anim blueprint")
-    TObjectPtr<UAnimMontage> MontageToPlaying;
-
-    TArray<FName> SessionNames;
-
-    FName RandomSessionName;
 };
- 

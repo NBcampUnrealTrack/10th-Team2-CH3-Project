@@ -1,10 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "BaseItem.h"
 #include "WeaponItem.generated.h"
-
-DECLARE_MULTICAST_DELEGATE(FWeaponAmmoChanged);
 
 class AIngamePlayerController;
 
@@ -28,14 +26,8 @@ public:
     virtual bool CanReload() const;
 
     int GetCurrentAmmo() const;
-    int32 GetReserveAmmo() const { return ReserveAmmo; }
-    FText GetWeaponName() const { return WeaponName; }
-    FWeaponAmmoChanged OnAmmoChanged;
 
 protected:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="===Weapon===|Properties")
-    FText WeaponName = NSLOCTEXT("PriestHUD", "DefaultWeapon", "Weapon");
-
 	// Properties
 	// 데미지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Weapon===|Properties")
