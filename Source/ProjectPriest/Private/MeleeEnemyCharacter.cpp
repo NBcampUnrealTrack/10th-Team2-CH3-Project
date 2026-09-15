@@ -16,8 +16,6 @@ AMeleeEnemyCharacter::AMeleeEnemyCharacter()
     LeftHandCollision->SetupAttachment(GetMesh(), TEXT("hand_l"));
     RightHandCollision->SetupAttachment(GetMesh(), TEXT("hand_r"));
 
-    AttackRange = 200.f; //공격 사거리
-    Damage = 10.0f;
 }
 
 void AMeleeEnemyCharacter::Attack(ACharacter* PlayerCharacter)
@@ -67,7 +65,8 @@ void AMeleeEnemyCharacter::OnNotifyApplyDamage()
         TEXT("=== OnNotifyApplyDamage ===")
     );
     for (AActor* Actor : OverlappingActors) {
-        if (Actor && Actor->ActorHasTag("Player")) {
+        if (Actor && Actor->ActorHasTag("Player"))
+        {
             UGameplayStatics::ApplyDamage(
                 Actor,
                 Damage,

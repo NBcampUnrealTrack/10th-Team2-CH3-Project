@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "EnemyCharacter.h"
@@ -6,6 +6,9 @@
 #include "PlayerCharacter.h"
 #include "MonsterAIController.h"
 #include "Engine/DamageEvents.h"
+#include "IngameGameMode.h"
+#include "Components/CapsuleComponent.h"
+#include "JUtility.h"
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
@@ -17,16 +20,17 @@ AEnemyCharacter::AEnemyCharacter()
 	//생성시 AI Possess 설정
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	//스탯 초기화
-	Health = 100.0f;
-	Damage = 10.0f;
-	Defense = 5.0f;
-	AttackRange = 0; //공격 사거리
-	MinimumDamage = 1.0f;//몬스터가 받는 최소피해
-
-	PatrolRadius = 1000.0f;
 }
 
+void AEnemyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	
+	AIngameGameMode* IngameGameMode = Cast<AIngameGameMode>(GetWorld()->GetAuthGameMode());
+	JASSERT(IsValid(IngameGameMode), "Ingame game mode is invalid");
+	
+	IngameGameMode->OnMonsterDead();	
+}
 
 void AEnemyCharacter::Attack(ACharacter* PlayerCharacter)
 {
@@ -62,7 +66,28 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const&
 
 void AEnemyCharacter::Die()
 {
-	Destroy();
+	if (bIsDead)
+	{
+		return;
+	}
+
+	bIsDead = true;
+
+	AMonsterAIController* AiController = Cast<AMonsterAIController>(GetController());
+
+	GetCapsuleComponent()->SetCollisionEnabled(
+		ECollisionEnabled::NoCollision
+	);
+
+	DropItem();
+
+	GetWorldTimerManager().SetTimer(
+		DeathTimerHandle,
+		this,
+		&AEnemyCharacter::DestroyEnemy,//bool형을 반환하지 않는 함수를 다시 정의
+		5.0f,
+		false
+	);
 }
 
 void AEnemyCharacter::BeginPlay()
@@ -72,7 +97,28 @@ void AEnemyCharacter::BeginPlay()
 	PatrolOrigin = this->GetActorLocation();
 
     AnimInstance = GetMesh()->GetAnimInstance();
+
+	const FMonsterData* MonsterData =
+		RowDataTable.GetRow<FMonsterData>(
+			TEXT("AEnemyCharacter::BeginPlay")
+		);
+	if (MonsterData)
+	{
+		AttackRange = MonsterData->AttackRange;
+		Damage = MonsterData->Damage;
+		Defense = MonsterData->Defense;
+		Health = MonsterData->Health;
+		MinimumDamage = MonsterData->MinimumDamage;
+		PatrolRadius = MonsterData->PatrolRadius;
+	}
+	
+	AIngameGameMode* IngameGameMode 
+		= Cast<AIngameGameMode>( GetWorld()->GetAuthGameMode());
+	JASSERT(IsValid(IngameGameMode), "Ingame game mode is invalid");
+	
+	IngameGameMode->OnMonsterSpawned();	
 }
+
 
 //TODO: 아 맘에 안들어 겁나 화나는 그런 구조네...
 // BT_Attack 
@@ -129,7 +175,30 @@ EAttackAnimationState AEnemyCharacter::GetAttackAnimationeState()
 void AEnemyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
 
+void AEnemyCharacter::DropItem()
+{
+	const FMonsterData* MonsterData =
+		RowDataTable.GetRow<FMonsterData>(
+			TEXT("AEnemyCharacter::DropItem")
+		);
+	if (!MonsterData || !MonsterData->DropItemClass)
+	{ 
+		return;
+	}
+
+	GetWorld()->SpawnActor<AActor>(
+		MonsterData->DropItemClass,
+		GetActorLocation(),
+		FRotator::ZeroRotator
+	);
+	
+}
+
+void AEnemyCharacter::DestroyEnemy()
+{
+	Destroy();
 }
 
 FVector AEnemyCharacter::GetPatrolOrigin()

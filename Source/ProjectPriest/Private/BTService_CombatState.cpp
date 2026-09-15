@@ -29,11 +29,15 @@ void UBTService_CombatState::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
 	AMonsterAIController* AIController = Cast<AMonsterAIController>(AICon);
 
 	if (!AIController)
+	{
 		return BlackboardComp->SetValueAsBool(TEXT("IsCombat"), false);
+	}
 
 
 	if (playerPawn != AIController->GetDetectedPlayer())
+	{
 		return BlackboardComp->SetValueAsBool(TEXT("IsCombat"), false);
+	}
 
 	//FVector DetectedPlayerLocation = AIController->GetDetectedPlayerLocation();
 
