@@ -116,6 +116,8 @@ protected:
 
     void ResetThrowCoolTime();
 
+    void OnDeath();
+
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Components")
     TObjectPtr<USpringArmComponent> SpringArm;
@@ -177,6 +179,8 @@ protected:
     bool bCanInteract;
     
     bool bCanThrow = true;
+
+    bool bIsDead = false;
 
     FTimerHandle ThrowCoolTimeTimerHandle;
 };
