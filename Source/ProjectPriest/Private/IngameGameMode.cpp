@@ -1,5 +1,7 @@
-﻿#include "IngameGameMode.h"
+#include "IngameGameMode.h"
 #include "IngameGameState.h"
+#include "PlayerCharacter.h"
+#include "BossRoomOpenInteractor.h"
 #include "JUtility.h"
 
 void AIngameGameMode::BeginPlay()
@@ -33,24 +35,39 @@ void AIngameGameMode::OnPlayerDead()
     }
 }
 
-void AIngameGameMode::OnOpenBossRoomDoor()
+void AIngameGameMode::OnOpenBossRoomDoor(APlayerCharacter* Player)
 {
-    JASSERT(IsValid(IngameState), "Game state is not valid");
-
-    float StartTime = IngameState->GetStartTime();
-    float NowTime = GetWorld()->GetTimeSeconds();
-    float ElapsedTime = NowTime - StartTime;
-
-    JError("클리어 화면을 구현하세요 클리어 시간은 %f", ElapsedTime);
+    if (!IsValid(IngameState) || !IsValid(Player) || Player->GetWorld() != GetWorld()
+        || !FMath::IsFinite(Player->GetCurrentHealth()) || Player->GetCurrentHealth() <= 0.0f
+        || !IngameState->IsExitAvailable() || IngameState->GetMonsterCount() != 0)
+    {
+        return;
+    }
+    TArray<AActor*> Objectives;
+    Player->GetOverlappingActors(Objectives, ABossRoomOpenInteractor::StaticClass());
+    if (Objectives.IsEmpty())
+    {
+        return;
+    }
+    IngameState->TryCompleteStage(GetWorld()->GetTimeSeconds() - IngameState->GetStartTime());
 }
 
 void AIngameGameMode::OnMonsterSpawned()
 {
+    if (!IsValid(IngameState))
+    {
+        return;
+    }
+    IngameState->SetDoorVisibility(false);
     IngameState->IncreaseMosnterCount();
 }
 
 void AIngameGameMode::OnMonsterDead()
 {
+    if (!IsValid(IngameState))
+    {
+        return;
+    }
     IngameState->DecreaseMosnterCount();
     if (IngameState->GetMonsterCount() <= 0 )
     {

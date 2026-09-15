@@ -1,44 +1,44 @@
-﻿#include "MvcControl.h"
+#include "MvcControl.h"
 #include "MvcModel.h"
 #include "MvcView.h"
 
-UMvcControl::UMvcControl()
-{
-}
-
 void UMvcControl::BeginDestroy()
 {
-    if (nullptr != Model)
-    {
-        Model->RemoveListener(ModelListenerHandle);
-    }
-    
-    if (nullptr != View)
-    {
-        View->RemoveListener(ViewListenerHandle);
-    }
+    Disconnect();
+    Super::BeginDestroy();
+}
+
+void UMvcControl::Disconnect()
+{
+    SetView(nullptr);
+    SetModel(nullptr);
 }
 
 void UMvcControl::SetView(IMvcView* NewView)
 {
-    View = NewView;
-    ViewListenerHandle = View->AddListener(this);
-}
-
-template<DrivedMvcView T>
-T* UMvcControl::GetView()
-{
-    return View;
+    // 이전 뷰가 살아 있을 때만 구독을 해제한다.
+    if (IMvcView* Previous = Cast<IMvcView>(ViewObject.Get()))
+    {
+        Previous->RemoveListener(ViewListenerHandle);
+    }
+    ViewListenerHandle.Reset();
+    ViewObject = NewView ? NewView->_getUObject() : nullptr;
+    if (NewView && ViewObject.IsValid())
+    {
+        ViewListenerHandle = NewView->AddListener(this);
+    }
 }
 
 void UMvcControl::SetModel(IMvcModel* NewModel)
 {
-    Model = NewModel;
-    ModelListenerHandle = Model->AddListener(this);
-}
-
-template<DrivedMvcModel T>
-T* UMvcControl::GetModel()
-{
-    return Model;
+    if (IMvcModel* Previous = Cast<IMvcModel>(ModelObject.Get()))
+    {
+        Previous->RemoveListener(ModelListenerHandle);
+    }
+    ModelListenerHandle.Reset();
+    ModelObject = NewModel ? NewModel->_getUObject() : nullptr;
+    if (NewModel && ModelObject.IsValid())
+    {
+        ModelListenerHandle = NewModel->AddListener(this);
+    }
 }

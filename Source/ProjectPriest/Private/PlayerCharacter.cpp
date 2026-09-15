@@ -13,6 +13,7 @@
 #include "Components/SphereComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "IngameGameMode.h"
+#include "IngameGameState.h"
 #include  "JUtility.h"
 
 // Sets default values
@@ -171,6 +172,13 @@ float APlayerCharacter::TakeDamage(
     AController* EventInstigator,
     AActor* DamageCauser)
 {
+    if (const AIngameGameState* State = GetWorld()->GetGameState<AIngameGameState>())
+    {
+        if (State->HasStageCleared())
+        {
+            return 0.0f;
+        }
+    }
     const float ActualDamage = Super::TakeDamage(
         DamageAmount,
         DamageEvent,
@@ -470,11 +478,8 @@ void APlayerCharacter::OnInteractInputted(const FInputActionValue& value)
 {
     JLog("Intract inputted");
     
-    if (!bCanInteract)
-    {
-        JLog("Can not interact at this moment");
-        return;
-    }
+    // The GameMode checks the actual objective overlap; the generic sensor flag
+    // can be cleared when another overlapping actor leaves the sensor.
         
     
     AIngameGameMode* IngameGameMode 
@@ -482,7 +487,7 @@ void APlayerCharacter::OnInteractInputted(const FInputActionValue& value)
     
     JASSERT(IsValid(IngameGameMode), "Game mode is not IngameGameMode or nullptr");
     
-    IngameGameMode->OnOpenBossRoomDoor();
+    IngameGameMode->OnOpenBossRoomDoor(this);
 }
 
 void APlayerCharacter::OnSprintInputted(const FInputActionInstance& InputValue)
