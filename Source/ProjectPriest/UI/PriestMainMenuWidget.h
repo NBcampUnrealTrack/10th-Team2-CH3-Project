@@ -1,8 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "MvcView.h"
+#include "PriestItemTypes.h"
 #include "PriestMainMenuWidget.generated.h"
 
 enum class EPriestMenuAction : uint8;
@@ -69,6 +70,9 @@ public:
 
 	void ShowStatusMessage(const FText& Message);
 
+	UFUNCTION(BlueprintCallable, Category = "Priest|Inventory")
+	void SelectInventoryCategory(EItemCategory InCategory);
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Priest|Inventory")
 	TSubclassOf<UPriestInventorySlotWidget> InventorySlotClass;
@@ -88,6 +92,13 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Priest|Menu")
 	EPriestLobbyTab CurrentTab = EPriestLobbyTab::Region;
+
+	UPROPERTY(
+		EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category = "Priest|Inventory"
+	)
+	EItemCategory SelectedCategory = EItemCategory::Consumable;
 
 private:
     UFUNCTION() void RefreshInventory();

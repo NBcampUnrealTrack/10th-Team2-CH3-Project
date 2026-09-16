@@ -1,4 +1,4 @@
-#include "PriestMainMenuWidget.h"
+﻿#include "PriestMainMenuWidget.h"
 #include "JUtility.h"
 #include "Engine/Engine.h"
 #include "PriestMainMenuPlayerController.h"
@@ -61,7 +61,8 @@ void UPriestMainMenuWidget::RefreshInventory()
     {
         return;
     }
-    const TArray<FPriestOwnedItem> Items = Inventory->GetOwnedItems();
+    const TArray<FPriestOwnedItem> Items =
+        Inventory->GetItemsByCategory(SelectedCategory);
     if (InventorySummary)
     {
         InventorySummary->SetText(Items.IsEmpty()
@@ -160,4 +161,33 @@ void UPriestMainMenuWidget::ShowStatusMessage(const FText& Message)
 	{
 		MenuStatusText->SetText(Message);
 	}
+}
+
+void UPriestMainMenuWidget::SelectInventoryCategory(
+    EItemCategory InCategory
+)
+{
+    switch (InCategory)
+    {
+    case EItemCategory::Weapon:
+    case EItemCategory::Ammo:
+    case EItemCategory::Consumable:
+    case EItemCategory::Material:
+        break;
+
+    default:
+        JError(
+            "%hs: 잘못된 인벤토리 분류입니다. Category=%d",
+            __FUNCTION__,
+            static_cast<int32>(InCategory)
+        );
+        return;
+    }
+
+    SelectedCategory = InCategory;
+
+    if (IsValid(Inventory))
+    {
+        RefreshInventory();
+    }
 }

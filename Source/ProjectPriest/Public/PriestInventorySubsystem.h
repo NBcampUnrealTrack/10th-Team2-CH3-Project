@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "PotionTypes.h"
+#include "PriestItemTypes.h"
 #include "PriestInventorySubsystem.generated.h"
 
 USTRUCT(BlueprintType)
@@ -72,6 +73,17 @@ public:
         FName ItemId
     ) const;
 
+    UFUNCTION(BlueprintPure, Category = "Priest|Inventory|Definition")
+    bool TryGetItemDefinition(
+        FName ItemId,
+        FPriestItemDefinition& OutDefinition
+    ) const;
+
+    UFUNCTION(BlueprintPure, Category = "Priest|Inventory")
+    TArray<FPriestOwnedItem> GetItemsByCategory(
+        EItemCategory Category
+    ) const;
+
 private:
     UPROPERTY(Transient) TArray<FPriestOwnedItem> OwnedItems;
     bool bPreviewItemsGranted = false;
@@ -81,4 +93,7 @@ private:
 
     UPROPERTY(Transient)
     TObjectPtr<UDataTable> PotionDefinitions;
+
+    UPROPERTY(Transient)
+    TObjectPtr<UDataTable> ItemDefinitions;
 };

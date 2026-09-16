@@ -138,6 +138,36 @@ void UPriestInventorySubsystem::Initialize(
 {
     Super::Initialize(Collection);
 
+    ItemDefinitions = LoadObject<UDataTable>(
+        nullptr,
+        TEXT(
+            "/Game/01_PP/DataTable/"
+            "DT_ItemDefinitions.DT_ItemDefinitions"
+        )
+    );
+
+    if (!IsValid(ItemDefinitions))
+    {
+        JError(
+            "%hs: DT_ItemDefinitions 로드 실패. "
+            "에셋 경로를 확인하세요.",
+            __FUNCTION__
+        );
+    }
+    else if (
+        ItemDefinitions->GetRowStruct()
+        != FPriestItemDefinition::StaticStruct()
+        )
+    {
+        JError(
+            "%hs: DT_ItemDefinitions의 Row Structure가 "
+            "PriestItemDefinition이 아닙니다.",
+            __FUNCTION__
+        );
+
+        ItemDefinitions = nullptr;
+    }
+
     PotionDefinitions = LoadObject<UDataTable>(
         nullptr,
         TEXT(
@@ -220,4 +250,92 @@ bool UPriestInventorySubsystem::CanAssignQuickSlot(
 
     FPotionDefinition Definition;
     return TryGetPotionDefinition(ItemId, Definition);
+}
+
+bool UPriestInventorySubsystem::TryGetItemDefinition(
+    FName ItemId,
+    FPriestItemDefinition& OutDefinition
+) const
+{
+    OutDefinition = FPriestItemDefinition{};
+
+    if (ItemId.IsNone())
+    {
+        return false;
+    }
+
+    JASSERT_BOOL(
+        (IsValid(ItemDefinitions)),
+        "%hs: 공통 아이템 DataTable이 준비되지 않았습니다.",
+        __FUNCTION__
+    );
+
+    const FPriestItemDefinition* Definition =
+        ItemDefinitions->FindRow<FPriestItemDefinition>(
+            ItemId,
+            TEXT("TryGetItemDefinition"),
+            false
+        );
+
+    if (!Definition)
+    {
+        return false;
+    }
+
+    JASSERT_BOOL(
+        (Definition->Category != EItemCategory::None),
+        "%hs: 아이템 분류가 미지정 상태입니다. ItemId=%s",
+        __FUNCTION__,
+        *ItemId.ToString()
+    );
+
+    OutDefinition = *Definition;
+    return true;
+}
+
+TArray<FPriestOwnedItem>
+UPriestInventorySubsystem::GetItemsByCategory(
+    EItemCategory Category
+) const
+{
+    TArray<FPriestOwnedItem> Result;
+
+    if (Category == EItemCategory::None)
+    {
+        return Result;
+    }
+
+    if (!IsValid(ItemDefinitions))
+    {
+        JError(
+            "%hs: 공통 아이템 DataTable이 준비되지 않았습니다.",
+            __FUNCTION__
+        );
+
+        return Result;
+    }
+
+    for (const FPriestOwnedItem& Item : OwnedItems)
+    {
+        FPriestItemDefinition Definition;
+
+        if (!TryGetItemDefinition(Item.ItemId, Definition))
+        {
+            JError(
+                "%hs: 보유 아이템의 공통 정의를 확인하세요. "
+                "ItemId=%s",
+                __FUNCTION__,
+                *Item.ItemId.ToString()
+            );
+
+            continue;
+        }
+
+        if (Definition.Category == Category)
+        {
+            Result.Add(Item);
+        }
+    }
+
+    return Result;
 }
