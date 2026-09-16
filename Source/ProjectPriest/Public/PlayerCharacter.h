@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
@@ -62,6 +62,11 @@ public:
     float GetCurrentHealth() const { return CurrentHealth; }
     float GetMaxHealth() const { return MaxHealth; }
     AWeaponItem* GetEquippedWeapon() const { return WeaponInstance.Get(); }
+
+    AWeaponItem* GetWeaponInstance() const
+    {
+        return WeaponInstance;
+    }
 
     const FVector GetMuzzleLocation();
     /////////////////////////////////////
