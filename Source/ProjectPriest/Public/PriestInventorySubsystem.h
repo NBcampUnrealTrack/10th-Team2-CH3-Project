@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
@@ -26,6 +26,10 @@ class PROJECTPRIEST_API UPriestInventorySubsystem : public UGameInstanceSubsyste
     GENERATED_BODY()
 
 public:
+    virtual void Initialize(
+        FSubsystemCollectionBase& Collection
+    ) override;
+
     UFUNCTION(BlueprintPure, Category="Priest|Inventory")
     TArray<FPriestOwnedItem> GetOwnedItems() const { return OwnedItems; }
 
@@ -42,9 +46,6 @@ public:
     // Call only from the temporary menu setup; never refill on menu re-entry.
     void GrantPreviewItemsOnce();
 
-    UPROPERTY(BlueprintAssignable, Category="Priest|Inventory")
-    FPriestInventoryChanged OnInventoryChanged;
-
     UFUNCTION(BlueprintPure, Category = "Priest|Inventory|QuickSlot")
     FName GetQuickSlotItemId(int32 SlotIndex) const;
 
@@ -54,17 +55,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Priest|Inventory|QuickSlot")
     bool ClearQuickSlot(int32 SlotIndex);
 
-    UPROPERTY(BlueprintAssignable, Category = "Priest|Inventory|QuickSlot")
-    FPriestQuickSlotsChanged OnQuickSlotsChanged;
-
-    virtual void Initialize(
-        FSubsystemCollectionBase& Collection
-    ) override;
-
     UFUNCTION(BlueprintPure, Category = "Priest|Inventory|Potion")
-    bool TryGetPotionDefinition(
+    bool TryGetPotionData(
         FName ItemId,
-        FPotionDefinition& OutDefinition
+        FPotionData& OutData
     ) const;
 
     UFUNCTION(BlueprintPure, Category = "Priest|Inventory|QuickSlot")
@@ -73,16 +67,23 @@ public:
         FName ItemId
     ) const;
 
-    UFUNCTION(BlueprintPure, Category = "Priest|Inventory|Definition")
-    bool TryGetItemDefinition(
+    UFUNCTION(BlueprintPure, Category = "Priest|Inventory|Data")
+    bool TryGetItemData(
         FName ItemId,
-        FPriestItemDefinition& OutDefinition
+        FPriestItemData& OutData
     ) const;
 
     UFUNCTION(BlueprintPure, Category = "Priest|Inventory")
     TArray<FPriestOwnedItem> GetItemsByCategory(
         EItemCategory Category
     ) const;
+
+public:
+    UPROPERTY(BlueprintAssignable, Category="Priest|Inventory")
+    FPriestInventoryChanged OnInventoryChanged;
+
+    UPROPERTY(BlueprintAssignable, Category = "Priest|Inventory|QuickSlot")
+    FPriestQuickSlotsChanged OnQuickSlotsChanged;
 
 private:
     UPROPERTY(Transient) TArray<FPriestOwnedItem> OwnedItems;
@@ -92,8 +93,8 @@ private:
     TArray<FName> QuickSlotItemIds = { NAME_None, NAME_None };
 
     UPROPERTY(Transient)
-    TObjectPtr<UDataTable> PotionDefinitions;
+    TObjectPtr<UDataTable> PotionDataTable;
 
     UPROPERTY(Transient)
-    TObjectPtr<UDataTable> ItemDefinitions;
+    TObjectPtr<UDataTable> ItemDataTable;
 };

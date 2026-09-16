@@ -1,4 +1,4 @@
-﻿#include "PlayerCharacter.h"
+#include "PlayerCharacter.h"
 #include "IngamePlayerController.h"
 #include "IngameGameMode.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -526,8 +526,8 @@ EPotionUseResult APlayerCharacter::TryUsePotion(FName ItemId)
 
     JASSERT_RETURN((IsValid(Inventory)), EPotionUseResult::Unavailable, "%hs [%s]: InventorySubsystem이 없습니다.", __FUNCTION__, *GetNameSafe(this));
 
-    FPotionDefinition Definition;
-    if (!Inventory->TryGetPotionDefinition(ItemId, Definition))
+    FPotionData Data;
+    if (!Inventory->TryGetPotionData(ItemId, Data))
     {
         return EPotionUseResult::InvalidPotion;
     }
@@ -558,7 +558,7 @@ EPotionUseResult APlayerCharacter::TryUsePotion(FName ItemId)
     const float PreviousHealth = CurrentHealth;
     const float MissingHealth = MaxHealth - CurrentHealth;
     const float ActualHeal =
-        FMath::Min(Definition.HealAmount, MissingHealth);
+        FMath::Min(Data.HealAmount, MissingHealth);
 
     const float NewHealth =
         FMath::Min(CurrentHealth + ActualHeal, MaxHealth);

@@ -26,7 +26,7 @@ void UPriestQuickSlotWidget::NativeConstruct()
     JASSERT(IsValid(Instance), "%hs [%s]: GameInstance가 없습니다.", __FUNCTION__, *GetNameSafe(this));
     Inventory = Instance->GetSubsystem<UPriestInventorySubsystem>();
     JASSERT(IsValid(Inventory), "%hs [%s]: InventorySubsystem 연결에 실패했습니다.", __FUNCTION__, *GetNameSafe(this));
-    JASSERT(SlotIndex >= 0 && SlotIndex <= 1, "%hs [%s]: SlotIndex=%d, 허용 범위는 0~1입니다.", __FUNCTION__, *GetNameSafe(this), SlotIndex);
+    JASSERT(0 <= SlotIndex && SlotIndex <= 1, "%hs [%s]: SlotIndex=%d, 허용 범위는 0~1입니다.", __FUNCTION__, *GetNameSafe(this), SlotIndex);
     Inventory->OnInventoryChanged.AddUniqueDynamic(this, &UPriestQuickSlotWidget::RefreshQuickSlot);
     Inventory->OnQuickSlotsChanged.AddUniqueDynamic(this, &UPriestQuickSlotWidget::RefreshQuickSlot);
     RefreshQuickSlot();
@@ -50,7 +50,7 @@ void UPriestQuickSlotWidget::DisconnectInventory()
 
 void UPriestQuickSlotWidget::SetSlotIndex(int32 InSlotIndex)
 {
-    JASSERT(InSlotIndex >= 0 && InSlotIndex <= 1, "%hs [%s]: SlotIndex=%d, 허용 범위는 0~1입니다.", __FUNCTION__, *GetNameSafe(this), InSlotIndex);
+    JASSERT(0 <= InSlotIndex && InSlotIndex <= 1, "%hs [%s]: SlotIndex=%d, 허용 범위는 0~1입니다.", __FUNCTION__, *GetNameSafe(this), InSlotIndex);
     SlotIndex = InSlotIndex;
     RefreshQuickSlot();
 }

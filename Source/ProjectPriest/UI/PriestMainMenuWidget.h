@@ -74,18 +74,24 @@ public:
 	void SelectInventoryCategory(EItemCategory InCategory);
 
 protected:
+    virtual void NativeConstruct() override;
+    virtual void NativeDestruct() override;
+
+    // 선택 탭의 색상 변경이나 버튼 포커스는 WBP에서 필요에 따라 구현한다.
+    UFUNCTION(BlueprintImplementableEvent, Category = "Priest|Menu")
+    void OnMenuStateChanged(EPriestMenuPage Page, EPriestLobbyTab Tab);
+
+private:
+    UFUNCTION() void RefreshInventory();
+    bool SendRequest(EPriestMenuAction Action);
+    void RefreshPage();
+
+protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Priest|Inventory")
 	TSubclassOf<UPriestInventorySlotWidget> InventorySlotClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Priest|Inventory", meta = (ClampMin = "1"))
 	int32 InventoryColumns = 5;
-
-	virtual void NativeConstruct() override;
-	virtual void NativeDestruct() override;
-
-	// 선택 탭의 색상 변경이나 버튼 포커스는 WBP에서 필요에 따라 구현한다.
-	UFUNCTION(BlueprintImplementableEvent, Category = "Priest|Menu")
-	void OnMenuStateChanged(EPriestMenuPage Page, EPriestLobbyTab Tab);
 
 	UPROPERTY(BlueprintReadOnly, Category = "Priest|Menu")
 	EPriestMenuPage CurrentPage = EPriestMenuPage::Title;
@@ -93,23 +99,16 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Priest|Menu")
 	EPriestLobbyTab CurrentTab = EPriestLobbyTab::Region;
 
-	UPROPERTY(
-		EditDefaultsOnly,
-		BlueprintReadOnly,
-		Category = "Priest|Inventory"
-	)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Priest|Inventory")
 	EItemCategory SelectedCategory = EItemCategory::Consumable;
 
 private:
-    UFUNCTION() void RefreshInventory();
     UPROPERTY(Transient) TObjectPtr<UPriestInventorySubsystem> Inventory;
     // Designer owns layout. Optional so menus without inventory still work.
     UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UUniformGridPanel> InventoryGrid;
     UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UTextBlock> InventorySummary;
     bool bBindingsReady = false;
-    bool SendRequest(EPriestMenuAction Action);
     FViewEventRaisedDelegate Listener;
-	void RefreshPage();
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UWidgetSwitcher> MenuSwitcher;

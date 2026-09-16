@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
@@ -15,7 +15,7 @@ enum class EItemCategory : uint8
 };
 
 USTRUCT(BlueprintType)
-struct PROJECTPRIEST_API FPriestItemDefinition
+struct PROJECTPRIEST_API FPriestItemData
     : public FTableRowBase
 {
     GENERATED_BODY()

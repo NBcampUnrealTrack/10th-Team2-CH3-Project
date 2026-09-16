@@ -23,6 +23,23 @@ protected:
     virtual void NativeConstruct() override;
     virtual void NativeDestruct() override;
 
+    virtual bool NativeOnDrop(
+        const FGeometry& InGeometry,
+        const FDragDropEvent& InDragDropEvent,
+        UDragDropOperation* InOperation
+    ) override;
+
+private:
+    UFUNCTION() void RefreshQuickSlot();
+    void DisconnectInventory();
+
+    virtual FReply NativeOnMouseButtonDown(
+        const FGeometry& InGeometry,
+        const FPointerEvent& InMouseEvent
+    ) override;
+
+protected:
+
     // Configure each instance in the HUD Designer: 0 = key 1, 1 = key 2.
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Priest|QuickSlot", meta = (ClampMin = "0", ClampMax = "1", ExposeOnSpawn = "true"))
     int32 SlotIndex = 0;
@@ -34,22 +51,9 @@ protected:
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> ItemNameText;
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> QuantityText;
 
-    virtual bool NativeOnDrop(
-        const FGeometry& InGeometry,
-        const FDragDropEvent& InDragDropEvent,
-        UDragDropOperation* InOperation
-    ) override;
-
 private:
-    UFUNCTION() void RefreshQuickSlot();
-    void DisconnectInventory();
-
     UPROPERTY(Transient) TObjectPtr<UPriestInventorySubsystem> Inventory;
     FName LastItemId;
     FText LastItemName;
 
-    virtual FReply NativeOnMouseButtonDown(
-        const FGeometry& InGeometry,
-        const FPointerEvent& InMouseEvent
-    ) override;
 };

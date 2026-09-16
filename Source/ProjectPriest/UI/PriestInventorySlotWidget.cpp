@@ -1,4 +1,4 @@
-﻿#include "PriestInventorySlotWidget.h"
+#include "PriestInventorySlotWidget.h"
 #include "Components/TextBlock.h"
 #include "PriestInventoryDragDropOperation.h"
 #include "PriestInventorySubsystem.h"
@@ -86,18 +86,20 @@ void UPriestInventorySlotWidget::NativeOnDragDetected(
         __FUNCTION__
     );
 
-    if (Item.ItemId.IsNone()
-        || Inventory->GetQuantity(Item.ItemId) <= 0)
+    const bool bIsEmptySlot = Item.ItemId.IsNone()
+        || Inventory->GetQuantity(Item.ItemId) <= 0;
+
+    if (bIsEmptySlot)
     {
         return;
     }
 
     //일단 포션만 드래그 가능
-    FPotionDefinition Definition;
+    FPotionData Data;
 
-    if (!Inventory->TryGetPotionDefinition(
+    if (!Inventory->TryGetPotionData(
         Item.ItemId,
-        Definition
+        Data
     ))
     {
         return;

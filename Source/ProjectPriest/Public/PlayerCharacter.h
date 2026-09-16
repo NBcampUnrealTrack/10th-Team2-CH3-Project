@@ -60,7 +60,6 @@ public:
         AActor* DamageCauser
     ) override;
 
-    FPlayerCombatChanged OnCombatChanged;
     float GetCurrentHealth() const { return CurrentHealth; }
     float GetMaxHealth() const { return MaxHealth; }
     AWeaponItem* GetEquippedWeapon() const { return WeaponInstance.Get(); }
@@ -124,6 +123,9 @@ protected:
     void ResetThrowCoolTime();
 
     void OnDeath();
+
+public:
+    FPlayerCombatChanged OnCombatChanged;
 
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Components")

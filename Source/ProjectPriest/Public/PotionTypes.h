@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
@@ -16,7 +16,7 @@ enum class EPotionUseResult : uint8
 };
 
 USTRUCT(BlueprintType)
-struct PROJECTPRIEST_API FPotionDefinition : public FTableRowBase
+struct PROJECTPRIEST_API FPotionData : public FTableRowBase
 {
     GENERATED_BODY()
 

@@ -21,13 +21,6 @@ public:
 protected:
     virtual void NativePreConstruct() override;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Priest|Inventory")
-    FPriestOwnedItem Item;
-
-    // Required names in the slot WBP; font, color and alignment are designer-owned.
-    UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> ItemNameText;
-    UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> QuantityText;
-
     UFUNCTION(BlueprintImplementableEvent, Category = "Priest|Inventory")
     void OnItemChanged(const FPriestOwnedItem& InItem);
 
@@ -44,4 +37,12 @@ protected:
 
 private:
     void RefreshItem();
+
+protected:
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Priest|Inventory")
+    FPriestOwnedItem Item;
+
+    // Required names in the slot WBP; font, color and alignment are designer-owned.
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> ItemNameText;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> QuantityText;
 };

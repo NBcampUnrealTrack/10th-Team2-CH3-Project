@@ -138,66 +138,65 @@ void UPriestInventorySubsystem::Initialize(
 {
     Super::Initialize(Collection);
 
-    ItemDefinitions = LoadObject<UDataTable>(
+    ItemDataTable = LoadObject<UDataTable>(
         nullptr,
         TEXT(
             "/Game/01_PP/DataTable/"
-            "DT_ItemDefinitions.DT_ItemDefinitions"
-        )
-    );
-
-    if (!IsValid(ItemDefinitions))
-    {
-        JError(
-            "%hs: DT_ItemDefinitions 로드 실패. "
-            "에셋 경로를 확인하세요.",
-            __FUNCTION__
-        );
-    }
-    else if (
-        ItemDefinitions->GetRowStruct()
-        != FPriestItemDefinition::StaticStruct()
-        )
-    {
-        JError(
-            "%hs: DT_ItemDefinitions의 Row Structure가 "
-            "PriestItemDefinition이 아닙니다.",
-            __FUNCTION__
-        );
-
-        ItemDefinitions = nullptr;
-    }
-
-    PotionDefinitions = LoadObject<UDataTable>(
-        nullptr,
-        TEXT(
-            "/Game/01_PP/DataTable/"
-            "DT_PotionDefinitions.DT_PotionDefinitions"
+            "DT_ItemData.DT_ItemData"
         )
     );
 
     JASSERT(
-        IsValid(PotionDefinitions),
-        "%hs: DT_PotionDefinitions 로드에 실패했습니다. "
+        IsValid(ItemDataTable),
+        "%hs: DT_ItemData 로드 실패. 에셋 경로를 확인하세요.",
+        __FUNCTION__
+    );
+
+    if (
+        ItemDataTable->GetRowStruct()
+        != FPriestItemData::StaticStruct()
+        )
+    {
+        JError(
+            "%hs: DT_ItemData의 Row Structure가 "
+            "PriestItemData가 아닙니다.",
+            __FUNCTION__
+        );
+
+        ItemDataTable = nullptr;
+        return;
+    }
+
+    PotionDataTable = LoadObject<UDataTable>(
+        nullptr,
+        TEXT(
+            "/Game/01_PP/DataTable/"
+            "DT_PotionData.DT_PotionData"
+        )
+    );
+
+    JASSERT(
+        IsValid(PotionDataTable),
+        "%hs: DT_PotionData 로드에 실패했습니다. "
         "에셋 경로를 확인하세요.",
         __FUNCTION__
     );
 
     JASSERT(
-        PotionDefinitions->GetRowStruct()
-        == FPotionDefinition::StaticStruct(),
+        PotionDataTable->GetRowStruct()
+        == FPotionData::StaticStruct(),
         "%hs: 포션 DataTable의 Row Structure가 "
-        "PotionDefinition이 아닙니다.",
+        "PotionData가 아닙니다.",
         __FUNCTION__
     );
 }
 
-bool UPriestInventorySubsystem::TryGetPotionDefinition(
+bool UPriestInventorySubsystem::TryGetPotionData(
     FName ItemId,
-    FPotionDefinition& OutDefinition
+    FPotionData& OutData
 ) const
 {
-    OutDefinition = FPotionDefinition{};
+    OutData = FPotionData{};
 
     if (ItemId.IsNone())
     {
@@ -205,34 +204,34 @@ bool UPriestInventorySubsystem::TryGetPotionDefinition(
     }
 
     JASSERT_BOOL(
-        (IsValid(PotionDefinitions)),
+        (IsValid(PotionDataTable)),
         "%hs: 포션 DataTable이 준비되지 않았습니다.",
         __FUNCTION__
     );
 
-    const FPotionDefinition* Definition =
-        PotionDefinitions->FindRow<FPotionDefinition>(
+    const FPotionData* Data =
+        PotionDataTable->FindRow<FPotionData>(
             ItemId,
-            TEXT("TryGetPotionDefinition"),
+            TEXT("TryGetPotionData"),
             false
         );
 
-    if (!Definition)
+    if (!Data)
     {
         return false;
     }
 
     JASSERT_BOOL(
-        (FMath::IsFinite(Definition->HealAmount)
-            && Definition->HealAmount > 0.0f),
+        (FMath::IsFinite(Data->HealAmount)
+            && Data->HealAmount > 0.0f),
         "%hs: 포션 회복량이 잘못되었습니다. "
         "ItemId=%s, HealAmount=%f",
         __FUNCTION__,
         *ItemId.ToString(),
-        Definition->HealAmount
+        Data->HealAmount
     );
 
-    OutDefinition = *Definition;
+    OutData = *Data;
     return true;
 }
 
@@ -248,16 +247,16 @@ bool UPriestInventorySubsystem::CanAssignQuickSlot(
         return false;
     }
 
-    FPotionDefinition Definition;
-    return TryGetPotionDefinition(ItemId, Definition);
+    FPotionData Data;
+    return TryGetPotionData(ItemId, Data);
 }
 
-bool UPriestInventorySubsystem::TryGetItemDefinition(
+bool UPriestInventorySubsystem::TryGetItemData(
     FName ItemId,
-    FPriestItemDefinition& OutDefinition
+    FPriestItemData& OutData
 ) const
 {
-    OutDefinition = FPriestItemDefinition{};
+    OutData = FPriestItemData{};
 
     if (ItemId.IsNone())
     {
@@ -265,31 +264,31 @@ bool UPriestInventorySubsystem::TryGetItemDefinition(
     }
 
     JASSERT_BOOL(
-        (IsValid(ItemDefinitions)),
+        (IsValid(ItemDataTable)),
         "%hs: 공통 아이템 DataTable이 준비되지 않았습니다.",
         __FUNCTION__
     );
 
-    const FPriestItemDefinition* Definition =
-        ItemDefinitions->FindRow<FPriestItemDefinition>(
+    const FPriestItemData* Data =
+        ItemDataTable->FindRow<FPriestItemData>(
             ItemId,
-            TEXT("TryGetItemDefinition"),
+            TEXT("TryGetItemData"),
             false
         );
 
-    if (!Definition)
+    if (!Data)
     {
         return false;
     }
 
     JASSERT_BOOL(
-        (Definition->Category != EItemCategory::None),
+        (Data->Category != EItemCategory::None),
         "%hs: 아이템 분류가 미지정 상태입니다. ItemId=%s",
         __FUNCTION__,
         *ItemId.ToString()
     );
 
-    OutDefinition = *Definition;
+    OutData = *Data;
     return true;
 }
 
@@ -305,21 +304,18 @@ UPriestInventorySubsystem::GetItemsByCategory(
         return Result;
     }
 
-    if (!IsValid(ItemDefinitions))
-    {
-        JError(
-            "%hs: 공통 아이템 DataTable이 준비되지 않았습니다.",
-            __FUNCTION__
-        );
-
-        return Result;
-    }
+    JASSERT_RETURN(
+        (IsValid(ItemDataTable)),
+        Result,
+        "%hs: 공통 아이템 DataTable이 준비되지 않았습니다.",
+        __FUNCTION__
+    );
 
     for (const FPriestOwnedItem& Item : OwnedItems)
     {
-        FPriestItemDefinition Definition;
+        FPriestItemData Data;
 
-        if (!TryGetItemDefinition(Item.ItemId, Definition))
+        if (!TryGetItemData(Item.ItemId, Data))
         {
             JError(
                 "%hs: 보유 아이템의 공통 정의를 확인하세요. "
@@ -331,7 +327,7 @@ UPriestInventorySubsystem::GetItemsByCategory(
             continue;
         }
 
-        if (Definition.Category == Category)
+        if (Data.Category == Category)
         {
             Result.Add(Item);
         }
