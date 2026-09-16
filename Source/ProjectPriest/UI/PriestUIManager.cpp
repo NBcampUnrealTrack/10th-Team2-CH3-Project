@@ -1,4 +1,4 @@
-#include "PriestUIManager.h"
+﻿#include "PriestUIManager.h"
 #include "JUtility.h"
 #include "Engine/Engine.h"
 #include "PriestMissionController.h"
@@ -14,6 +14,43 @@
 #include "PriestDamageNumberWidget.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
+#include "PriestQuickSlotWidget.h"
+#include "PriestInventorySubsystem.h"
+#include "Engine/GameInstance.h"
+
+void UPriestUIManager::ConnectQuickSlot(UPriestQuickSlotWidget* View, int32 SlotIndex)
+{
+    JASSERT(IsValid(View), "%hs: QuickSlot View가 없습니다.", __FUNCTION__);
+    JASSERT(SlotIndex >= 0 && SlotIndex <= 1, "%hs: 잘못된 슬롯 인덱스 %d", __FUNCTION__, SlotIndex);
+    DisconnectQuickSlot(View);
+    UGameInstance* Instance = GetLocalPlayer() ? GetLocalPlayer()->GetGameInstance() : nullptr;
+    JASSERT(IsValid(Instance), "%hs: GameInstance가 없습니다.", __FUNCTION__);
+    UPriestInventorySubsystem* Inventory = Instance->GetSubsystem<UPriestInventorySubsystem>();
+    JASSERT(IsValid(Inventory), "%hs: InventorySubsystem이 없습니다.", __FUNCTION__);
+    FPriestQuickSlotBinding Binding;
+    Binding.View = View;
+    Binding.Model = NewObject<UPriestQuickSlotModel>(this);
+    Binding.Controller = NewObject<UPriestQuickSlotController>(this);
+    QuickSlotBindings.Add(Binding);
+    Binding.Model->Initialize(Inventory, SlotIndex);
+    Binding.Controller->SetModel(Binding.Model);
+    Binding.Controller->SetView(View);
+    Binding.Controller->HandleModelChanged(Binding.Model, 0);
+}
+
+void UPriestUIManager::DisconnectQuickSlot(UPriestQuickSlotWidget* View)
+{
+    for (int32 Index = QuickSlotBindings.Num() - 1; Index >= 0; --Index)
+    {
+        FPriestQuickSlotBinding& Binding = QuickSlotBindings[Index];
+        if (!Binding.View.IsValid() || Binding.View.Get() == View)
+        {
+            if (IsValid(Binding.Controller)) Binding.Controller->Disconnect();
+            if (IsValid(Binding.Model)) Binding.Model->Disconnect();
+            QuickSlotBindings.RemoveAt(Index);
+        }
+    }
+}
 
 void UPriestUIManager::SetHUDWidgetClass(TSubclassOf<UPriestHUDWidget> WidgetClass)
 {
@@ -168,6 +205,12 @@ void UPriestUIManager::HideHUD()
 
 void UPriestUIManager::Deinitialize()
 {
+    for (FPriestQuickSlotBinding& Binding : QuickSlotBindings)
+    {
+        if (IsValid(Binding.Controller)) Binding.Controller->Disconnect();
+        if (IsValid(Binding.Model)) Binding.Model->Disconnect();
+    }
+    QuickSlotBindings.Empty();
 	// 서브시스템 종료 시 화면과 보유 참조를 정리한다.
     DisconnectCombatHUD();
 	HUD = nullptr;

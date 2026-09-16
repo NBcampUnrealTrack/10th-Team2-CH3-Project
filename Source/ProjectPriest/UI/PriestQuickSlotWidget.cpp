@@ -1,10 +1,12 @@
 ﻿#include "PriestQuickSlotWidget.h"
-#include "PriestInventorySubsystem.h"
 #include "PriestInventoryDragDropOperation.h"
+#include "PriestQuickSlotEventParameter.h"
 #include "Components/TextBlock.h"
-#include "Engine/GameInstance.h"
 #include "Engine/Engine.h"
 #include "JUtility.h"
+#include "PriestUIManager.h"
+#include "Engine/LocalPlayer.h"
+#include "InputCoreTypes.h"
 
 void UPriestQuickSlotWidget::NativePreConstruct()
 {
@@ -21,79 +23,81 @@ void UPriestQuickSlotWidget::NativePreConstruct()
 void UPriestQuickSlotWidget::NativeConstruct()
 {
     Super::NativeConstruct();
-    DisconnectInventory();
-    UGameInstance* Instance = GetGameInstance();
-    JASSERT(IsValid(Instance), "%hs [%s]: GameInstance가 없습니다.", __FUNCTION__, *GetNameSafe(this));
-    Inventory = Instance->GetSubsystem<UPriestInventorySubsystem>();
-    JASSERT(IsValid(Inventory), "%hs [%s]: InventorySubsystem 연결에 실패했습니다.", __FUNCTION__, *GetNameSafe(this));
-    JASSERT(0 <= SlotIndex && SlotIndex <= 1, "%hs [%s]: SlotIndex=%d, 허용 범위는 0~1입니다.", __FUNCTION__, *GetNameSafe(this), SlotIndex);
-    Inventory->OnInventoryChanged.AddUniqueDynamic(this, &UPriestQuickSlotWidget::RefreshQuickSlot);
-    Inventory->OnQuickSlotsChanged.AddUniqueDynamic(this, &UPriestQuickSlotWidget::RefreshQuickSlot);
-    RefreshQuickSlot();
+
+    if (UIManager.IsValid())
+    {
+        UIManager->DisconnectQuickSlot(this);
+    }
+
+    ULocalPlayer* LocalPlayer = GetOwningLocalPlayer();
+
+    JASSERT_RETURN(
+        IsValid(LocalPlayer),
+        ,
+        "%hs: Owning LocalPlayer가 없습니다.",
+        __FUNCTION__
+    );
+
+    UIManager =
+        LocalPlayer->GetSubsystem<UPriestUIManager>();
+
+    JASSERT_RETURN(
+        UIManager.IsValid(),
+        ,
+        "%hs: UIManager가 없습니다.",
+        __FUNCTION__
+    );
+
+    UIManager->ConnectQuickSlot(this, SlotIndex);
 }
 
 void UPriestQuickSlotWidget::NativeDestruct()
 {
-    DisconnectInventory();
+    if (UIManager.IsValid()) UIManager->DisconnectQuickSlot(this);
+    UIManager.Reset();
     Super::NativeDestruct();
-}
-
-void UPriestQuickSlotWidget::DisconnectInventory()
-{
-    if (IsValid(Inventory))
-    {
-        Inventory->OnInventoryChanged.RemoveDynamic(this, &UPriestQuickSlotWidget::RefreshQuickSlot);
-        Inventory->OnQuickSlotsChanged.RemoveDynamic(this, &UPriestQuickSlotWidget::RefreshQuickSlot);
-    }
-    Inventory = nullptr;
 }
 
 void UPriestQuickSlotWidget::SetSlotIndex(int32 InSlotIndex)
 {
-    JASSERT(0 <= InSlotIndex && InSlotIndex <= 1, "%hs [%s]: SlotIndex=%d, 허용 범위는 0~1입니다.", __FUNCTION__, *GetNameSafe(this), InSlotIndex);
+    JASSERT(InSlotIndex >= 0 && InSlotIndex <= 1, "%hs: 잘못된 슬롯 인덱스 %d", __FUNCTION__, InSlotIndex);
     SlotIndex = InSlotIndex;
-    RefreshQuickSlot();
+    if (UIManager.IsValid()) UIManager->ConnectQuickSlot(this, SlotIndex);
 }
 
-void UPriestQuickSlotWidget::RefreshQuickSlot()
+void UPriestQuickSlotWidget::SetQuickSlotData(const FPriestQuickSlotData& InData)
 {
-    JASSERT(IsValid(KeyText), "%hs [%s]: KeyText 바인딩이 유효하지 않습니다. WBP의 Text Block 이름과 타입을 확인하세요.", __FUNCTION__, *GetNameSafe(this));
-    JASSERT(IsValid(ItemNameText), "%hs [%s]: ItemNameText 바인딩이 유효하지 않습니다. WBP의 Text Block 이름과 타입을 확인하세요.", __FUNCTION__, *GetNameSafe(this));
-    JASSERT(IsValid(QuantityText), "%hs [%s]: QuantityText 바인딩이 유효하지 않습니다. WBP의 Text Block 이름과 타입을 확인하세요.", __FUNCTION__, *GetNameSafe(this));
+    ViewData = InData;
+    RefreshDisplay();
+}
 
-    KeyText->SetText(FText::AsNumber(SlotIndex + 1));
-    const FName ItemId = IsValid(Inventory)
-        ? Inventory->GetQuickSlotItemId(SlotIndex) : NAME_None;
-
-    if (ItemId != LastItemId)
-    {
-        LastItemId = ItemId;
-        LastItemName = FText::GetEmpty();
-    }
-    if (ItemId.IsNone())
+void UPriestQuickSlotWidget::RefreshDisplay()
+{
+    JASSERT(IsValid(KeyText), "%hs [%s]: KeyText 바인딩을 확인하세요.", __FUNCTION__, *GetNameSafe(this));
+    JASSERT(IsValid(ItemNameText), "%hs [%s]: ItemNameText 바인딩을 확인하세요.", __FUNCTION__, *GetNameSafe(this));
+    JASSERT(IsValid(QuantityText), "%hs [%s]: QuantityText 바인딩을 확인하세요.", __FUNCTION__, *GetNameSafe(this));
+    KeyText->SetText(FText::AsNumber(ViewData.SlotIndex + 1));
+    if (!ViewData.bAssigned)
     {
         ItemNameText->SetText(NSLOCTEXT("PriestQuickSlot", "Unassigned", "미등록"));
         QuantityText->SetText(FText::GetEmpty());
         SetRenderOpacity(EmptyOpacity);
         return;
     }
-
-    const int32 Quantity = Inventory->GetQuantity(ItemId);
-    for (const FPriestOwnedItem& Item : Inventory->GetOwnedItems())
-    {
-        if (Item.ItemId == ItemId)
-        {
-            LastItemName = Item.DisplayName;
-            break;
-        }
-    }
-    // Keep the last observed name when the stack reaches zero. A fresh widget
-    // falls back to the ID until a shared item-definition lookup is introduced.
-    ItemNameText->SetText(LastItemName.IsEmpty() ? FText::FromName(ItemId) : LastItemName);
-    QuantityText->SetText(FText::Format(NSLOCTEXT("PriestQuickSlot", "Quantity", "× {0}"), FText::AsNumber(Quantity)));
-    SetRenderOpacity(Quantity > 0 ? 1.0f : EmptyOpacity);
+    ItemNameText->SetText(ViewData.DisplayName);
+    QuantityText->SetText(FText::Format(NSLOCTEXT("PriestQuickSlot", "Quantity", "× {0}"), FText::AsNumber(ViewData.Quantity)));
+    SetRenderOpacity(ViewData.Quantity > 0 ? 1.0f : EmptyOpacity);
 }
 
+FDelegateHandle UPriestQuickSlotWidget::AddListener(UMvcControl* Control)
+{
+    return Listener.AddUObject(Control, &UMvcControl::HandleViewEvent);
+}
+void UPriestQuickSlotWidget::RemoveListener(FDelegateHandle Handle) { Listener.Remove(Handle); }
+void UPriestQuickSlotWidget::InvokeViewEvent(EViewEventType EventType, UEventParameterBase* Parameter)
+{
+    Listener.Broadcast(this, EventType, Parameter);
+}
 bool UPriestQuickSlotWidget::NativeOnDrop(
     const FGeometry& InGeometry,
     const FDragDropEvent& InDragDropEvent,
@@ -108,17 +112,19 @@ bool UPriestQuickSlotWidget::NativeOnDrop(
         return false;
     }
 
-    JASSERT_BOOL(
-        (IsValid(Inventory)),
-        "%hs [%s]: InventorySubsystem이 없습니다.",
-        __FUNCTION__,
-        *GetNameSafe(this)
+    TStrongObjectPtr<UPriestQuickSlotEventParameter> Parameter(
+        NewObject<UPriestQuickSlotEventParameter>()
     );
 
-    return Inventory->AssignQuickSlot(
-        SlotIndex,
-        InventoryOperation->ItemId
+    Parameter->Action = EPriestQuickSlotAction::Assign;
+    Parameter->ItemId = InventoryOperation->ItemId;
+
+    InvokeViewEvent(
+        EViewEventType::QuickSlotRequest,
+        Parameter.Get()
     );
+
+    return Parameter->bAccepted;
 }
 
 FReply UPriestQuickSlotWidget::NativeOnMouseButtonDown(
@@ -135,15 +141,16 @@ FReply UPriestQuickSlotWidget::NativeOnMouseButtonDown(
         );
     }
 
-    JASSERT_RETURN(
-        (IsValid(Inventory)),
-        FReply::Handled(),
-        "%hs [%s]: InventorySubsystem이 없습니다.",
-        __FUNCTION__,
-        *GetNameSafe(this)
+    TStrongObjectPtr<UPriestQuickSlotEventParameter> Parameter(
+        NewObject<UPriestQuickSlotEventParameter>()
     );
 
-    Inventory->ClearQuickSlot(SlotIndex);
+    Parameter->Action = EPriestQuickSlotAction::Clear;
+
+    InvokeViewEvent(
+        EViewEventType::QuickSlotRequest,
+        Parameter.Get()
+    );
 
     return FReply::Handled();
 }

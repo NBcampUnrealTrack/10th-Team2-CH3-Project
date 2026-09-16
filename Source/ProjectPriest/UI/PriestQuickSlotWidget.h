@@ -2,19 +2,25 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "MvcView.h"
+#include "PriestQuickSlotData.h"
 #include "PriestQuickSlotWidget.generated.h"
 
-class UPriestInventorySubsystem;
 class UTextBlock;
 class UDragDropOperation;
+class UPriestUIManager;
 
 // WBP owns layout and styling; this class owns inventory observation and text updates.
 UCLASS(Abstract, Blueprintable)
-class PROJECTPRIEST_API UPriestQuickSlotWidget : public UUserWidget
+class PROJECTPRIEST_API UPriestQuickSlotWidget : public UUserWidget, public IMvcView
 {
     GENERATED_BODY()
 
 public:
+    void SetQuickSlotData(const FPriestQuickSlotData& InData);
+    virtual FDelegateHandle AddListener(UMvcControl* Control) override;
+    virtual void RemoveListener(FDelegateHandle Handle) override;
+    virtual void InvokeViewEvent(EViewEventType EventType, UEventParameterBase* Parameter) override;
     UFUNCTION(BlueprintCallable, Category = "Priest|QuickSlot")
     void SetSlotIndex(int32 InSlotIndex);
 
@@ -30,8 +36,7 @@ protected:
     ) override;
 
 private:
-    UFUNCTION() void RefreshQuickSlot();
-    void DisconnectInventory();
+    void RefreshDisplay();
 
     virtual FReply NativeOnMouseButtonDown(
         const FGeometry& InGeometry,
@@ -52,8 +57,8 @@ protected:
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> QuantityText;
 
 private:
-    UPROPERTY(Transient) TObjectPtr<UPriestInventorySubsystem> Inventory;
-    FName LastItemId;
-    FText LastItemName;
+    UPROPERTY(Transient) FPriestQuickSlotData ViewData;
+    TWeakObjectPtr<UPriestUIManager> UIManager;
+    FViewEventRaisedDelegate Listener;
 
 };

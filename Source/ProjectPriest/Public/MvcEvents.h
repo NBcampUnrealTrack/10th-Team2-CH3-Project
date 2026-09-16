@@ -14,7 +14,8 @@ UENUM(BlueprintType)
 enum class EViewEventType : uint8
 {
     None            UMETA(Hidden),
-    ButtonClicked   UMETA(DisplayName = "ButtonClicked")
+    ButtonClicked   UMETA(DisplayName = "ButtonClicked"),
+    QuickSlotRequest
 };
 
 UENUM(BlueprintType)
