@@ -120,3 +120,30 @@ bool UPriestQuickSlotWidget::NativeOnDrop(
         InventoryOperation->ItemId
     );
 }
+
+FReply UPriestQuickSlotWidget::NativeOnMouseButtonDown(
+    const FGeometry& InGeometry,
+    const FPointerEvent& InMouseEvent
+)
+{
+    if (InMouseEvent.GetEffectingButton()
+        != EKeys::RightMouseButton)
+    {
+        return Super::NativeOnMouseButtonDown(
+            InGeometry,
+            InMouseEvent
+        );
+    }
+
+    JASSERT_RETURN(
+        (IsValid(Inventory)),
+        FReply::Handled(),
+        "%hs [%s]: InventorySubsystem이 없습니다.",
+        __FUNCTION__,
+        *GetNameSafe(this)
+    );
+
+    Inventory->ClearQuickSlot(SlotIndex);
+
+    return FReply::Handled();
+}

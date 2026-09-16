@@ -47,4 +47,9 @@ private:
     UPROPERTY(Transient) TObjectPtr<UPriestInventorySubsystem> Inventory;
     FName LastItemId;
     FText LastItemName;
+
+    virtual FReply NativeOnMouseButtonDown(
+        const FGeometry& InGeometry,
+        const FPointerEvent& InMouseEvent
+    ) override;
 };
