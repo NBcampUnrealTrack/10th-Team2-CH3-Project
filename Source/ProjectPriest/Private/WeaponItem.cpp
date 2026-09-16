@@ -1,4 +1,4 @@
-#include "WeaponItem.h"
+﻿#include "WeaponItem.h"
 #include "IngamePlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/PlayerCameraManager.h"
@@ -112,6 +112,16 @@ bool AWeaponItem::CanReload() const
 int AWeaponItem::GetCurrentAmmo() const
 {
     return CurrentAmmo;
+}
+
+void AWeaponItem::AddReserveAmmo(int32 Amount)
+{
+	if (Amount <= 0)
+	{
+		return;
+	}
+
+	ReserveAmmo += Amount;
 }
 
 void AWeaponItem::CompleteReload()
