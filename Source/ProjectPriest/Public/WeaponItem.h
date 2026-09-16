@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "BaseItem.h"
@@ -28,8 +28,13 @@ public:
     virtual bool CanReload() const;
 
     int GetCurrentAmmo() const;
+
     int32 GetReserveAmmo() const { return ReserveAmmo; }
+
+	void AddReserveAmmo(int32 Amount);
+
     FText GetWeaponName() const { return WeaponName; }
+
     FWeaponAmmoChanged OnAmmoChanged;
 
 protected:
