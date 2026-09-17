@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "PriestInventorySubsystem.h"
+#include "PriestInventoryViewData.h"
 #include "PriestInventorySlotWidget.generated.h"
 
 class UTextBlock;
@@ -16,13 +16,13 @@ class PROJECTPRIEST_API UPriestInventorySlotWidget : public UUserWidget
 
 public:
     UFUNCTION(BlueprintCallable, Category = "Priest|Inventory")
-    void SetItem(const FPriestOwnedItem& InItem);
+    void SetItem(const FPriestInventorySlotData& InItem);
 
 protected:
     virtual void NativePreConstruct() override;
 
     UFUNCTION(BlueprintImplementableEvent, Category = "Priest|Inventory")
-    void OnItemChanged(const FPriestOwnedItem& InItem);
+    void OnItemChanged(const FPriestInventorySlotData& InItem);
 
     virtual FReply NativeOnMouseButtonDown(
         const FGeometry& InGeometry,
@@ -40,7 +40,7 @@ private:
 
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Priest|Inventory")
-    FPriestOwnedItem Item;
+    FPriestInventorySlotData Item;
 
     // Required names in the slot WBP; font, color and alignment are designer-owned.
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> ItemNameText;

@@ -29,38 +29,18 @@ void UPriestQuickSlotModel::Disconnect()
 
 bool UPriestQuickSlotModel::AssignItem(FName ItemId)
 {
-    JASSERT_BOOL(
-        IsValid(Inventory),
-        "%hs [%s]: InventorySubsystem이 없습니다.",
-        __FUNCTION__,
-        *GetNameSafe(this)
-    );
+    JASSERT_BOOL(IsValid(Inventory), "%hs [%s]: InventorySubsystem이 없습니다.", __FUNCTION__, *GetNameSafe(this));
 
-    JASSERT_BOOL(
-        !ItemId.IsNone(),
-        "%hs [%s]: ItemId가 유효하지 않습니다.",
-        __FUNCTION__,
-        *GetNameSafe(this)
-    );
+    JASSERT_BOOL(!ItemId.IsNone(), "%hs [%s]: ItemId가 유효하지 않습니다.", __FUNCTION__, *GetNameSafe(this));
 
-    return Inventory->AssignQuickSlot(
-        Data.SlotIndex,
-        ItemId
-    );
+    return Inventory->AssignQuickSlot(Data.SlotIndex, ItemId);
 }
 
 bool UPriestQuickSlotModel::ClearItem()
 {
-    JASSERT_BOOL(
-        IsValid(Inventory),
-        "%hs [%s]: InventorySubsystem이 없습니다.",
-        __FUNCTION__,
-        *GetNameSafe(this)
-    );
+    JASSERT_BOOL(IsValid(Inventory), "%hs [%s]: InventorySubsystem이 없습니다.", __FUNCTION__, *GetNameSafe(this));
 
-    return Inventory->ClearQuickSlot(
-        Data.SlotIndex
-    );
+    return Inventory->ClearQuickSlot(Data.SlotIndex);
 }
 
 void UPriestQuickSlotModel::BeginDestroy()

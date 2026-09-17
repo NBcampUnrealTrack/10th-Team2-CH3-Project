@@ -21,12 +21,15 @@
 void UPriestUIManager::ConnectQuickSlot(UPriestQuickSlotWidget* View, int32 SlotIndex)
 {
     JASSERT(IsValid(View), "%hs: QuickSlot View가 없습니다.", __FUNCTION__);
-    JASSERT(SlotIndex >= 0 && SlotIndex <= 1, "%hs: 잘못된 슬롯 인덱스 %d", __FUNCTION__, SlotIndex);
+    JASSERT(0 <= SlotIndex && SlotIndex <= 1, "%hs: 잘못된 슬롯 인덱스 %d", __FUNCTION__, SlotIndex);
     DisconnectQuickSlot(View);
+
     UGameInstance* Instance = GetLocalPlayer() ? GetLocalPlayer()->GetGameInstance() : nullptr;
     JASSERT(IsValid(Instance), "%hs: GameInstance가 없습니다.", __FUNCTION__);
+
     UPriestInventorySubsystem* Inventory = Instance->GetSubsystem<UPriestInventorySubsystem>();
     JASSERT(IsValid(Inventory), "%hs: InventorySubsystem이 없습니다.", __FUNCTION__);
+
     FPriestQuickSlotBinding Binding;
     Binding.View = View;
     Binding.Model = NewObject<UPriestQuickSlotModel>(this);

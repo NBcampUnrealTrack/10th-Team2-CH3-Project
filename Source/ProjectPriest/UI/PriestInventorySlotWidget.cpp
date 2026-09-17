@@ -1,14 +1,12 @@
-#include "PriestInventorySlotWidget.h"
+﻿#include "PriestInventorySlotWidget.h"
 #include "Components/TextBlock.h"
 #include "PriestInventoryDragDropOperation.h"
-#include "PriestInventorySubsystem.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
-#include "Engine/GameInstance.h"
 #include "Engine/Engine.h"
 #include "InputCoreTypes.h"
 #include "JUtility.h"
 
-void UPriestInventorySlotWidget::SetItem(const FPriestOwnedItem& InItem)
+void UPriestInventorySlotWidget::SetItem(const FPriestInventorySlotData& InItem)
 {
     Item = InItem;
     RefreshItem();
@@ -69,38 +67,16 @@ void UPriestInventorySlotWidget::NativeOnDragDetected(
 {
     OutOperation = nullptr;
 
-    UGameInstance* Instance = GetGameInstance();
-
-    JASSERT(
-        IsValid(Instance),
-        "%hs: GameInstance가 없습니다.",
-        __FUNCTION__
-    );
-
-    UPriestInventorySubsystem* Inventory =
-        Instance->GetSubsystem<UPriestInventorySubsystem>();
-
-    JASSERT(
-        IsValid(Inventory),
-        "%hs: InventorySubsystem이 없습니다.",
-        __FUNCTION__
-    );
-
-    const bool bIsEmptySlot = Item.ItemId.IsNone()
-        || Inventory->GetQuantity(Item.ItemId) <= 0;
+    const bool bIsEmptySlot =
+        Item.ItemId.IsNone()
+        || Item.Quantity <= 0;
 
     if (bIsEmptySlot)
     {
         return;
     }
 
-    //일단 포션만 드래그 가능
-    FPotionData Data;
-
-    if (!Inventory->TryGetPotionData(
-        Item.ItemId,
-        Data
-    ))
+    if (!Item.bQuickSlotCompatible)
     {
         return;
     }
@@ -111,17 +87,9 @@ void UPriestInventorySlotWidget::NativeOnDragDetected(
             GetClass()
         );
 
-    JASSERT(
-        IsValid(DragVisual),
-        "%hs: 드래그 표시 위젯 생성에 실패했습니다.",
-        __FUNCTION__
-    );
+    JASSERT(IsValid(DragVisual), "%hs: 드래그 표시 위젯 생성에 실패했습니다.", __FUNCTION__);
 
-    FPriestOwnedItem DisplayItem = Item;
-    DisplayItem.Quantity =
-        Inventory->GetQuantity(Item.ItemId);
-
-    DragVisual->SetItem(DisplayItem);
+    DragVisual->SetItem(Item);
 
     DragVisual->SetVisibility(
         ESlateVisibility::HitTestInvisible
@@ -136,11 +104,7 @@ void UPriestInventorySlotWidget::NativeOnDragDetected(
             )
         );
 
-    JASSERT(
-        IsValid(Operation),
-        "%hs: 드래그 작업 생성에 실패했습니다.",
-        __FUNCTION__
-    );
+    JASSERT(IsValid(Operation), "%hs: 드래그 작업 생성에 실패했습니다.", __FUNCTION__);
 
     Operation->ItemId = Item.ItemId;
     Operation->DefaultDragVisual = DragVisual;

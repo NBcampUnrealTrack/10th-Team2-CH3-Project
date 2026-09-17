@@ -6,10 +6,9 @@
 #include "Components/WidgetSwitcher.h"
 #include "PriestMenuMvc.h"
 #include "UObject/StrongObjectPtr.h"
-#include "PriestInventorySubsystem.h"
-#include "Engine/GameInstance.h"
 #include "PriestInventorySlotWidget.h"
 #include "Components/UniformGridPanel.h"
+#include "PriestInventoryEventParameter.h"
 
 bool UPriestMainMenuWidget::Initialize()
 {
@@ -34,66 +33,86 @@ void UPriestMainMenuWidget::NativeConstruct()
         return;
     }
 	SetIsFocusable(true);
-	UGameInstance* Instance = GetGameInstance();
-	JASSERT(IsValid(Instance), "%hs [%s]: GameInstance가 없습니다.", __FUNCTION__, *GetNameSafe(this));
-	Inventory = Instance->GetSubsystem<UPriestInventorySubsystem>();
-	JASSERT(IsValid(Inventory), "%hs [%s]: InventorySubsystem 연결에 실패했습니다.", __FUNCTION__, *GetNameSafe(this));
-	Inventory->OnInventoryChanged.AddUniqueDynamic(this, &UPriestMainMenuWidget::RefreshInventory);
-	RefreshInventory();
 	ShowStatusMessage(FText::GetEmpty());
 	RefreshPage();
+    if (bHasInventoryData)
+    {
+        RefreshInventoryDisplay();
+    }
 
 }
 
 void UPriestMainMenuWidget::NativeDestruct()
 {
-    if (Inventory)
-    {
-        Inventory->OnInventoryChanged.RemoveDynamic(this, &UPriestMainMenuWidget::RefreshInventory);
-        Inventory = nullptr;
-    }
     Super::NativeDestruct();
 }
 
-void UPriestMainMenuWidget::RefreshInventory()
+void UPriestMainMenuWidget::SetInventoryData(const FPriestInventoryViewData& InData)
 {
-    if (!Inventory)
-    {
-        return;
-    }
-    const TArray<FPriestOwnedItem> Items =
-        Inventory->GetItemsByCategory(SelectedCategory);
-    if (InventorySummary)
-    {
-        InventorySummary->SetText(Items.IsEmpty()
-            ? NSLOCTEXT("PriestInventory", "Empty", "보유 중인 아이템이 없습니다.")
-            : FText::Format(NSLOCTEXT("PriestInventory", "Kinds", "총 {0}종"), FText::AsNumber(Items.Num())));
-    }
-    if (!InventoryGrid)
-    {
-        return;
-    }
+    InventoryData = InData;
+    bHasInventoryData = true;
+    RefreshInventoryDisplay();
+}
+
+void UPriestMainMenuWidget::SelectInventoryCategory(EItemCategory InCategory)
+{
+    TStrongObjectPtr<UPriestInventoryEventParameter> Request(
+        NewObject<UPriestInventoryEventParameter>()
+    );
+
+    Request->Action = EPriestInventoryAction::SelectCategory;
+
+    Request->Category = InCategory;
+
+    InvokeViewEvent(EViewEventType::InventoryRequest, Request.Get());
+}
+
+void UPriestMainMenuWidget::RefreshInventoryDisplay()
+{
+    const TArray<FPriestInventorySlotData>& Items =
+        InventoryData.Items;
+
+    JASSERT(IsValid(InventoryGrid),
+        "%hs [%s]: InventoryGrid 바인딩이 없습니다. WBP의 Uniform Grid Panel 이름을 확인하세요.",
+        __FUNCTION__,
+        *GetNameSafe(this)
+    );
+
     InventoryGrid->ClearChildren();
-    if (!InventorySlotClass || InventorySlotClass->HasAnyClassFlags(CLASS_Abstract))
+
+    if (!InventorySlotClass
+        || InventorySlotClass->HasAnyClassFlags(CLASS_Abstract))
     {
-        UE_LOG(LogTemp, Warning, TEXT("Main menu: Set InventorySlotClass to WBP_InventorySlot in Class Defaults."));
+        JWarning("Main menu: Set InventorySlotClass " "to WBP_InventorySlot in Class Defaults.");
         return;
     }
+
     const int32 Columns = FMath::Max(1, InventoryColumns);
+
     for (int32 Index = 0; Index < Items.Num(); ++Index)
     {
-        UPriestInventorySlotWidget* SlotWidget = CreateWidget<UPriestInventorySlotWidget>(GetOwningPlayer(), InventorySlotClass);
-        if (SlotWidget)
+        UPriestInventorySlotWidget* SlotWidget =
+            CreateWidget<UPriestInventorySlotWidget>(
+                GetOwningPlayer(),
+                InventorySlotClass
+            );
+
+        if (!IsValid(SlotWidget))
         {
-            SlotWidget->SetItem(Items[Index]);
-            InventoryGrid->AddChildToUniformGrid(SlotWidget, Index / Columns, Index % Columns);
+            JError("%hs: 슬롯 생성 실패. ItemId=%s", __FUNCTION__, *Items[Index].ItemId.ToString());
+            continue;
         }
-        else
-        {
-            JError("%hs: 슬롯 생성 실패. ItemId=%s, Class=%s", __FUNCTION__, *Items[Index].ItemId.ToString(), *GetNameSafe(InventorySlotClass.Get()));
-        }
+
+        SlotWidget->SetItem(Items[Index]);
+
+        InventoryGrid->AddChildToUniformGrid(
+            SlotWidget,
+            Index / Columns,
+            Index % Columns
+        );
     }
 }
+
 void UPriestMainMenuWidget::ShowTitle()
 {
     SendRequest(EPriestMenuAction::Title);
@@ -161,33 +180,4 @@ void UPriestMainMenuWidget::ShowStatusMessage(const FText& Message)
 	{
 		MenuStatusText->SetText(Message);
 	}
-}
-
-void UPriestMainMenuWidget::SelectInventoryCategory(
-    EItemCategory InCategory
-)
-{
-    switch (InCategory)
-    {
-    case EItemCategory::Weapon:
-    case EItemCategory::Ammo:
-    case EItemCategory::Consumable:
-    case EItemCategory::Material:
-        break;
-
-    default:
-        JError(
-            "%hs: 잘못된 인벤토리 분류입니다. Category=%d",
-            __FUNCTION__,
-            static_cast<int32>(InCategory)
-        );
-        return;
-    }
-
-    SelectedCategory = InCategory;
-
-    if (IsValid(Inventory))
-    {
-        RefreshInventory();
-    }
 }

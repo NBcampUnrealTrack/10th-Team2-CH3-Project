@@ -18,8 +18,7 @@ class PROJECTPRIEST_API UPriestQuickSlotEventParameter
     GENERATED_BODY()
 
 public:
-    EPriestQuickSlotAction Action =
-        EPriestQuickSlotAction::Assign;
+    EPriestQuickSlotAction Action = EPriestQuickSlotAction::Assign;
 
     FName ItemId = NAME_None;
 

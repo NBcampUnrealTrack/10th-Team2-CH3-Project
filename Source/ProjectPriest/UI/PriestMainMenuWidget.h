@@ -4,13 +4,13 @@
 #include "Blueprint/UserWidget.h"
 #include "MvcView.h"
 #include "PriestItemTypes.h"
+#include "PriestInventoryViewData.h"
 #include "PriestMainMenuWidget.generated.h"
 
 enum class EPriestMenuAction : uint8;
 class UTextBlock;
 class UWidgetSwitcher;
 class UUniformGridPanel;
-class UPriestInventorySubsystem;
 class UPriestInventorySlotWidget;
 
 // 값은 WBP의 MenuSwitcher 자식 순서와 일치해야 한다.
@@ -38,6 +38,7 @@ class PROJECTPRIEST_API UPriestMainMenuWidget : public UUserWidget, public IMvcV
 
 public:
     virtual bool Initialize() override;
+	void SetInventoryData(const FPriestInventoryViewData& InData);
     bool HasValidBindings() const
     {
         return bBindingsReady;
@@ -82,9 +83,9 @@ protected:
     void OnMenuStateChanged(EPriestMenuPage Page, EPriestLobbyTab Tab);
 
 private:
-    UFUNCTION() void RefreshInventory();
     bool SendRequest(EPriestMenuAction Action);
     void RefreshPage();
+	void RefreshInventoryDisplay();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Priest|Inventory")
@@ -99,15 +100,11 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Priest|Menu")
 	EPriestLobbyTab CurrentTab = EPriestLobbyTab::Region;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Priest|Inventory")
-	EItemCategory SelectedCategory = EItemCategory::Consumable;
-
 private:
-    UPROPERTY(Transient) TObjectPtr<UPriestInventorySubsystem> Inventory;
-    // Designer owns layout. Optional so menus without inventory still work.
-    UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UUniformGridPanel> InventoryGrid;
-    UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UTextBlock> InventorySummary;
+	UPROPERTY(Transient) FPriestInventoryViewData InventoryData;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UUniformGridPanel> InventoryGrid;
     bool bBindingsReady = false;
+    bool bHasInventoryData = false;
     FViewEventRaisedDelegate Listener;
 
 	UPROPERTY(meta = (BindWidget))

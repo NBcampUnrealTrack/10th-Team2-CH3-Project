@@ -8,6 +8,8 @@
 class UPriestMainMenuWidget;
 class UPriestMenuModel;
 class UPriestMenuController;
+class UPriestInventoryModel;
+class UPriestInventoryController;
 
 UCLASS()
 class PROJECTPRIEST_API APriestMainMenuPlayerController : public APlayerController
@@ -45,8 +47,10 @@ private:
     UPROPERTY(Transient) TObjectPtr<UPriestMenuModel> MenuModel;
     UPROPERTY(Transient) TObjectPtr<UPriestMenuController> MenuController;
 
-	UPROPERTY(Transient)
-	TObjectPtr<UPriestMainMenuWidget> MainMenu;
+	UPROPERTY(Transient) TObjectPtr<UPriestMainMenuWidget> MainMenu;
+	UPROPERTY(Transient) TObjectPtr<UPriestInventoryModel> InventoryModel;
+
+	UPROPERTY(Transient) TObjectPtr<UPriestInventoryController> InventoryController;
 
 	FDelegateHandle TravelFailureHandle;
 	bool bTravelRequested = false;

@@ -16,7 +16,10 @@ public:
     bool AssignItem(FName ItemID);
     bool ClearItem();
     virtual void BeginDestroy() override;
-    const FPriestQuickSlotData& GetData() const { return Data; }
+    const FPriestQuickSlotData& GetData() const 
+    { 
+        return Data; 
+    }
     virtual FDelegateHandle AddListener(UMvcControl* Control) override;
     virtual void RemoveListener(FDelegateHandle Handle) override;
     virtual void InvokePropertyChanged(uint8 PropertyName) override;
