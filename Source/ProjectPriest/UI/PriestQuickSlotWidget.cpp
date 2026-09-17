@@ -102,7 +102,10 @@ FDelegateHandle UPriestQuickSlotWidget::AddListener(UMvcControl* Control)
 {
     return Listener.AddUObject(Control, &UMvcControl::HandleViewEvent);
 }
-void UPriestQuickSlotWidget::RemoveListener(FDelegateHandle Handle) { Listener.Remove(Handle); }
+void UPriestQuickSlotWidget::RemoveListener(FDelegateHandle Handle) 
+{ 
+    Listener.Remove(Handle); 
+}
 void UPriestQuickSlotWidget::InvokeViewEvent(EViewEventType EventType, UEventParameterBase* Parameter)
 {
     Listener.Broadcast(this, EventType, Parameter);

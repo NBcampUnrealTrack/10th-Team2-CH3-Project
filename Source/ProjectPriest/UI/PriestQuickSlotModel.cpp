@@ -49,6 +49,11 @@ void UPriestQuickSlotModel::BeginDestroy()
     Super::BeginDestroy();
 }
 
+const FPriestQuickSlotData& UPriestQuickSlotModel::GetData() const
+{
+    return Data;
+}
+
 void UPriestQuickSlotModel::Refresh()
 {
     JASSERT(IsValid(Inventory), "%hs: InventorySubsystem이 없습니다.", __FUNCTION__);

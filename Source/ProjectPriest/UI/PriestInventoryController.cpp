@@ -15,10 +15,7 @@ void UPriestInventoryController::HandleModelChanged(IMvcModel* InModel, uint8 Pr
 
     JASSERT(IsValid(View), "%hs: Inventory View가 유효하지 않습니다.", __FUNCTION__);
 
-    if (InModel != Model)
-    {
-        return;
-    }
+    JASSERT(InModel == Model, "%hs: 연결된 Model과 이벤트 발생 Model이 다릅니다.", __FUNCTION__);
 
     View->SetInventoryData(Model->GetData());
 }
@@ -33,10 +30,7 @@ void UPriestInventoryController::HandleViewEvent(IMvcView* InView, EViewEventTyp
 
     JASSERT(IsValid(View), "%hs: Inventory View가 유효하지 않습니다.", __FUNCTION__);
 
-    if (InView != View)
-    {
-        return;
-    }
+    JASSERT(InView == View, "%hs: 연결된 View와 이벤트 발생 View가 다릅니다.", __FUNCTION__);
 
     if (EventType != EViewEventType::InventoryRequest)
     {
