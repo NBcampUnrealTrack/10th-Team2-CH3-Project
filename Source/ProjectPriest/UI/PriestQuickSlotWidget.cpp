@@ -13,9 +13,18 @@ void UPriestQuickSlotWidget::NativePreConstruct()
     Super::NativePreConstruct();
     if (IsDesignTime())
     {
-        if (KeyText) KeyText->SetText(FText::AsNumber(SlotIndex + 1));
-        if (ItemNameText) ItemNameText->SetText(NSLOCTEXT("PriestQuickSlot", "PreviewPotion", "회복 포션"));
-        if (QuantityText) QuantityText->SetText(FText::FromString(TEXT("× 5")));
+        if (KeyText)
+        {
+            KeyText->SetText(FText::AsNumber(SlotIndex + 1));
+        }
+        if (ItemNameText)
+        {
+            ItemNameText->SetText(NSLOCTEXT("PriestQuickSlot", "PreviewPotion", "회복 포션"));
+        }
+        if (QuantityText)
+        {
+            QuantityText->SetText(FText::FromString(TEXT("× 5")));
+        }
         SetRenderOpacity(1.0f);
     }
 }
