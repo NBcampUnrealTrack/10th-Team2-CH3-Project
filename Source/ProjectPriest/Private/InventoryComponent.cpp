@@ -1,4 +1,5 @@
 ﻿#include "InventoryComponent.h"
+#include "Engine/DataTable.h"
 #include "JUtility.h"
 
 UInventoryComponent::UInventoryComponent()
@@ -89,4 +90,41 @@ bool UInventoryComponent::HasItem(FName ItemID, int32 Quantity) const
 {
 	// Quantity에는 보통 1이 들어감
 	return GetItemQuantity(ItemID) >= Quantity;
+}
+
+bool UInventoryComponent::CraftItem(FName RecipeID)
+{
+	if (!RecipeDataTable)
+	{
+		JError("RecipeDataTable이 없습니다.");
+		return false;
+	}
+
+	const FRecipeData* RecipeData = RecipeDataTable->FindRow<FRecipeData>(RecipeID, TEXT("UInventoryComponent::CraftItem"));
+
+	if (!RecipeData)
+	{
+		JError("Recipe를 찾을 수 없습니다.");
+		return false;
+	}
+
+	// 재료 보유 여부 확인
+	for (const FRecipeIngredient& Ingredient : RecipeData->Ingredients)
+	{
+		if (!HasItem(Ingredient.ItemID, Ingredient.Quantity))
+		{
+			return false;
+		}
+	}
+
+	// 인벤토리에서 재료 감소
+	for (const FRecipeIngredient& Ingredient : RecipeData->Ingredients)
+	{
+		RemoveItem(Ingredient.ItemID, Ingredient.Quantity);
+	}
+
+	// 인벤토리에 바로 제작 아이템 추가
+	AddItem(RecipeData->ResultItemID, RecipeData->ResultQuantity);
+
+	return true;
 }
