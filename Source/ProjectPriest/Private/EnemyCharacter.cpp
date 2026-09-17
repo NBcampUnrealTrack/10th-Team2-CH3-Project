@@ -127,15 +127,6 @@ void AEnemyCharacter::BeginPlay()
 	IngameGameMode->OnMonsterSpawned();	
 }
 
-
-//TODO: 아 맘에 안들어 겁나 화나는 그런 구조네...
-// BT_Attack 
-// -> AEnemyCharacter::Attack() 
-// -> Play Montage 
-// -> Raise ApplyDamage 
-// -> AEnemyCharacter::OnNotifyApplyDamage
-// -> BT_Attack.OnApplyDamage;
-
 float AEnemyCharacter::GetAttackRange()
 {
 	return AttackRange;
@@ -199,7 +190,17 @@ void AEnemyCharacter::DropItem()
 	// 50 : 50 확률로 재료 / 총알 아이템 선택
 	if (FMath::RandBool())
 	{
-		SelectedItemClass = MonsterData->DropItem.MaterialItemClass;
+		const TArray<TSubclassOf<ABaseItem>>& MaterialItemClasses = MonsterData->DropItem.MaterialItemClasses;
+		
+		if (MaterialItemClasses.IsEmpty())
+		{
+			JError("MaterialItemClasses가 비어 있습니다.");
+			return;
+		}
+
+		const int32 RandomIndex = FMath::RandRange(0, MaterialItemClasses.Num() - 1);
+
+		SelectedItemClass = MaterialItemClasses[RandomIndex];
 	}
 	else
 	{

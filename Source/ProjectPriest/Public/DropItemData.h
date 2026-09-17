@@ -11,7 +11,7 @@ struct PROJECTPRIEST_API FDropItemData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<ABaseItem> MaterialItemClass = nullptr;
+	TArray<TSubclassOf<ABaseItem>> MaterialItemClasses;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<ABaseItem> AmmoItemClass = nullptr;
