@@ -7,24 +7,18 @@
 #include "Engine/DamageEvents.h"
 // Sets default values
 AProjectile::AProjectile()
-
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
     SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Scene Root"));
-    StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
     Vfx = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Vfx"));
-    Collision = CreateDefaultSubobject<USphereComponent>(TEXT("Collision"));
 
     SetRootComponent(SceneRoot);
-    StaticMesh->SetupAttachment(SceneRoot);
     Vfx->SetupAttachment(SceneRoot);
-    Collision->SetupAttachment(SceneRoot);    
 	
-	Collision->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnOverlapBegin);
-	Collision->OnComponentEndOverlap.AddDynamic(this, &AProjectile::OnOverlapEnd);
-	Collision->SetGenerateOverlapEvents(true);
+    LifeTime = 5.0f;
+    MoveSpeed = 1000.0f;
 }
 
 // Called when the game starts or when spawned
