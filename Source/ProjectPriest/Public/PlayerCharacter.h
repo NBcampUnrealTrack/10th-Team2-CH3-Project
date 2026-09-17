@@ -63,10 +63,7 @@ public:
     float GetMaxHealth() const { return MaxHealth; }
     AWeaponItem* GetEquippedWeapon() const { return WeaponInstance.Get(); }
 
-    AWeaponItem* GetWeaponInstance() const
-    {
-        return WeaponInstance;
-    }
+    AWeaponItem* GetWeaponInstance() const;
 
     const FVector GetMuzzleLocation();
     /////////////////////////////////////

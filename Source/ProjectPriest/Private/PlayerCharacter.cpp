@@ -206,6 +206,11 @@ float APlayerCharacter::TakeDamage(
     return ActualDamage;
 }
 
+AWeaponItem* APlayerCharacter::GetWeaponInstance() const
+{
+    return WeaponInstance;
+}
+
 const FVector APlayerCharacter::GetMuzzleLocation()
 {
     const FName SocketName = TEXT("gun_pinSocket");
