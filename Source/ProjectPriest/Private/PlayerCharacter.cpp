@@ -206,9 +206,19 @@ float APlayerCharacter::TakeDamage(
     return ActualDamage;
 }
 
-AWeaponItem* APlayerCharacter::GetWeaponInstance() const
+float APlayerCharacter::GetCurrentHealth() const
 {
-    return WeaponInstance;
+    return CurrentHealth;
+}
+
+float APlayerCharacter::GetMaxHealth() const
+{
+    return MaxHealth;
+}
+
+AWeaponItem* APlayerCharacter::GetEquippedWeapon() const
+{
+    return WeaponInstance.Get();
 }
 
 const FVector APlayerCharacter::GetMuzzleLocation()

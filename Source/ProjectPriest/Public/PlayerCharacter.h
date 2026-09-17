@@ -59,11 +59,12 @@ public:
     ) override;
 
     FPlayerCombatChanged OnCombatChanged;
-    float GetCurrentHealth() const { return CurrentHealth; }
-    float GetMaxHealth() const { return MaxHealth; }
-    AWeaponItem* GetEquippedWeapon() const { return WeaponInstance.Get(); }
 
-    AWeaponItem* GetWeaponInstance() const;
+    float GetCurrentHealth() const;
+
+    float GetMaxHealth() const;
+
+    AWeaponItem* GetEquippedWeapon() const;
 
     const FVector GetMuzzleLocation();
     /////////////////////////////////////
