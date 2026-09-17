@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+#include "DropItemData.h"
 #include "MonsterData.generated.h"
 
 USTRUCT(BlueprintType)
@@ -35,8 +36,7 @@ struct FMonsterData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Patrol")
 	float PatrolRadius = 0.0f;
 
-	//드롭 아이템
+	//드롭 아이템 관리 테이블
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|DropItem")
-	TSubclassOf<AActor> DropItemClass = nullptr;
-
+	FDropItemData DropItem;
 };
