@@ -1,5 +1,6 @@
 ﻿#include "PriestInventorySubsystem.h"
 #include "Engine/Engine.h"
+#include "PriestInventorySettings.h"
 #include "Engine/DataTable.h"
 #include "UObject/UObjectGlobals.h"
 #include "JUtility.h"
@@ -138,17 +139,14 @@ void UPriestInventorySubsystem::Initialize(
 {
     Super::Initialize(Collection);
 
-    ItemDataTable = LoadObject<UDataTable>(
-        nullptr,
-        TEXT(
-            "/Game/01_PP/DataTable/"
-            "DT_ItemData.DT_ItemData"
-        )
-    );
+    const UPriestInventorySettings* Settings =
+        GetDefault<UPriestInventorySettings>();
+
+    ItemDataTable = Settings->ItemDataTable.LoadSynchronous();
 
     JASSERT(
         IsValid(ItemDataTable),
-        "%hs: DT_ItemData 로드 실패. 에셋 경로를 확인하세요.",
+        "%hs: ItemDataTable 로드 실패. 프로젝트 설정의 Inventory Settings를 확인하세요.",
         __FUNCTION__
     );
 
@@ -167,18 +165,11 @@ void UPriestInventorySubsystem::Initialize(
         return;
     }
 
-    PotionDataTable = LoadObject<UDataTable>(
-        nullptr,
-        TEXT(
-            "/Game/01_PP/DataTable/"
-            "DT_PotionData.DT_PotionData"
-        )
-    );
+    PotionDataTable = Settings->PotionDataTable.LoadSynchronous();
 
     JASSERT(
         IsValid(PotionDataTable),
-        "%hs: DT_PotionData 로드에 실패했습니다. "
-        "에셋 경로를 확인하세요.",
+        "%hs: PotionDataTable 로드 실패. 프로젝트 설정의 Inventory Settings를 확인하세요.",
         __FUNCTION__
     );
 
