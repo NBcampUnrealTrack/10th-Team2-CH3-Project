@@ -191,17 +191,28 @@ void AEnemyCharacter::DropItem()
 		RowDataTable.GetRow<FMonsterData>(
 			TEXT("AEnemyCharacter::DropItem")
 		);
-	if (!MonsterData || !MonsterData->DropItemClass)
-	{ 
-		return;
+
+	JASSERT(MonsterData, "MonsterData가 없습니다.");
+
+	TSubclassOf<ABaseItem> SelectedItemClass;
+
+	// 50 : 50 확률로 재료 / 총알 아이템 선택
+	if (FMath::RandBool())
+	{
+		SelectedItemClass = MonsterData->DropItem.MaterialItemClass;
+	}
+	else
+	{
+		SelectedItemClass = MonsterData->DropItem.AmmoItemClass;
 	}
 
-	GetWorld()->SpawnActor<AActor>(
-		MonsterData->DropItemClass,
+	JASSERT(SelectedItemClass, "재료 아이템 혹은 총알 아이템이 선택되지 않았습니다.");
+
+	GetWorld()->SpawnActor<ABaseItem>(
+		SelectedItemClass,
 		GetActorLocation(),
 		FRotator::ZeroRotator
 	);
-	
 }
 
 void AEnemyCharacter::DestroyEnemy()

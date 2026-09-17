@@ -210,6 +210,21 @@ float APlayerCharacter::TakeDamage(
     return ActualDamage;
 }
 
+float APlayerCharacter::GetCurrentHealth() const
+{
+    return CurrentHealth;
+}
+
+float APlayerCharacter::GetMaxHealth() const
+{
+    return MaxHealth;
+}
+
+AWeaponItem* APlayerCharacter::GetEquippedWeapon() const
+{
+    return WeaponInstance.Get();
+}
+
 const FVector APlayerCharacter::GetMuzzleLocation()
 {
     const FName SocketName = TEXT("gun_pinSocket");
