@@ -27,13 +27,13 @@ public:
 
     virtual bool CanReload() const;
 
-    int GetCurrentAmmo() const;
+    int32 GetCurrentAmmo() const;
 
-    int32 GetReserveAmmo() const { return ReserveAmmo; }
+	int32 GetReserveAmmo() const;
 
 	void AddReserveAmmo(int32 Amount);
 
-    FText GetWeaponName() const { return WeaponName; }
+	FText GetWeaponName() const;
 
     FWeaponAmmoChanged OnAmmoChanged;
 
