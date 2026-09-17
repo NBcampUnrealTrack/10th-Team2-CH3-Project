@@ -16,7 +16,7 @@ void AAmmoUpItem::ActivateItem(AActor* Activator)
 
 	JASSERT(Player, "Player가 없습니다.");
 
-	AWeaponItem* Weapon = Player->GetWeaponInstance();
+	AWeaponItem* Weapon = Player->GetEquippedWeapon();
 
 	JASSERT(Weapon, "Weapon이 없습니다.");
 
