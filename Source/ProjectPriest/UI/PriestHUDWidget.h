@@ -20,6 +20,11 @@ class PROJECTPRIEST_API UPriestHUDWidget
 {
 	GENERATED_BODY()
 public:
+    virtual bool Initialize() override;
+    bool HasValidBindings() const
+    {
+        return bBindingsReady;
+    }
     void ShowKillNotification();
     void ResetKillNotification();
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Priest|Kill Notification", meta=(ClampMin="0.1"))
@@ -55,6 +60,7 @@ protected:
     virtual void NativeTick(const FGeometry& Geometry, float DeltaTime) override;
 
 private:
+    bool bBindingsReady = false;
     // 디자인과 문구는 WBP에서 설정하고, 코드는 표시 시간만 제어한다.
     UPROPERTY(meta=(BindWidget))
     TObjectPtr<UWidget> DamageFeedback;

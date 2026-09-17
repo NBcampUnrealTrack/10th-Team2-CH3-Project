@@ -1,4 +1,5 @@
 #include "IngamePlayerController.h"
+#include "JUtility.h"
 #include "IngameGameState.h"
 #include "../UI/PriestStageClearWidget.h"
 #include "../UI/PriestDeathWidget.h"
@@ -40,7 +41,7 @@ void AIngamePlayerController::BeginPlay()
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed."), __FUNCTION__, *GetNameSafe(this));
+        JError("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed.", __FUNCTION__, *GetNameSafe(this));
     }
     if (GEngine)
     {
@@ -56,7 +57,7 @@ void AIngamePlayerController::BeginPlay()
         }
         else
         {
-            UE_LOG(LogTemp, Error, TEXT("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed."), __FUNCTION__, *GetNameSafe(this));
+            JError("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed.", __FUNCTION__, *GetNameSafe(this));
         }
     }
 
@@ -122,7 +123,7 @@ void AIngamePlayerController::HandleCombatPawnChanged(APawn* PreviousPawn, APawn
         }
         else
         {
-            UE_LOG(LogTemp, Error, TEXT("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed."), __FUNCTION__, *GetNameSafe(this));
+            JError("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed.", __FUNCTION__, *GetNameSafe(this));
         }
     }
 }
@@ -159,7 +160,7 @@ void AIngamePlayerController::ClientNotifyHitConfirmed_Implementation(float Appl
         }
         else
         {
-            UE_LOG(LogTemp, Error, TEXT("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed."), __FUNCTION__, *GetNameSafe(this));
+            JError("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed.", __FUNCTION__, *GetNameSafe(this));
         }
     }
 }
@@ -178,7 +179,7 @@ void AIngamePlayerController::ClientNotifyPlayerDamaged_Implementation(APawn* Da
         }
         else
         {
-            UE_LOG(LogTemp, Error, TEXT("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed."), __FUNCTION__, *GetNameSafe(this));
+            JError("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed.", __FUNCTION__, *GetNameSafe(this));
         }
     }
 }
@@ -193,7 +194,7 @@ void AIngamePlayerController::ClientNotifyEnemyKilled_Implementation()
         }
         else
         {
-            UE_LOG(LogTemp, Error, TEXT("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed."), __FUNCTION__, *GetNameSafe(this));
+            JError("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed.", __FUNCTION__, *GetNameSafe(this));
         }
     }
 }
@@ -257,7 +258,7 @@ bool AIngamePlayerController::ExecuteResultTravel(bool bRestart, FText& OutError
     if (Package.IsEmpty() || !FPackageName::DoesPackageExist(Package))
     {
         OutError = NSLOCTEXT("PriestDeath", "MissingMap", "Map not found. Check the map settings.");
-        UE_LOG(LogTemp, Warning, TEXT("Priest Death UI: Map does not exist: %s"), *Package);
+        JWarning("Priest Death UI: Map does not exist: %s", *Package);
         return false;
     }
     bResultTravelRequested = true;
@@ -272,7 +273,7 @@ void AIngamePlayerController::HandleResultTravelFailure(UWorld* World, ETravelFa
         return;
     }
     bResultTravelRequested = false;
-    UE_LOG(LogTemp, Warning, TEXT("Priest Death UI: Travel failed (%d): %s"), static_cast<int32>(FailureType), *ErrorString);
+    JWarning("Priest Death UI: Travel failed (%d): %s", static_cast<int32>(FailureType), *ErrorString);
     OnResultTravelFailed.Broadcast(NSLOCTEXT("PriestDeath", "TravelFailed", "Map travel failed. Please try again."));
 }
 
@@ -280,7 +281,7 @@ void AIngamePlayerController::HandleMissionGameStateChanged(AGameStateBase* Stat
 {
     if (IsValid(State) && !Cast<AIngameGameState>(State))
     {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: GameState has the wrong type. Set GameStateClass to IngameGameState in the game mode."), __FUNCTION__, *GetNameSafe(this));
+        JError("%hs [%s]: GameState has the wrong type. Set GameStateClass to IngameGameState in the game mode.", __FUNCTION__, *GetNameSafe(this));
     }
     if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
     {
@@ -290,7 +291,7 @@ void AIngamePlayerController::HandleMissionGameStateChanged(AGameStateBase* Stat
         }
         else
         {
-            UE_LOG(LogTemp, Error, TEXT("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed."), __FUNCTION__, *GetNameSafe(this));
+            JError("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed.", __FUNCTION__, *GetNameSafe(this));
         }
     }
 }

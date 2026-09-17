@@ -1,4 +1,8 @@
 ﻿#include "MaterialItem.h"
+#include "MaterialTable.h"
+#include "Engine/DataTable.h"
+#include "InventoryComponent.h"
+#include "JUtility.h"
 
 AMaterialItem::AMaterialItem()
 {
@@ -7,13 +11,23 @@ AMaterialItem::AMaterialItem()
 
 void AMaterialItem::ActivateItem(AActor* Activator)
 {
-	if (!Activator)
-	{
-		return;
-	}
+	JASSERT(Activator, "Activator가 없습니다.");
 
-	// 인벤토리에 재료 추가
-	// ex) Inventory.quantity += quantity;
+	UInventoryComponent* Inventory = Activator->FindComponentByClass<UInventoryComponent>();
+
+	JASSERT(Inventory, "Inventory가 없습니다.");
+
+	Inventory->AddItem(MaterialID, Quantity);
 
 	DestroyItem();
+}
+
+const FMaterialTable* AMaterialItem::GetMaterialData() const
+{
+	if (!MaterialDataTable || MaterialID.IsNone())
+	{
+		return nullptr;
+	}
+
+	return MaterialDataTable->FindRow<FMaterialTable>(MaterialID, TEXT("MaterialItem"));
 }

@@ -1,6 +1,20 @@
 #include "PriestDamageNumberWidget.h"
+#include "JUtility.h"
+#include "Engine/Engine.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/TextBlock.h"
+
+bool UPriestDamageNumberWidget::Initialize()
+{
+    if (bBindingsReady)
+    {
+        return true;
+    }
+    JASSERT_BOOL((Super::Initialize()), "%hs: Base widget initialization failed", __FUNCTION__);
+    JASSERT_BOOL((IsValid(DamageText)), "%hs: Missing required DamageText binding", __FUNCTION__);
+    bBindingsReady = true;
+    return true;
+}
 
 void UPriestDamageNumberWidget::InitializeDamage(float Amount, const FVector& Location)
 {
@@ -12,11 +26,6 @@ void UPriestDamageNumberWidget::InitializeDamage(float Amount, const FVector& Lo
 
 void UPriestDamageNumberWidget::RefreshText()
 {
-    if (!DamageText)
-    {
-        UE_LOG(LogTemp, Error, TEXT("%hs [%s]: Missing required DamageText binding. Check the Widget Blueprint."), __FUNCTION__, *GetNameSafe(this));
-        return;
-    }
     FNumberFormattingOptions Format;
     Format.SetMaximumFractionalDigits(1);
     Format.SetMinimumFractionalDigits(0);
@@ -26,6 +35,10 @@ void UPriestDamageNumberWidget::RefreshText()
 void UPriestDamageNumberWidget::NativeConstruct()
 {
     Super::NativeConstruct();
+    if (!bBindingsReady)
+    {
+        return;
+    }
     RefreshText();
     SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
     // 첫 위치 계산 전 화면 모서리에서 깜박이지 않도록 한다.

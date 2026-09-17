@@ -11,7 +11,10 @@ class PROJECTPRIEST_API UPriestStageClearRequest : public UEventParameterBase
 {
     GENERATED_BODY()
 public:
-    UPriestStageClearRequest() { EventType = EViewEventType::ButtonClicked; }
+    UPriestStageClearRequest()
+    {
+        EventType = EViewEventType::ButtonClicked;
+    }
 };
 
 // Layout, labels and button styles belong to the child Widget Blueprint.
@@ -20,6 +23,11 @@ class PROJECTPRIEST_API UPriestStageClearWidget : public UUserWidget, public IMv
 {
     GENERATED_BODY()
 public:
+    virtual bool Initialize() override;
+    bool HasValidBindings() const
+    {
+        return bBindingsReady;
+    }
     virtual FDelegateHandle AddListener(UMvcControl* Control) override;
     virtual void RemoveListener(FDelegateHandle Handle) override;
     virtual void InvokeViewEvent(EViewEventType EventType, UEventParameterBase* Parameter) override;
@@ -29,11 +37,11 @@ public:
     void ShowStatus(const FText& Message);
     void FocusMainMenu();
 protected:
-    virtual void NativeOnInitialized() override;
     UPROPERTY(meta=(BindWidget)) TObjectPtr<UTextBlock> ClearTimeText;
     UPROPERTY(meta=(BindWidget)) TObjectPtr<UButton> MainMenuButton;
     UPROPERTY(meta=(BindWidget)) TObjectPtr<UTextBlock> StatusText;
 private:
+    bool bBindingsReady = false;
     UFUNCTION() void RequestMainMenu();
     FViewEventRaisedDelegate Listener;
 };

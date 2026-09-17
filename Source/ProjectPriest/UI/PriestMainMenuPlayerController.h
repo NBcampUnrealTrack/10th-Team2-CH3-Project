@@ -17,10 +17,17 @@ class PROJECTPRIEST_API APriestMainMenuPlayerController : public APlayerControll
 public:
 	APriestMainMenuPlayerController();
 	bool StartStageOne();
-    bool CanProcessMenuRequest() const { return IsLocalController() && !bTravelRequested; }
+    bool CanProcessMenuRequest() const
+    {
+        return IsLocalController() && !bTravelRequested;
+    }
     void RequestQuitGame();
 
 protected:
+	// Temporary inventory preview. Disable when crafting/rewards supply real items.
+	UPROPERTY(EditDefaultsOnly, Category = "Priest|Inventory")
+	bool bGrantPreviewInventory = true;
+
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
