@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "PotionTypes.h"
 #include "PlayerCharacter.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FPlayerCombatChanged);
@@ -13,6 +14,7 @@ class UCameraComponent;
 class UInputAction;
 class AHolyGenerade;
 class AWeaponItem;
+class UDataTable;
 struct FInputActionInstance;
 struct FInputActionValue;
 
@@ -57,8 +59,6 @@ public:
         AController* EventInstigator,
         AActor* DamageCauser
     ) override;
-
-    FPlayerCombatChanged OnCombatChanged;
 
     float GetCurrentHealth() const;
 
@@ -110,6 +110,11 @@ public:
     UFUNCTION()
     void OnInteractInputted(const FInputActionValue& value);
 
+    UFUNCTION(BlueprintCallable, Category = "Items|Potion")
+    EPotionUseResult TryUsePotion(FName ItemId);
+
+    UFUNCTION(BlueprintCallable, Category = "Items|QuickSlot")
+    EPotionUseResult TryUseQuickSlot(int32 SlotIndex);
 
 protected:
 	// Called when the game starts or when spawned
@@ -120,6 +125,9 @@ protected:
     void ResetThrowCoolTime();
 
     void OnDeath();
+
+public:
+    FPlayerCombatChanged OnCombatChanged;
 
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Components")
@@ -186,4 +194,7 @@ protected:
     bool bIsDead = false;
 
     FTimerHandle ThrowCoolTimeTimerHandle;
+
+private:
+    bool bIsUsingPotion = false;
 };

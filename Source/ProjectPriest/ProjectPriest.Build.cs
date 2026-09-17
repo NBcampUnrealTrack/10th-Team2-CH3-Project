@@ -17,7 +17,8 @@ public class ProjectPriest : ModuleRules
             "NavigationSystem",
 			"AIModule",
             "Niagara",
-            "UMG"
+            "UMG",
+            "DeveloperSettings"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

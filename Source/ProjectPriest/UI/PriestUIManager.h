@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "Subsystems/LocalPlayerSubsystem.h"
 #include "PriestHUDData.h"
+#include "PriestQuickSlotModel.h"
+#include "PriestQuickSlotController.h"
 #include "PriestUIManager.generated.h"
 
 class UPriestHUDWidget;
@@ -18,6 +20,16 @@ class APawn;
 class APlayerController;
 class AIngamePlayerController;
 class UPriestDamageNumberWidget;
+class UPriestQuickSlotWidget;
+
+USTRUCT()
+struct FPriestQuickSlotBinding
+{
+    GENERATED_BODY()
+    UPROPERTY(Transient) TWeakObjectPtr<UPriestQuickSlotWidget> View;
+    UPROPERTY(Transient) TObjectPtr<UPriestQuickSlotModel> Model;
+    UPROPERTY(Transient) TObjectPtr<UPriestQuickSlotController> Controller;
+};
 
 // 로컬 플레이어마다 엔진이 생성하는 UI 관리자. 맵에 직접 배치할 필요가 없다.
 UCLASS()
@@ -25,6 +37,8 @@ class PROJECTPRIEST_API UPriestUIManager : public ULocalPlayerSubsystem
 {
 	GENERATED_BODY()
 public:
+    void ConnectQuickSlot(UPriestQuickSlotWidget* View, int32 SlotIndex);
+    void DisconnectQuickSlot(UPriestQuickSlotWidget* View);
     void SetMissionState(AIngameGameState* State, AIngamePlayerController* Owner);
     void SetStageClearWidgetClass(TSubclassOf<UPriestStageClearWidget> WidgetClass);
     UPriestStageClearWidget* ShowStageClearScreen(APlayerController* Owner);
@@ -55,6 +69,7 @@ public:
 
 private:
     void ConnectCombatView();
+    UPROPERTY(Transient) TArray<FPriestQuickSlotBinding> QuickSlotBindings;
     bool bMissionBindingInitialized = false;
     bool bCombatBindingInitialized = false;
     UPROPERTY(Transient) TObjectPtr<UPriestStageClearController> StageClearController;
