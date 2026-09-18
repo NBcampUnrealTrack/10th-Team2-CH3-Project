@@ -2,7 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "RecipeData.h"
 #include "InventoryComponent.generated.h"
+
+class UDataTable;
 
 USTRUCT(BlueprintType)
 struct FInventoryItem
@@ -27,6 +30,9 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "===Inventory===|Items")
 	TArray<FInventoryItem> Items;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Inventory===|Recipe")
+	TObjectPtr<UDataTable> RecipeDataTable;
 		
 public:
 	// 인벤토리에 아이템을 넣는 함수
@@ -40,4 +46,7 @@ public:
 
 	// 아이템 수량만큼 보유 여부 반환 함수, 아이템 제작에 사용
 	bool HasItem(FName ItemID, int32 Quantity) const;
+
+	// 아이템 제작 함수
+	bool CraftItem(FName RecipeID);
 };
