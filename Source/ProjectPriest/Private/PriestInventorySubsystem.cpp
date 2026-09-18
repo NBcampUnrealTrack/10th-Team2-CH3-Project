@@ -103,6 +103,7 @@ void UPriestInventorySubsystem::GrantPreviewItemsOnce()
     }
     bPreviewItemsGranted = true;
     AddItem(TEXT("HealthPotion"), 5);
+    AddItem(TEXT("AttackSpeedUpPotion"), 2);
 }
 
 FName UPriestInventorySubsystem::GetQuickSlotItemId(

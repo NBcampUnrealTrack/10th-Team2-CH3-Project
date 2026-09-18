@@ -93,6 +93,10 @@ void APlayerCharacter::OnDeath()
 
     bIsDead = true;
 
+    //사망 전에 공격속도증가포션 효과가 남아있다면 정리
+    GetWorldTimerManager().ClearTimer(AttackSpeedPotionTimerHandle);
+    EndAttackSpeedPotionEffect();
+
     // 게임 모드 호출
     AIngameGameMode* IngameGameMode = GetWorld()->GetAuthGameMode<AIngameGameMode>();
 
@@ -541,59 +545,89 @@ EPotionUseResult APlayerCharacter::TryUsePotion(FName ItemId)
 
     JASSERT_RETURN((IsValid(Inventory)), EPotionUseResult::Unavailable, "%hs [%s]: InventorySubsystem이 없습니다.", __FUNCTION__, *GetNameSafe(this));
 
-    FHealthPotionData Data;
-    if (!Inventory->TryGetHealthPotionData(ItemId, Data))
+    FHealthPotionData HealthData;
+    if (Inventory->TryGetHealthPotionData(ItemId, HealthData))
     {
-        return EPotionUseResult::InvalidPotion;
+        if (!FMath::IsFinite(CurrentHealth)
+            || !FMath::IsFinite(MaxHealth)
+            || MaxHealth <= 0.0f)
+        {
+            JError("%hs [%s]: 잘못된 체력 설정. CurrentHealth=%f, MaxHealth=%f", __FUNCTION__, *GetNameSafe(this), CurrentHealth, MaxHealth);
+            return EPotionUseResult::Unavailable;
+        }
+
+        if (bIsDead || CurrentHealth <= 0.0f)
+        {
+            return EPotionUseResult::Dead;
+        }
+
+        if (CurrentHealth >= MaxHealth)
+        {
+            return EPotionUseResult::FullHealth;
+        }
+
+        if (Inventory->GetQuantity(ItemId) < 1)
+        {
+            return EPotionUseResult::NotOwned;
+        }
+        const float PreviousHealth = CurrentHealth;
+        const float MissingHealth = MaxHealth - CurrentHealth;
+        const float ActualHeal =
+            FMath::Min(HealthData.HealAmount, MissingHealth);
+
+        const float NewHealth =
+            FMath::Min(CurrentHealth + ActualHeal, MaxHealth);
+
+        if (NewHealth <= PreviousHealth)
+        {
+            return EPotionUseResult::Unavailable;
+        }
+
+        CurrentHealth = NewHealth;
+
+        if (!Inventory->RemoveItem(ItemId, 1))
+        {
+            CurrentHealth = PreviousHealth;
+            return EPotionUseResult::NotOwned;
+        }
+
+        OnCombatChanged.Broadcast();
+
+        return EPotionUseResult::Success;
     }
 
-    if (!FMath::IsFinite(CurrentHealth)
-        || !FMath::IsFinite(MaxHealth)
-        || MaxHealth <= 0.0f)
+    FAttackSpeedUpPotionData AttackSpeedData;
+    if (Inventory->TryGetAttackSpeedUpPotionData(ItemId, AttackSpeedData))
     {
-        JError("%hs [%s]: 잘못된 체력 설정. CurrentHealth=%f, MaxHealth=%f", __FUNCTION__, *GetNameSafe(this), CurrentHealth, MaxHealth);
-        return EPotionUseResult::Unavailable;
+        if (bIsDead || CurrentHealth <= 0.0f)
+        {
+            return EPotionUseResult::Dead;
+        }
+
+        if (Inventory->GetQuantity(ItemId) < 1)
+        {
+            return EPotionUseResult::NotOwned;
+        }
+
+        if (!Inventory->RemoveItem(ItemId, 1))
+        {
+            return EPotionUseResult::NotOwned;
+        }
+
+        AttackSpeedMultiplier = AttackSpeedData.AttackSpeedMultiplier;
+
+        GetWorldTimerManager().SetTimer(
+            AttackSpeedPotionTimerHandle,
+            this,
+            &APlayerCharacter::EndAttackSpeedPotionEffect,
+            AttackSpeedData.Duration,
+            false
+        );
+
+        return EPotionUseResult::Success;
     }
 
-    if (bIsDead || CurrentHealth <= 0.0f)
-    {
-        return EPotionUseResult::Dead;
-    }
-
-    if (CurrentHealth >= MaxHealth)
-    {
-        return EPotionUseResult::FullHealth;
-    }
-
-    if (Inventory->GetQuantity(ItemId) < 1)
-    {
-        return EPotionUseResult::NotOwned;
-    }
-
-    const float PreviousHealth = CurrentHealth;
-    const float MissingHealth = MaxHealth - CurrentHealth;
-    const float ActualHeal =
-        FMath::Min(Data.HealAmount, MissingHealth);
-
-    const float NewHealth =
-        FMath::Min(CurrentHealth + ActualHeal, MaxHealth);
-
-    if (NewHealth <= PreviousHealth)
-    {
-        return EPotionUseResult::Unavailable;
-    }
-
-    CurrentHealth = NewHealth;
-
-    if (!Inventory->RemoveItem(ItemId, 1))
-    {
-        CurrentHealth = PreviousHealth;
-        return EPotionUseResult::NotOwned;
-    }
-
-    OnCombatChanged.Broadcast();
-
-    return EPotionUseResult::Success;
+    return EPotionUseResult::InvalidPotion;
 }
 
 EPotionUseResult APlayerCharacter::TryUseQuickSlot(
@@ -618,4 +652,16 @@ EPotionUseResult APlayerCharacter::TryUseQuickSlot(
     }
 
     return TryUsePotion(ItemId);
+}
+
+float APlayerCharacter::GetAttackSpeedMultiplier() const
+{
+    return AttackSpeedMultiplier;
+}
+
+void APlayerCharacter::EndAttackSpeedPotionEffect()
+{
+    AttackSpeedMultiplier = 1.0f;
+    AttackSpeedPotionTimerHandle.Invalidate();
+    JLog("포션 지속시간 종료");
 }

@@ -30,11 +30,24 @@ void AWeaponItem::Attack()
 
 	bCanFire = false;
 
+	float Multiplier = 1.0f;
+
+	if (const APlayerCharacter* Player = Cast<APlayerCharacter>(GetOwner()))
+	{
+		const float PlayerMultiplier = Player->GetAttackSpeedMultiplier();
+		if (FMath::IsFinite(PlayerMultiplier) && PlayerMultiplier > 0.0f)
+		{
+			Multiplier = PlayerMultiplier;
+		}
+	}
+
+	const float EffectiveFireInterval = FMath::Max(FireInterval / Multiplier, 0.01f);
+
 	GetWorldTimerManager().SetTimer(
 		FireTimerHandle,
 		this,
 		&AWeaponItem::ResetFire,
-		FireInterval,
+		EffectiveFireInterval,
 		false
 	);
 
