@@ -7,7 +7,7 @@
 #include "PriestGameInstance.generated.h"
 
 class UPartInstance;
-class UPartManager; // PartManager 전방 선언
+class UPartManager;
 
 UCLASS()
 class PROJECTPRIEST_API UPriestGameInstance : public UGameInstance
