@@ -38,7 +38,10 @@ bool UPriestInventorySubsystem::AddItem(FName ItemId, FText DisplayName, int32 Q
 int32 UPriestInventorySubsystem::GetQuantity(FName ItemId) const
 {
     const FPriestOwnedItem* Item = OwnedItems.FindByPredicate(
-        [ItemId](const FPriestOwnedItem& Entry) { return Entry.ItemId == ItemId; });
+        [ItemId](const FPriestOwnedItem& Entry) 
+        { 
+            return Entry.ItemId == ItemId; 
+        });
     return Item ? Item->Quantity : 0;
 }
 
@@ -46,8 +49,11 @@ bool UPriestInventorySubsystem::RemoveItem(FName ItemId, int32 Quantity)
 {
     JASSERT_BOOL((!ItemId.IsNone() && Quantity > 0), "%hs: 잘못된 차감 요청. ItemId=%s, Quantity=%d", __FUNCTION__, *ItemId.ToString(), Quantity);
     const int32 Index = OwnedItems.IndexOfByPredicate(
-        [ItemId](const FPriestOwnedItem& Entry) { return Entry.ItemId == ItemId; });
-    if (Quantity <= 0 || Index == INDEX_NONE || OwnedItems[Index].Quantity < Quantity)
+        [ItemId](const FPriestOwnedItem& Entry) 
+        { 
+            return Entry.ItemId == ItemId; 
+        });
+    if (Index == INDEX_NONE || OwnedItems[Index].Quantity < Quantity)
     {
         return false;
     }
