@@ -18,6 +18,9 @@ struct FPartData : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FText Name;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EPartSlot SlotType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

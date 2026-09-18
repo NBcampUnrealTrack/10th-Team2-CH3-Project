@@ -345,7 +345,13 @@ void AWeaponItem::BeginPlay()
 
 	UPartManager* Manager = Instance->GetPartManager();
 
+	JLog("Weapon Damage : %f", GetDamage());
+	JLog("Magazine Size : %d", GetMagazineSize());
+
 	Manager->ApplyPartsToWeapon(this);
+
+	JLog("After Damage : %f", GetDamage());
+	JLog("After Magazine : %d", GetMagazineSize());
 }
 
 void AWeaponItem::EndPlay(const EEndPlayReason::Type EndPlayReason)
