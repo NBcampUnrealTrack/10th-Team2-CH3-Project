@@ -96,8 +96,5 @@ private:
     TObjectPtr<UDataTable> PotionDataTable;
 
     UPROPERTY(Transient)
-    TObjectPtr<UDataTable> ItemDataTable;
-
-    UPROPERTY(Transient)
     TMap<EItemCategory, TObjectPtr<UDataTable>> ItemDataTables;
 };

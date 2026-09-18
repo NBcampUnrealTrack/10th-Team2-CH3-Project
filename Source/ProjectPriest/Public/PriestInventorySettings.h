@@ -17,9 +17,6 @@ class PROJECTPRIEST_API UPriestInventorySettings
     GENERATED_BODY()
 
 public:
-    UPROPERTY(Config, EditAnywhere, Category = "Legacy")
-    TSoftObjectPtr<UDataTable> ItemDataTable;
-
     UPROPERTY(Config, EditAnywhere, Category = "Item Tables")
     TSoftObjectPtr<UDataTable> WeaponDataTable;
 

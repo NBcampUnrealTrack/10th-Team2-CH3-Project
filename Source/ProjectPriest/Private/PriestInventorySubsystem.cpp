@@ -170,29 +170,6 @@ void UPriestInventorySubsystem::Initialize(
     const UPriestInventorySettings* Settings =
         GetDefault<UPriestInventorySettings>();
 
-    ItemDataTable = Settings->ItemDataTable.LoadSynchronous();
-
-    JASSERT(
-        IsValid(ItemDataTable),
-        "%hs: ItemDataTable 로드 실패. 프로젝트 설정의 Inventory Settings를 확인하세요.",
-        __FUNCTION__
-    );
-
-    if (
-        ItemDataTable->GetRowStruct()
-        != FPriestItemData::StaticStruct()
-        )
-    {
-        JError(
-            "%hs: DT_ItemData의 Row Structure가 "
-            "PriestItemData가 아닙니다.",
-            __FUNCTION__
-        );
-
-        ItemDataTable = nullptr;
-        return;
-    }
-
     PotionDataTable = Settings->PotionDataTable.LoadSynchronous();
 
     JASSERT(
