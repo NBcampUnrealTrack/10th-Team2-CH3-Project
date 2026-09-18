@@ -33,7 +33,7 @@ bool UPartManager::RemovePart(const FPartData& ReplacedPart)
 
 void UPartManager::SetPartInstance(UPartInstance* NewPartInstance)
 {
-	this->PartInstance = PartInstance;
+	PartInstance = NewPartInstance;
 }
 
 void UPartManager::ApplyPartsToWeapon(AWeaponItem* Weapon)
