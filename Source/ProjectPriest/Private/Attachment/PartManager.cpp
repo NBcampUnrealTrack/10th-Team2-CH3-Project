@@ -12,23 +12,28 @@ UPartManager::UPartManager()
 
 void UPartManager::SetPart(const FPartData& Part, FPartData& ReplacedPart)
 {
-	FPartData* ExistingPart = PartSlots.Find(Part.SlotType);
+	FPartData* ExistingPart = PartInstance->PartSlots.Find(Part.SlotType);
 	if (ExistingPart)
 	{
 		ReplacedPart = *ExistingPart;
 	}
-	PartSlots.Add(Part.SlotType, Part);
+	PartInstance->PartSlots.Add(Part.SlotType, Part);
 	return;
 }
 
 bool UPartManager::RemovePart(const FPartData& ReplacedPart)
 {
-	if (PartSlots.Remove(ReplacedPart.SlotType) > 0)
+	if (PartInstance->PartSlots.Remove(ReplacedPart.SlotType) > 0)
 	{
 		return true;
 	}
 	JLog("Invalid input, UPartManager::RemovePart");
 	return false;
+}
+
+void UPartManager::SetPartInstance(UPartInstance* NewPartInstance)
+{
+	this->PartInstance = PartInstance;
 }
 
 void UPartManager::ApplyPartsToWeapon(AWeaponItem* Weapon)
@@ -45,7 +50,7 @@ void UPartManager::ApplyPartsToWeapon(AWeaponItem* Weapon)
 	float ValuDamage = 1.0f;
 	float ValueMagazineSize = 1.0f;
 
-	for (const auto& Part : PartSlots)
+	for (const auto& Part : PartInstance->PartSlots)
 	{
 		if (Part.Value.Damage > 0.0f)
 		{
@@ -58,5 +63,4 @@ void UPartManager::ApplyPartsToWeapon(AWeaponItem* Weapon)
 	}
 	Weapon->SetDamage(BaseDamage * ValuDamage);
 	Weapon->SetMagazineSize(BaseMagazineSize * ValueMagazineSize);
-
 }
