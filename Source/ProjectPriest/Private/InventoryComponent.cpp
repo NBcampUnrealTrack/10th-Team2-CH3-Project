@@ -94,11 +94,11 @@ bool UInventoryComponent::HasItem(FName ItemID, int32 Quantity) const
 
 bool UInventoryComponent::CraftItem(FName RecipeID)
 {
-	JASSERT(RecipeDataTable, "RecipeDataTable이 없습니다.");
+	JASSERT_BOOL(RecipeDataTable, "RecipeDataTable이 없습니다.");
 
 	const FRecipeData* RecipeData = RecipeDataTable->FindRow<FRecipeData>(RecipeID, TEXT("UInventoryComponent::CraftItem"));
 
-	JASSERT(RecipeData, "Recipe를 찾을 수 없습니다.");
+	JASSERT_BOOL(RecipeData, "Recipe를 찾을 수 없습니다.");
 
 	// 재료 보유 여부 확인
 	for (const FRecipeIngredient& Ingredient : RecipeData->Ingredients)
