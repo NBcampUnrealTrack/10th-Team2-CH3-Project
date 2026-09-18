@@ -1,7 +1,9 @@
 ﻿#include "MaterialItem.h"
 #include "MaterialTable.h"
 #include "Engine/DataTable.h"
-#include "InventoryComponent.h"
+#include "PriestInventorySubsystem.h"
+#include "Engine/GameInstance.h"
+#include "Engine/Engine.h"
 #include "JUtility.h"
 
 AMaterialItem::AMaterialItem()
@@ -13,13 +15,23 @@ void AMaterialItem::ActivateItem(AActor* Activator)
 {
 	JASSERT(Activator, "Activator가 없습니다.");
 
-	UInventoryComponent* Inventory = Activator->FindComponentByClass<UInventoryComponent>();
+	UGameInstance* Instance = Activator->GetGameInstance();
 
-	JASSERT(Inventory, "Inventory가 없습니다.");
+	JASSERT(IsValid(Instance), "GameInstance가 없습니다.");
 
-	Inventory->AddItem(MaterialID, Quantity);
+    UPriestInventorySubsystem* Inventory =
+        Instance->GetSubsystem<UPriestInventorySubsystem>();
 
-	DestroyItem();
+    JASSERT(IsValid(Inventory), "InventorySubsystem이 없습니다.");
+
+    FPriestItemData Data;
+
+    JASSERT(Inventory->TryGetItemData(MaterialID, Data), "아이템 정의가 없습니다.");
+
+    if (Inventory->AddItem(MaterialID, Quantity))
+    {
+        DestroyItem();
+    }
 }
 
 const FMaterialTable* AMaterialItem::GetMaterialData() const

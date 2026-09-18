@@ -5,11 +5,12 @@
 #include "UObject/UObjectGlobals.h"
 #include "JUtility.h"
 
-bool UPriestInventorySubsystem::AddItem(FName ItemId, FText DisplayName, int32 Quantity)
+bool UPriestInventorySubsystem::AddItem(FName ItemId, int32 Quantity)
 {
-    JASSERT_BOOL((!ItemId.IsNone() && !DisplayName.IsEmpty() && Quantity > 0), "%hs: 잘못된 추가 요청", __FUNCTION__)
-
     FPriestItemData Data;
+
+    JASSERT_BOOL((!ItemId.IsNone() && !Data.DisplayName.IsEmpty() && Quantity > 0), "%hs: 잘못된 추가 요청", __FUNCTION__)
+    JASSERT_BOOL((TryGetItemData(ItemId, Data) && Data.MaxStack > 0), "%hs: 아이템 정의 또는 MaxStack을 확인하세요.", __FUNCTION__);
 
     for (FPriestOwnedItem& Item : OwnedItems)
     {
@@ -33,7 +34,7 @@ bool UPriestInventorySubsystem::AddItem(FName ItemId, FText DisplayName, int32 Q
     {
         FPriestOwnedItem Item;
         Item.ItemId = ItemId;
-        Item.DisplayName = DisplayName;
+        Item.DisplayName = Data.DisplayName;
         Item.Quantity = FMath::Min(Quantity, Data.MaxStack);
 
         Quantity -= Item.Quantity;
@@ -101,7 +102,7 @@ void UPriestInventorySubsystem::GrantPreviewItemsOnce()
         return;
     }
     bPreviewItemsGranted = true;
-    AddItem(TEXT("HealthPotion"), NSLOCTEXT("PriestInventory", "HealthPotion", "회복 포션"), 5);
+    AddItem(TEXT("HealthPotion"), 5);
 }
 
 FName UPriestInventorySubsystem::GetQuickSlotItemId(

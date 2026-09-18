@@ -35,7 +35,7 @@ public:
 
     // ItemId is the stacking key; names are presentation only.
     UFUNCTION(BlueprintCallable, Category="Priest|Inventory")
-    bool AddItem(FName ItemId, FText DisplayName, int32 Quantity);
+    bool AddItem(FName ItemId, int32 Quantity);
 
     UFUNCTION(BlueprintPure, Category="Priest|Inventory")
     int32 GetQuantity(FName ItemId) const;
