@@ -26,7 +26,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-    UFUNCTION()
+    UFUNCTION(BlueprintCallable)
     void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent,
         AActor* OtherActor,
         UPrimitiveComponent* OtherComp,
@@ -35,7 +35,7 @@ public:
         const FHitResult& SweepResult);
 
 
-    UFUNCTION()
+    UFUNCTION(BlueprintCallable)
     void OnEndOverlap(UPrimitiveComponent* OverlappedComponent,
         AActor* OtherActor,
         UPrimitiveComponent* OtherComp,

@@ -36,6 +36,9 @@ void AAoEObject::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+    if (IsPendingKillPending())
+        return;
+    
     float Now = GetWorld()->GetTimeSeconds();
     if (bIsStartDelay)
     {
@@ -63,6 +66,13 @@ void AAoEObject::Tick(float DeltaTime)
             NextDamageTime = Now + DamageDelay;
         }
     }
+    
+    float TotalDuration = Now - StartTime;
+    if (TotalDuration >= Duration)
+    {
+        JLog("%s Duration over will be destroy", *GetActorNameOrLabel());
+        Destroy();
+    }
 }
 
 void AAoEObject::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent,
@@ -73,7 +83,7 @@ void AAoEObject::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent,
     const FHitResult& SweepResult)
 {
     APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
-    JASSERT(IsValid(PlayerCharacter), "%s is not playercharacter", *OtherActor->GetName());
+    JASSERT(IsValid(PlayerCharacter), "%hs %s is not playercharacter", __FUNCTION__, *OtherActor->GetName());
 
     TargetActor = PlayerCharacter;
 }
