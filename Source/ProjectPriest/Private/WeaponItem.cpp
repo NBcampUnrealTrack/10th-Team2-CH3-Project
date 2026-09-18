@@ -3,11 +3,14 @@
 #include "Kismet/GameplayStatics.h"
 #include "Camera/PlayerCameraManager.h"
 #include "PlayerCharacter.h"
+#include "Attachment/PartManager.h"
+#include "PriestGameInstance.h"
 #include "JUtility.h"
 
 AWeaponItem::AWeaponItem()
 {
 	ItemType = TEXT("Weapon");
+	//PartManager = NewObject<UPartManager>(this);
 }
 
 bool AWeaponItem::IsReloading() const
@@ -329,6 +332,26 @@ void AWeaponItem::PerformTraceTPS(
 			2.0f
 		);
 	}
+}
+
+void AWeaponItem::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UPriestGameInstance* GameInstance =
+		Cast<UPriestGameInstance>(GetGameInstance());
+
+	UPartInstance* Instance = GameInstance->GetOrCreatePartInstance(ItemType);
+
+	UPartManager* Manager = Instance->GetPartManager();
+
+	JLog("Weapon Damage : %f", GetDamage());
+	JLog("Magazine Size : %d", GetMagazineSize());
+
+	Manager->ApplyPartsToWeapon(this);
+
+	JLog("After Damage : %f", GetDamage());
+	JLog("After Magazine : %d", GetMagazineSize());
 }
 
 void AWeaponItem::EndPlay(const EEndPlayReason::Type EndPlayReason)
