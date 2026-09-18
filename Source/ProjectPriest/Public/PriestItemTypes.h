@@ -1,8 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
 #include "PriestItemTypes.generated.h"
+
+class UTexture2D;
 
 UENUM(BlueprintType)
 enum class EItemCategory : uint8
@@ -20,10 +22,15 @@ struct PROJECTPRIEST_API FPriestItemData
 {
     GENERATED_BODY()
 
-    UPROPERTY(
-        EditAnywhere,
-        BlueprintReadOnly,
-        Category = "Item"
-    )
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
+    FText DisplayName;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (ClampMin = "1", UIMin = "1"))
+    int32 MaxStack = 99;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
+    TObjectPtr<UTexture2D> Icon = nullptr;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
     EItemCategory Category = EItemCategory::None;
 };

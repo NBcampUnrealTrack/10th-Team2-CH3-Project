@@ -17,17 +17,21 @@ class PROJECTPRIEST_API UPriestInventorySettings
     GENERATED_BODY()
 
 public:
-    UPROPERTY(
-        Config,
-        EditAnywhere,
-        Category = "Data Tables"
-    )
+    UPROPERTY(Config, EditAnywhere, Category = "Legacy")
     TSoftObjectPtr<UDataTable> ItemDataTable;
 
-    UPROPERTY(
-        Config,
-        EditAnywhere,
-        Category = "Data Tables"
-    )
+    UPROPERTY(Config, EditAnywhere, Category = "Item Tables")
+    TSoftObjectPtr<UDataTable> WeaponDataTable;
+
+    UPROPERTY(Config, EditAnywhere, Category = "Item Tables")
+    TSoftObjectPtr<UDataTable> AmmoDataTable;
+
+    UPROPERTY(Config, EditAnywhere, Category = "Item Tables")
+    TSoftObjectPtr<UDataTable> ConsumableDataTable;
+
+    UPROPERTY(Config, EditAnywhere, Category = "Item Tables")
+    TSoftObjectPtr<UDataTable> MaterialDataTable;
+
+    UPROPERTY(Config, EditAnywhere, Category = "Effect Tables")
     TSoftObjectPtr<UDataTable> PotionDataTable;
 };

@@ -7,61 +7,89 @@
 
 bool UPriestInventorySubsystem::AddItem(FName ItemId, FText DisplayName, int32 Quantity)
 {
-    if (ItemId.IsNone() || DisplayName.IsEmpty() || Quantity <= 0)
-    {
-        JError("%hs: 잘못된 추가 요청. ItemId=%s, Name=%s, Quantity=%d", __FUNCTION__, *ItemId.ToString(), *DisplayName.ToString(), Quantity);
-        return false;
-    }
+    JASSERT_BOOL((!ItemId.IsNone() && !DisplayName.IsEmpty() && Quantity > 0), "%hs: 잘못된 추가 요청", __FUNCTION__)
+
+    FPriestItemData Data;
+
     for (FPriestOwnedItem& Item : OwnedItems)
     {
-        if (Item.ItemId == ItemId)
+        if (Quantity == 0)
         {
-            if (Item.Quantity > MAX_int32 - Quantity)
-            {
-                JError("%hs: 수량 범위 초과. ItemId=%s, Current=%d, Add=%d", __FUNCTION__, *ItemId.ToString(), Item.Quantity, Quantity);
-                return false;
-            }
-            Item.Quantity += Quantity;
-            OnInventoryChanged.Broadcast();
-            return true;
+            break;
         }
+
+        if (Item.ItemId != ItemId || Item.Quantity >= Data.MaxStack)
+        {
+            continue;
+        }
+
+        const int32 Count = FMath::Min(Quantity, Data.MaxStack - Item.Quantity);
+
+        Item.Quantity += Count;
+        Quantity -= Count;
     }
-    FPriestOwnedItem Item;
-    Item.ItemId = ItemId;
-    Item.DisplayName = DisplayName;
-    Item.Quantity = Quantity;
-    OwnedItems.Add(Item);
+
+    while (Quantity > 0)
+    {
+        FPriestOwnedItem Item;
+        Item.ItemId = ItemId;
+        Item.DisplayName = DisplayName;
+        Item.Quantity = FMath::Min(Quantity, Data.MaxStack);
+
+        Quantity -= Item.Quantity;
+        OwnedItems.Add(Item);
+    }
+
     OnInventoryChanged.Broadcast();
     return true;
 }
 
 int32 UPriestInventorySubsystem::GetQuantity(FName ItemId) const
 {
-    const FPriestOwnedItem* Item = OwnedItems.FindByPredicate(
-        [ItemId](const FPriestOwnedItem& Entry) 
-        { 
-            return Entry.ItemId == ItemId; 
-        });
-    return Item ? Item->Quantity : 0;
+    int32 TotalQuantity = 0;
+
+    for (const FPriestOwnedItem& Item : OwnedItems)
+    {
+        if (Item.ItemId == ItemId)
+        {
+            TotalQuantity += Item.Quantity;
+        }
+    }
+
+    return TotalQuantity;
 }
 
 bool UPriestInventorySubsystem::RemoveItem(FName ItemId, int32 Quantity)
 {
     JASSERT_BOOL((!ItemId.IsNone() && Quantity > 0), "%hs: 잘못된 차감 요청. ItemId=%s, Quantity=%d", __FUNCTION__, *ItemId.ToString(), Quantity);
-    const int32 Index = OwnedItems.IndexOfByPredicate(
-        [ItemId](const FPriestOwnedItem& Entry) 
-        { 
-            return Entry.ItemId == ItemId; 
-        });
-    if (Index == INDEX_NONE || OwnedItems[Index].Quantity < Quantity)
+
+    if (GetQuantity(ItemId) < Quantity)
     {
         return false;
     }
-    OwnedItems[Index].Quantity -= Quantity;
-    if (OwnedItems[Index].Quantity == 0)
+
+    int32 RemainingQuantity = Quantity;
+
+    for (int32 Index = OwnedItems.Num() - 1; Index >= 0 && RemainingQuantity > 0; --Index)
     {
-        OwnedItems.RemoveAt(Index);
+        FPriestOwnedItem& Item = OwnedItems[Index];
+
+        if (Item.ItemId != ItemId)
+        {
+            continue;
+        }
+
+        const int32 RemovedQuantity = FMath::Min(Item.Quantity, RemainingQuantity);
+
+        Item.Quantity -= RemovedQuantity;
+        RemainingQuantity -= RemovedQuantity;
+
+        if (Item.Quantity == 0)
+        {
+            OwnedItems.RemoveAt(Index);
+        }
     }
+
     OnInventoryChanged.Broadcast();
     return true;
 }
@@ -73,13 +101,7 @@ void UPriestInventorySubsystem::GrantPreviewItemsOnce()
         return;
     }
     bPreviewItemsGranted = true;
-    AddItem(TEXT("Potion.Health"), NSLOCTEXT("PriestInventory", "HealthPotion", "회복 포션"), 5);
-    AddItem(TEXT("Potion.Health.Large"), NSLOCTEXT("PriestInventory", "LargeHealthPotion", "상급 회복 포션"), 2);
-    AddItem(TEXT("Material.Herb"), NSLOCTEXT("PriestInventory", "Herb", "약초"), 12);
-    AddItem(TEXT("Material.Essence"), NSLOCTEXT("PriestInventory", "Essence", "정수"), 4);
-
-    AssignQuickSlot(0, TEXT("Potion.Health"));
-    AssignQuickSlot(1, TEXT("Potion.Health.Large"));
+    AddItem(TEXT("HealthPotion"), NSLOCTEXT("PriestInventory", "HealthPotion", "회복 포션"), 5);
 }
 
 FName UPriestInventorySubsystem::GetQuickSlotItemId(
@@ -186,6 +208,72 @@ void UPriestInventorySubsystem::Initialize(
         "PotionData가 아닙니다.",
         __FUNCTION__
     );
+
+    ItemDataTables.Reset();
+
+    UDataTable* WeaponTable = Settings->WeaponDataTable.LoadSynchronous();
+
+    JASSERT(
+        IsValid(WeaponTable),
+        "%hs: 무기 테이블 로드 실패. 프로젝트 설정을 확인하세요.",
+        __FUNCTION__
+    );
+
+    JASSERT(
+        WeaponTable->GetRowStruct() == FPriestItemData::StaticStruct(),
+        "%hs: 무기 테이블의 Row Structure가 PriestItemData가 아닙니다.",
+        __FUNCTION__
+    );
+
+    ItemDataTables.Add(EItemCategory::Weapon, WeaponTable);
+
+    UDataTable* AmmoTable = Settings->AmmoDataTable.LoadSynchronous();
+
+    JASSERT(
+        IsValid(AmmoTable),
+        "%hs: 탄약 테이블 로드 실패. 프로젝트 설정을 확인하세요.",
+        __FUNCTION__
+    );
+
+    JASSERT(
+        AmmoTable->GetRowStruct() == FPriestItemData::StaticStruct(),
+        "%hs: 탄약 테이블의 Row Structure가 PriestItemData가 아닙니다.",
+        __FUNCTION__
+    );
+
+    ItemDataTables.Add(EItemCategory::Ammo, AmmoTable);
+
+    UDataTable* ConsumableTable = Settings->ConsumableDataTable.LoadSynchronous();
+
+    JASSERT(
+        IsValid(ConsumableTable),
+        "%hs: 소모품 테이블 로드 실패. 프로젝트 설정을 확인하세요.",
+        __FUNCTION__
+    );
+
+    JASSERT(
+        ConsumableTable->GetRowStruct() == FPriestItemData::StaticStruct(),
+        "%hs: 소모품 테이블의 Row Structure가 PriestItemData가 아닙니다.",
+        __FUNCTION__
+    );
+
+    ItemDataTables.Add(EItemCategory::Consumable, ConsumableTable);
+
+    UDataTable* MaterialTable = Settings->MaterialDataTable.LoadSynchronous();
+
+    JASSERT(
+        IsValid(MaterialTable),
+        "%hs: 재료 테이블 로드 실패. 프로젝트 설정을 확인하세요.",
+        __FUNCTION__
+    );
+
+    JASSERT(
+        MaterialTable->GetRowStruct() == FPriestItemData::StaticStruct(),
+        "%hs: 재료 테이블의 Row Structure가 PriestItemData가 아닙니다.",
+        __FUNCTION__
+    );
+
+    ItemDataTables.Add(EItemCategory::Material, MaterialTable);
 }
 
 bool UPriestInventorySubsystem::TryGetPotionData(
@@ -260,32 +348,50 @@ bool UPriestInventorySubsystem::TryGetItemData(
         return false;
     }
 
-    JASSERT_BOOL(
-        (IsValid(ItemDataTable)),
-        "%hs: 공통 아이템 DataTable이 준비되지 않았습니다.",
-        __FUNCTION__
-    );
+    bool bFound = false;
+    FPriestItemData FoundData;
 
-    const FPriestItemData* Data =
-        ItemDataTable->FindRow<FPriestItemData>(
-            ItemId,
-            TEXT("TryGetItemData"),
-            false
+    for (const auto& Entry : ItemDataTables)
+    {
+        const UDataTable* Table = Entry.Value.Get();
+
+        JASSERT_BOOL(
+            (IsValid(Table)),
+            "%hs: 유효하지 않은 아이템 테이블입니다. Category=%d",
+            __FUNCTION__,
+            static_cast<int32>(Entry.Key)
         );
 
-    if (!Data)
+        const FPriestItemData* Row =
+            Table->FindRow<FPriestItemData>(
+                ItemId,
+                TEXT("TryGetItemData"),
+                false
+            );
+
+        if (!Row)
+        {
+            continue;
+        }
+
+        JASSERT_BOOL(
+            (!bFound),
+            "%hs: 카테고리 테이블 간 ItemId가 중복됩니다. ItemId=%s",
+            __FUNCTION__,
+            *ItemId.ToString()
+        );
+
+        FoundData = *Row;
+        FoundData.Category = Entry.Key;
+        bFound = true;
+    }
+
+    if (!bFound)
     {
         return false;
     }
 
-    JASSERT_BOOL(
-        (Data->Category != EItemCategory::None),
-        "%hs: 아이템 분류가 미지정 상태입니다. ItemId=%s",
-        __FUNCTION__,
-        *ItemId.ToString()
-    );
-
-    OutData = *Data;
+    OutData = FoundData;
     return true;
 }
 
@@ -301,33 +407,33 @@ UPriestInventorySubsystem::GetItemsByCategory(
         return Result;
     }
 
+    const TObjectPtr<UDataTable>* FoundTable = ItemDataTables.Find(Category);
+
     JASSERT_RETURN(
-        (IsValid(ItemDataTable)),
+        (FoundTable != nullptr && IsValid(FoundTable->Get())),
         Result,
-        "%hs: 공통 아이템 DataTable이 준비되지 않았습니다.",
-        __FUNCTION__
+        "%hs: 카테고리의 데이터 테이블이 없습니다. Category=%d",
+        __FUNCTION__,
+        static_cast<int32>(Category)
     );
+
+    const UDataTable* Table = FoundTable->Get();
 
     for (const FPriestOwnedItem& Item : OwnedItems)
     {
-        FPriestItemData Data;
-
-        if (!TryGetItemData(Item.ItemId, Data))
-        {
-            JError(
-                "%hs: 보유 아이템의 공통 정의를 확인하세요. "
-                "ItemId=%s",
-                __FUNCTION__,
-                *Item.ItemId.ToString()
+        const FPriestItemData* ItemData =
+            Table->FindRow<FPriestItemData>(
+                Item.ItemId,
+                TEXT("GetItemsByCategory"),
+                false
             );
 
+        if (!ItemData)
+        {
             continue;
         }
 
-        if (Data.Category == Category)
-        {
-            Result.Add(Item);
-        }
+        Result.Add(Item);
     }
 
     return Result;
