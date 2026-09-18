@@ -28,10 +28,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-    UFUNCTION()
+    UFUNCTION(BlueprintCallable)
     void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-    UFUNCTION()
+    UFUNCTION(BlueprintCallable)
     void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 
@@ -39,11 +39,11 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Projectile ===|Components")
     TObjectPtr<USceneComponent> SceneRoot;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Projectile ===|Components")
-    TObjectPtr<UStaticMeshComponent> StaticMesh;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Projectile ===|Components")
+    /*TObjectPtr<UStaticMeshComponent> StaticMesh;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Projectile ===|Components")*/
     TObjectPtr<UNiagaraComponent> Vfx;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Projectile ===|Components")
-    TObjectPtr<USphereComponent> Collision;
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Projectile ===|Components")
+    //TObjectPtr<USphereComponent> Collision;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Projectile ===|Properties")
     float MoveSpeed;

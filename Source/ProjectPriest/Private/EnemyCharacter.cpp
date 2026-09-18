@@ -127,15 +127,6 @@ void AEnemyCharacter::BeginPlay()
 	IngameGameMode->OnMonsterSpawned();	
 }
 
-
-//TODO: 아 맘에 안들어 겁나 화나는 그런 구조네...
-// BT_Attack 
-// -> AEnemyCharacter::Attack() 
-// -> Play Montage 
-// -> Raise ApplyDamage 
-// -> AEnemyCharacter::OnNotifyApplyDamage
-// -> BT_Attack.OnApplyDamage;
-
 float AEnemyCharacter::GetAttackRange()
 {
 	return AttackRange;
@@ -191,17 +182,38 @@ void AEnemyCharacter::DropItem()
 		RowDataTable.GetRow<FMonsterData>(
 			TEXT("AEnemyCharacter::DropItem")
 		);
-	if (!MonsterData || !MonsterData->DropItemClass)
-	{ 
-		return;
+
+	JASSERT(MonsterData, "MonsterData가 없습니다.");
+
+	TSubclassOf<ABaseItem> SelectedItemClass;
+
+	// 50 : 50 확률로 재료 / 총알 아이템 선택
+	if (FMath::RandBool())
+	{
+		const TArray<TSubclassOf<ABaseItem>>& MaterialItemClasses = MonsterData->DropItem.MaterialItemClasses;
+		
+		if (MaterialItemClasses.IsEmpty())
+		{
+			JError("MaterialItemClasses가 비어 있습니다.");
+			return;
+		}
+
+		const int32 RandomIndex = FMath::RandRange(0, MaterialItemClasses.Num() - 1);
+
+		SelectedItemClass = MaterialItemClasses[RandomIndex];
+	}
+	else
+	{
+		SelectedItemClass = MonsterData->DropItem.AmmoItemClass;
 	}
 
-	GetWorld()->SpawnActor<AActor>(
-		MonsterData->DropItemClass,
+	JASSERT(SelectedItemClass, "재료 아이템 혹은 총알 아이템이 선택되지 않았습니다.");
+
+	GetWorld()->SpawnActor<ABaseItem>(
+		SelectedItemClass,
 		GetActorLocation(),
 		FRotator::ZeroRotator
 	);
-	
 }
 
 void AEnemyCharacter::DestroyEnemy()

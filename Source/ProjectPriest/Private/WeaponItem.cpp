@@ -112,9 +112,29 @@ bool AWeaponItem::CanReload() const
 	return true;
 }
 
-int AWeaponItem::GetCurrentAmmo() const
+int32 AWeaponItem::GetCurrentAmmo() const
 {
     return CurrentAmmo;
+}
+
+int32 AWeaponItem::GetReserveAmmo() const
+{
+	return ReserveAmmo;
+}
+
+void AWeaponItem::AddReserveAmmo(int32 Amount)
+{
+	if (Amount <= 0)
+	{
+		return;
+	}
+
+	ReserveAmmo += Amount;
+}
+
+FText AWeaponItem::GetWeaponName() const
+{
+	return WeaponName;
 }
 
 void AWeaponItem::CompleteReload()

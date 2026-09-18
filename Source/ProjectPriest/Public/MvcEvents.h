@@ -13,14 +13,16 @@ class IMvcView;
 UENUM(BlueprintType)
 enum class EViewEventType : uint8
 {
-    None            UMETA(Hidden),
-    ButtonClicked   UMETA(DisplayName = "ButtonClicked")
+    None              UMETA(Hidden),
+    ButtonClicked     UMETA(DisplayName = "ButtonClicked"),
+    QuickSlotRequest  UMETA(DisplayName = "QuickSlotRequest"),
+    InventoryRequest  UMETA(DisplayName = "InventoryRequest")
 };
 
 UENUM(BlueprintType)
 enum class EButtonName : uint8
 {
-    None            UMETA(Hidden),
+    None              UMETA(Hidden),
 };
 
 UCLASS()

@@ -134,7 +134,7 @@ protected:
 
     FTimerHandle DeathTimerHandle;
 
-    void DropItem();
+    virtual void DropItem();
 
     void DestroyEnemy();
 };

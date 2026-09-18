@@ -10,6 +10,8 @@
 #include "Misc/PackageName.h"
 #include "PriestInventorySubsystem.h"
 #include "Engine/GameInstance.h"
+#include "PriestInventoryModel.h"
+#include "PriestInventoryController.h"
 
 APriestMainMenuPlayerController::APriestMainMenuPlayerController()
 {
@@ -33,27 +35,69 @@ void APriestMainMenuPlayerController::BeginPlay()
 	{
 		JError("%hs [%s]: PriestUIManager subsystem is missing. UI request cannot be processed.", __FUNCTION__, *GetNameSafe(this));
 	}
-	JASSERT((MainMenuWidgetClass && !MainMenuWidgetClass->HasAnyClassFlags(CLASS_Abstract)), "Priest Menu: Set MainMenuWidgetClass in the menu PlayerController Blueprint.");
+	JASSERT(
+		(MainMenuWidgetClass && !MainMenuWidgetClass->HasAnyClassFlags(CLASS_Abstract)),
+		"Priest Menu: Set MainMenuWidgetClass in the menu PlayerController Blueprint."
+	);
+
+	UGameInstance* Instance = GetGameInstance();
+
+	JASSERT(
+        IsValid(Instance),
+		"%hs: GameInstance가 없습니다.",
+		__FUNCTION__
+	);
+
+	UPriestInventorySubsystem* Inventory =
+		Instance->GetSubsystem<UPriestInventorySubsystem>();
+
+	JASSERT(
+        IsValid(Inventory),
+		"%hs: InventorySubsystem 연결에 실패했습니다.",
+		__FUNCTION__
+	);
+
 	if (bGrantPreviewInventory)
 	{
-		GetGameInstance()->GetSubsystem<UPriestInventorySubsystem>()->GrantPreviewItemsOnce();
+		Inventory->GrantPreviewItemsOnce();
 	}
 
 	MainMenu = CreateWidget<UPriestMainMenuWidget>(this, MainMenuWidgetClass);
-    JASSERT((IsValid(MainMenu)), "Could not create MainMenuWidgetClass");
-    if (!MainMenu->HasValidBindings())
-    {
-        JError("Main menu widget initialization failed");
-        MainMenu = nullptr;
-        return;
-    }
-    MenuModel = NewObject<UPriestMenuModel>(this);
-    MenuController = NewObject<UPriestMenuController>(this);
-    MenuController->SetModel(MenuModel);
-    MenuController->SetView(MainMenu);
-    JASSERT((MainMenu->AddToPlayerScreen(0)), "Could not display the main menu");
+	JASSERT(IsValid(MainMenu), "%hs: MainMenu 생성 실패", __FUNCTION__);
 
-    MenuController->HandleModelChanged(MenuModel, 0);
+	if (!MainMenu->HasValidBindings())
+	{
+		JError("%hs: MainMenu 필수 위젯 바인딩 확인 실패", __FUNCTION__);
+
+		MainMenu = nullptr;
+		return;
+	}
+
+	MenuModel = NewObject<UPriestMenuModel>(this);
+	JASSERT(IsValid(MenuModel), "%hs: MenuModel 생성 실패", __FUNCTION__);
+
+	MenuController = NewObject<UPriestMenuController>(this);
+	JASSERT(IsValid(MenuController), "%hs: MenuController 생성 실패", __FUNCTION__);
+
+	InventoryModel = NewObject<UPriestInventoryModel>(this);
+	JASSERT(IsValid(InventoryModel), "%hs: InventoryModel 생성 실패", __FUNCTION__);
+
+	InventoryController = NewObject<UPriestInventoryController>(this);
+	JASSERT(IsValid(InventoryController), "%hs: InventoryController 생성 실패", __FUNCTION__);
+
+	InventoryModel->Initialize(Inventory);
+
+	MenuController->SetModel(MenuModel);
+	MenuController->SetView(MainMenu);
+
+	InventoryController->SetModel(InventoryModel);
+	InventoryController->SetView(MainMenu);
+
+	JASSERT(MainMenu->AddToPlayerScreen(0), "%hs: MainMenu 화면 표시 실패", __FUNCTION__);
+
+	MenuController->HandleModelChanged(MenuModel, 0);
+	InventoryController->HandleModelChanged(InventoryModel, 0);
+
 	bShowMouseCursor = true;
 	FInputModeUIOnly InputMode;
 	InputMode.SetWidgetToFocus(MainMenu->TakeWidget());
@@ -116,6 +160,18 @@ void APriestMainMenuPlayerController::EndPlay(const EEndPlayReason::Type EndPlay
     }
     MenuController = nullptr;
     MenuModel = nullptr;
+	if (InventoryController)
+	{
+		InventoryController->Disconnect();
+	}
+
+	if (InventoryModel)
+	{
+		InventoryModel->Disconnect();
+	}
+
+	InventoryController = nullptr;
+	InventoryModel = nullptr;
 	if (MainMenu)
 	{
 		MainMenu->RemoveFromParent();

@@ -1,4 +1,4 @@
-﻿#include "PlayerCharacter.h"
+#include "PlayerCharacter.h"
 #include "IngamePlayerController.h"
 #include "IngameGameMode.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -14,6 +14,10 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "IngameGameMode.h"
 #include "IngameGameState.h"
+#include "PriestInventorySubsystem.h"
+#include "Engine/GameInstance.h"
+#include "Engine/DataTable.h"
+#include "Templates/UnrealTemplate.h"
 #include  "JUtility.h"
 
 // Sets default values
@@ -204,6 +208,21 @@ float APlayerCharacter::TakeDamage(
     }
 
     return ActualDamage;
+}
+
+float APlayerCharacter::GetCurrentHealth() const
+{
+    return CurrentHealth;
+}
+
+float APlayerCharacter::GetMaxHealth() const
+{
+    return MaxHealth;
+}
+
+AWeaponItem* APlayerCharacter::GetEquippedWeapon() const
+{
+    return WeaponInstance.Get();
 }
 
 const FVector APlayerCharacter::GetMuzzleLocation()
@@ -502,4 +521,101 @@ void APlayerCharacter::OnSprintInputted(const FInputActionInstance& InputValue)
     default:
         break;
     }
+}
+
+EPotionUseResult APlayerCharacter::TryUsePotion(FName ItemId)
+{
+    if (bIsUsingPotion || IsActorBeingDestroyed())
+    {
+        return EPotionUseResult::Unavailable;
+    }
+
+    TGuardValue<bool> UseGuard(bIsUsingPotion, true);
+
+    UGameInstance* GameInstance = GetGameInstance();
+
+    JASSERT_RETURN((IsValid(GameInstance)), EPotionUseResult::Unavailable, "%hs [%s]: GameInstance가 없습니다.", __FUNCTION__, *GetNameSafe(this));
+
+    UPriestInventorySubsystem* Inventory =
+        GameInstance->GetSubsystem<UPriestInventorySubsystem>();
+
+    JASSERT_RETURN((IsValid(Inventory)), EPotionUseResult::Unavailable, "%hs [%s]: InventorySubsystem이 없습니다.", __FUNCTION__, *GetNameSafe(this));
+
+    FPotionData Data;
+    if (!Inventory->TryGetPotionData(ItemId, Data))
+    {
+        return EPotionUseResult::InvalidPotion;
+    }
+
+    if (!FMath::IsFinite(CurrentHealth)
+        || !FMath::IsFinite(MaxHealth)
+        || MaxHealth <= 0.0f)
+    {
+        JError("%hs [%s]: 잘못된 체력 설정. CurrentHealth=%f, MaxHealth=%f", __FUNCTION__, *GetNameSafe(this), CurrentHealth, MaxHealth);
+        return EPotionUseResult::Unavailable;
+    }
+
+    if (bIsDead || CurrentHealth <= 0.0f)
+    {
+        return EPotionUseResult::Dead;
+    }
+
+    if (CurrentHealth >= MaxHealth)
+    {
+        return EPotionUseResult::FullHealth;
+    }
+
+    if (Inventory->GetQuantity(ItemId) < 1)
+    {
+        return EPotionUseResult::NotOwned;
+    }
+
+    const float PreviousHealth = CurrentHealth;
+    const float MissingHealth = MaxHealth - CurrentHealth;
+    const float ActualHeal =
+        FMath::Min(Data.HealAmount, MissingHealth);
+
+    const float NewHealth =
+        FMath::Min(CurrentHealth + ActualHeal, MaxHealth);
+
+    if (NewHealth <= PreviousHealth)
+    {
+        return EPotionUseResult::Unavailable;
+    }
+
+    CurrentHealth = NewHealth;
+
+    if (!Inventory->RemoveItem(ItemId, 1))
+    {
+        CurrentHealth = PreviousHealth;
+        return EPotionUseResult::NotOwned;
+    }
+
+    OnCombatChanged.Broadcast();
+
+    return EPotionUseResult::Success;
+}
+
+EPotionUseResult APlayerCharacter::TryUseQuickSlot(
+    int32 SlotIndex
+)
+{
+    UGameInstance* GameInstance = GetGameInstance();
+
+    JASSERT_RETURN((IsValid(GameInstance)), EPotionUseResult::Unavailable, "%hs [%s]: GameInstance가 없습니다.", __FUNCTION__, *GetNameSafe(this));
+
+    UPriestInventorySubsystem* Inventory =
+        GameInstance->GetSubsystem<UPriestInventorySubsystem>();
+
+    JASSERT_RETURN((IsValid(Inventory)), EPotionUseResult::Unavailable, "%hs [%s]: InventorySubsystem이 없습니다.", __FUNCTION__, *GetNameSafe(this));
+
+    const FName ItemId =
+        Inventory->GetQuickSlotItemId(SlotIndex);
+
+    if (ItemId.IsNone())
+    {
+        return EPotionUseResult::Unavailable;
+    }
+
+    return TryUsePotion(ItemId);
 }

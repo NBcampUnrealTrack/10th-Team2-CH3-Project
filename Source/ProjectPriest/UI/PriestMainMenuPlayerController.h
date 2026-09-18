@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/EngineBaseTypes.h"
@@ -8,6 +8,8 @@
 class UPriestMainMenuWidget;
 class UPriestMenuModel;
 class UPriestMenuController;
+class UPriestInventoryModel;
+class UPriestInventoryController;
 
 UCLASS()
 class PROJECTPRIEST_API APriestMainMenuPlayerController : public APlayerController
@@ -24,12 +26,16 @@ public:
     void RequestQuitGame();
 
 protected:
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+private:
+	void HandleTravelFailure(UWorld* World, ETravelFailure::Type FailureType, const FString& ErrorString);
+
+protected:
 	// Temporary inventory preview. Disable when crafting/rewards supply real items.
 	UPROPERTY(EditDefaultsOnly, Category = "Priest|Inventory")
 	bool bGrantPreviewInventory = true;
-
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Priest|Menu")
 	TSubclassOf<UPriestMainMenuWidget> MainMenuWidgetClass;
@@ -40,10 +46,11 @@ protected:
 private:
     UPROPERTY(Transient) TObjectPtr<UPriestMenuModel> MenuModel;
     UPROPERTY(Transient) TObjectPtr<UPriestMenuController> MenuController;
-	void HandleTravelFailure(UWorld* World, ETravelFailure::Type FailureType, const FString& ErrorString);
 
-	UPROPERTY(Transient)
-	TObjectPtr<UPriestMainMenuWidget> MainMenu;
+	UPROPERTY(Transient) TObjectPtr<UPriestMainMenuWidget> MainMenu;
+	UPROPERTY(Transient) TObjectPtr<UPriestInventoryModel> InventoryModel;
+
+	UPROPERTY(Transient) TObjectPtr<UPriestInventoryController> InventoryController;
 
 	FDelegateHandle TravelFailureHandle;
 	bool bTravelRequested = false;

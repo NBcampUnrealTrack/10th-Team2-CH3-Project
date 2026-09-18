@@ -1,15 +1,16 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "MvcView.h"
+#include "PriestItemTypes.h"
+#include "PriestInventoryViewData.h"
 #include "PriestMainMenuWidget.generated.h"
 
 enum class EPriestMenuAction : uint8;
 class UTextBlock;
 class UWidgetSwitcher;
 class UUniformGridPanel;
-class UPriestInventorySubsystem;
 class UPriestInventorySlotWidget;
 
 // 값은 WBP의 MenuSwitcher 자식 순서와 일치해야 한다.
@@ -37,6 +38,7 @@ class PROJECTPRIEST_API UPriestMainMenuWidget : public UUserWidget, public IMvcV
 
 public:
     virtual bool Initialize() override;
+	void SetInventoryData(const FPriestInventoryViewData& InData);
     bool HasValidBindings() const
     {
         return bBindingsReady;
@@ -69,19 +71,28 @@ public:
 
 	void ShowStatusMessage(const FText& Message);
 
+	UFUNCTION(BlueprintCallable, Category = "Priest|Inventory")
+	void SelectInventoryCategory(EItemCategory InCategory);
+
+protected:
+    virtual void NativeConstruct() override;
+    virtual void NativeDestruct() override;
+
+    // 선택 탭의 색상 변경이나 버튼 포커스는 WBP에서 필요에 따라 구현한다.
+    UFUNCTION(BlueprintImplementableEvent, Category = "Priest|Menu")
+    void OnMenuStateChanged(EPriestMenuPage Page, EPriestLobbyTab Tab);
+
+private:
+    bool SendRequest(EPriestMenuAction Action);
+    void RefreshPage();
+	void RefreshInventoryDisplay();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Priest|Inventory")
 	TSubclassOf<UPriestInventorySlotWidget> InventorySlotClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Priest|Inventory", meta = (ClampMin = "1"))
 	int32 InventoryColumns = 5;
-
-	virtual void NativeConstruct() override;
-	virtual void NativeDestruct() override;
-
-	// 선택 탭의 색상 변경이나 버튼 포커스는 WBP에서 필요에 따라 구현한다.
-	UFUNCTION(BlueprintImplementableEvent, Category = "Priest|Menu")
-	void OnMenuStateChanged(EPriestMenuPage Page, EPriestLobbyTab Tab);
 
 	UPROPERTY(BlueprintReadOnly, Category = "Priest|Menu")
 	EPriestMenuPage CurrentPage = EPriestMenuPage::Title;
@@ -90,15 +101,11 @@ protected:
 	EPriestLobbyTab CurrentTab = EPriestLobbyTab::Region;
 
 private:
-    UFUNCTION() void RefreshInventory();
-    UPROPERTY(Transient) TObjectPtr<UPriestInventorySubsystem> Inventory;
-    // Designer owns layout. Optional so menus without inventory still work.
-    UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UUniformGridPanel> InventoryGrid;
-    UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UTextBlock> InventorySummary;
+	UPROPERTY(Transient) FPriestInventoryViewData InventoryData;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UUniformGridPanel> InventoryGrid;
     bool bBindingsReady = false;
-    bool SendRequest(EPriestMenuAction Action);
+    bool bHasInventoryData = false;
     FViewEventRaisedDelegate Listener;
-	void RefreshPage();
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UWidgetSwitcher> MenuSwitcher;
