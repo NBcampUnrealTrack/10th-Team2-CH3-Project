@@ -7,6 +7,7 @@
 DECLARE_MULTICAST_DELEGATE(FWeaponAmmoChanged);
 
 class AIngamePlayerController;
+class UPartManager;
 
 UCLASS()
 class PROJECTPRIEST_API AWeaponItem : public ABaseItem
@@ -37,9 +38,18 @@ public:
 
     FWeaponAmmoChanged OnAmmoChanged;
 
+	float GetDamage()const { return Damage; }
+	void SetDamage(float SetDamage) { Damage = SetDamage; }
+	int32 GetMagazineSize()const { return MagazineSize; }
+	void SetMagazineSize(int32 SetMagazineSize) { MagazineSize = SetMagazineSize; }
+
+
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="===Weapon===|Properties")
     FText WeaponName = NSLOCTEXT("PriestHUD", "DefaultWeapon", "Weapon");
+
+	UPROPERTY()
+	TObjectPtr<UPartManager> PartManager;
 
 	// Properties
 	// 데미지
@@ -93,6 +103,8 @@ protected:
 
 	// TPS
 	void PerformTraceTPS(AIngamePlayerController* PlayerController, AActor* OwnerActor);
+
+	virtual void BeginPlay() override;
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 };
