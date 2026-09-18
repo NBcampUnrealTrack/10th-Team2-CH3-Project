@@ -56,10 +56,17 @@ public:
     bool ClearQuickSlot(int32 SlotIndex);
 
     UFUNCTION(BlueprintPure, Category = "Priest|Inventory|Potion")
-    bool TryGetPotionData(
+    bool TryGetHealthPotionData(
         FName ItemId,
-        FPotionData& OutData
+        FHealthPotionData& OutData
     ) const;
+
+    bool TryGetAttackSpeedUpPotionData(
+        FName ItemId,
+        FAttackSpeedUpPotionData& OutData
+    ) const;
+
+    bool IsPotion(FName ItemId) const;
 
     UFUNCTION(BlueprintPure, Category = "Priest|Inventory|QuickSlot")
     bool CanAssignQuickSlot(
@@ -93,7 +100,10 @@ private:
     TArray<FName> QuickSlotItemIds = { NAME_None, NAME_None };
 
     UPROPERTY(Transient)
-    TObjectPtr<UDataTable> PotionDataTable;
+    TObjectPtr<UDataTable> HealthPotionDataTable;
+
+    UPROPERTY(Transient)
+    TObjectPtr<UDataTable> AttackSpeedUpPotionDataTable;
 
     UPROPERTY(Transient)
     TMap<EItemCategory, TObjectPtr<UDataTable>> ItemDataTables;

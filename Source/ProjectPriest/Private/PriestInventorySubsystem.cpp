@@ -9,7 +9,7 @@ bool UPriestInventorySubsystem::AddItem(FName ItemId, int32 Quantity)
 {
     FPriestItemData Data;
 
-    JASSERT_BOOL((!ItemId.IsNone() && !Data.DisplayName.IsEmpty() && Quantity > 0), "%hs: 잘못된 추가 요청", __FUNCTION__)
+    JASSERT_BOOL((!ItemId.IsNone() && Quantity > 0), "%hs: 잘못된 추가 요청", __FUNCTION__)
     JASSERT_BOOL((TryGetItemData(ItemId, Data) && Data.MaxStack > 0), "%hs: 아이템 정의 또는 MaxStack을 확인하세요.", __FUNCTION__);
 
     for (FPriestOwnedItem& Item : OwnedItems)
@@ -171,17 +171,33 @@ void UPriestInventorySubsystem::Initialize(
     const UPriestInventorySettings* Settings =
         GetDefault<UPriestInventorySettings>();
 
-    PotionDataTable = Settings->PotionDataTable.LoadSynchronous();
+    HealthPotionDataTable = Settings->HealthPotionDataTable.LoadSynchronous();
 
     JASSERT(
-        IsValid(PotionDataTable),
+        IsValid(HealthPotionDataTable),
         "%hs: PotionDataTable 로드 실패. 프로젝트 설정의 Inventory Settings를 확인하세요.",
         __FUNCTION__
     );
 
     JASSERT(
-        PotionDataTable->GetRowStruct()
-        == FPotionData::StaticStruct(),
+        HealthPotionDataTable->GetRowStruct()
+        == FHealthPotionData::StaticStruct(),
+        "%hs: 포션 DataTable의 Row Structure가 "
+        "PotionData가 아닙니다.",
+        __FUNCTION__
+    );
+
+    AttackSpeedUpPotionDataTable = Settings->AttackSpeedUpPotionDataTable.LoadSynchronous();
+
+    JASSERT(
+        IsValid(AttackSpeedUpPotionDataTable),
+        "%hs: PotionDataTable 로드 실패. 프로젝트 설정의 Inventory Settings를 확인하세요.",
+        __FUNCTION__
+    );
+
+    JASSERT(
+        AttackSpeedUpPotionDataTable->GetRowStruct()
+        == FAttackSpeedUpPotionData::StaticStruct(),
         "%hs: 포션 DataTable의 Row Structure가 "
         "PotionData가 아닙니다.",
         __FUNCTION__
@@ -254,12 +270,12 @@ void UPriestInventorySubsystem::Initialize(
     ItemDataTables.Add(EItemCategory::Material, MaterialTable);
 }
 
-bool UPriestInventorySubsystem::TryGetPotionData(
+bool UPriestInventorySubsystem::TryGetHealthPotionData(
     FName ItemId,
-    FPotionData& OutData
+    FHealthPotionData& OutData
 ) const
 {
-    OutData = FPotionData{};
+    OutData = FHealthPotionData{};
 
     if (ItemId.IsNone())
     {
@@ -267,15 +283,15 @@ bool UPriestInventorySubsystem::TryGetPotionData(
     }
 
     JASSERT_BOOL(
-        (IsValid(PotionDataTable)),
-        "%hs: 포션 DataTable이 준비되지 않았습니다.",
+        (IsValid(HealthPotionDataTable)),
+        "%hs: 회복포션 DataTable이 준비되지 않았습니다.",
         __FUNCTION__
     );
 
-    const FPotionData* Data =
-        PotionDataTable->FindRow<FPotionData>(
+    const FHealthPotionData* Data =
+        HealthPotionDataTable->FindRow<FHealthPotionData>(
             ItemId,
-            TEXT("TryGetPotionData"),
+            TEXT("TryGetHealthPotionData"),
             false
         );
 
@@ -293,9 +309,98 @@ bool UPriestInventorySubsystem::TryGetPotionData(
         *ItemId.ToString(),
         Data->HealAmount
     );
-
     OutData = *Data;
     return true;
+}
+
+bool UPriestInventorySubsystem::TryGetAttackSpeedUpPotionData(
+    FName ItemId,
+    FAttackSpeedUpPotionData& OutData
+) const
+{
+    OutData = FAttackSpeedUpPotionData{};
+
+    if (ItemId.IsNone())
+    {
+        return false;
+    }
+
+    JASSERT_BOOL(
+        (IsValid(AttackSpeedUpPotionDataTable)),
+        "%hs: 공격속도 증가포션 DataTable이 준비되지 않았습니다.",
+        __FUNCTION__
+    );
+
+    const FAttackSpeedUpPotionData* Data =
+        AttackSpeedUpPotionDataTable
+        ->FindRow<FAttackSpeedUpPotionData>(
+            ItemId,
+            TEXT("TryGetAttackSpeedUpPotionData"),
+            false
+        );
+
+    if (!Data)
+    {
+        return false;
+    }
+
+    JASSERT_BOOL(
+        (FMath::IsFinite(Data->AttackSpeedMultiplier)
+            && Data->AttackSpeedMultiplier > 1.0f),
+        "%hs: 공격속도 배율이 잘못되었습니다. ItemId=%s",
+        __FUNCTION__,
+        *ItemId.ToString()
+    );
+
+    JASSERT_BOOL(
+        (FMath::IsFinite(Data->Duration)
+            && Data->Duration > 0.0f),
+        "%hs: 지속시간이 잘못되었습니다. ItemId=%s",
+        __FUNCTION__,
+        *ItemId.ToString()
+    );
+
+    OutData = *Data;
+
+    return true;
+}
+
+bool UPriestInventorySubsystem::IsPotion(FName ItemId) const
+{
+    if (ItemId.IsNone())
+    {
+        return false;
+    }
+
+    JASSERT_BOOL(
+        (IsValid(HealthPotionDataTable)),
+        "%hs: 회복포션 DataTable이 준비되지 않았습니다.",
+        __FUNCTION__
+    );
+
+    if (HealthPotionDataTable->FindRow<FHealthPotionData>(
+        ItemId,
+        TEXT("IsPotion"),
+        false))
+    {
+        return true;
+    }
+
+    JASSERT_BOOL(
+        (IsValid(AttackSpeedUpPotionDataTable)),
+        "%hs: 공격속도 증가포션 DataTable이 준비되지 않았습니다.",
+        __FUNCTION__
+    );
+
+    if (AttackSpeedUpPotionDataTable->FindRow<FAttackSpeedUpPotionData>(
+        ItemId,
+        TEXT("IsPotion"),
+        false))
+    {
+        return true;
+    }
+
+    return false;
 }
 
 bool UPriestInventorySubsystem::CanAssignQuickSlot(
@@ -310,8 +415,7 @@ bool UPriestInventorySubsystem::CanAssignQuickSlot(
         return false;
     }
 
-    FPotionData Data;
-    return TryGetPotionData(ItemId, Data);
+    return IsPotion(ItemId);
 }
 
 bool UPriestInventorySubsystem::TryGetItemData(

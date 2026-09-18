@@ -1,4 +1,4 @@
-#include "PlayerCharacter.h"
+﻿#include "PlayerCharacter.h"
 #include "IngamePlayerController.h"
 #include "IngameGameMode.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -541,8 +541,8 @@ EPotionUseResult APlayerCharacter::TryUsePotion(FName ItemId)
 
     JASSERT_RETURN((IsValid(Inventory)), EPotionUseResult::Unavailable, "%hs [%s]: InventorySubsystem이 없습니다.", __FUNCTION__, *GetNameSafe(this));
 
-    FPotionData Data;
-    if (!Inventory->TryGetPotionData(ItemId, Data))
+    FHealthPotionData Data;
+    if (!Inventory->TryGetHealthPotionData(ItemId, Data))
     {
         return EPotionUseResult::InvalidPotion;
     }

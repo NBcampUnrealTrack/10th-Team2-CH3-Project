@@ -81,13 +81,8 @@ void UPriestInventoryModel::Refresh()
 
         SlotData.Category = Data.SelectedCategory;
 
-        FPotionData PotionData;
-
         SlotData.bQuickSlotCompatible =
-            Inventory->TryGetPotionData(
-                Item.ItemId,
-                PotionData
-            );
+            Inventory->IsPotion(Item.ItemId);
 
         Data.Items.Add(MoveTemp(SlotData));
     }

@@ -23,34 +23,29 @@ enum class EPotionUseResult : uint8
 };
 
 USTRUCT(BlueprintType)
-struct PROJECTPRIEST_API FPotionData : public FTableRowBase
+struct PROJECTPRIEST_API FHealthPotionData : public FTableRowBase
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Potion")
-    EPotionEffectType EffectType = EPotionEffectType::Health;
-
     UPROPERTY(
         EditAnywhere,
         BlueprintReadOnly,
         Category = "Potion",
-        meta = (
-            ClampMin = "0.0",
-            EditCondition = "EffectType == EPotionEffectType::Health",
-            EditConditionHides
-        )
+        meta = (ClampMin = "0.0")
     )
     float HealAmount = 30.0f;
+};
+
+USTRUCT(BlueprintType)
+struct PROJECTPRIEST_API FAttackSpeedUpPotionData : public FTableRowBase
+{
+    GENERATED_BODY()
 
     UPROPERTY(
         EditAnywhere,
         BlueprintReadOnly,
         Category = "Potion",
-        meta = (
-            ClampMin = "1.0",
-            EditCondition = "EffectType == EPotionEffectType::AttackSpeed",
-            EditConditionHides
-        )
+        meta = (ClampMin = "1.0")
     )
     float AttackSpeedMultiplier = 1.5f;
 
@@ -58,11 +53,7 @@ struct PROJECTPRIEST_API FPotionData : public FTableRowBase
         EditAnywhere,
         BlueprintReadOnly,
         Category = "Potion",
-        meta = (
-            ClampMin = "0.0",
-            EditCondition = "EffectType == EPotionEffectType::AttackSpeed",
-            EditConditionHides
-        )
+        meta = (ClampMin = "0.0")
     )
     float Duration = 10.0f;
 };

@@ -30,5 +30,8 @@ public:
     TSoftObjectPtr<UDataTable> MaterialDataTable;
 
     UPROPERTY(Config, EditAnywhere, Category = "Effect Tables")
-    TSoftObjectPtr<UDataTable> PotionDataTable;
+    TSoftObjectPtr<UDataTable> HealthPotionDataTable;
+
+    UPROPERTY(Config, EditAnywhere, Category = "Effect Tables")
+    TSoftObjectPtr<UDataTable> AttackSpeedUpPotionDataTable;
 };
