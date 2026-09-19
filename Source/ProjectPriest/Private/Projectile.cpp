@@ -58,7 +58,7 @@ void AProjectile::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
 	if (!IsValid(PlayerCharacter))
 	{
-		JLog("%hs %s is not PlayerCharacter", __FUNCTION__, *OtherActor->GetName());
+		JLog("%s is not PlayerCharacter", *OtherActor->GetName());
 		return;
 	}
 	
