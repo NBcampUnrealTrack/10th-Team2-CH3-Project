@@ -9,6 +9,7 @@
 #include "IngameGameMode.h"
 #include "Components/CapsuleComponent.h"
 #include "JUtility.h"
+#include "BaseItem.h"
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
@@ -164,6 +165,31 @@ float AEnemyCharacter::GetDamage()
 void AEnemyCharacter::SetAttackTarget(ACharacter* Target)
 {
     AttackTarget = Target;
+}
+
+float AEnemyCharacter::GetHealthRate() const
+{
+	FMonsterData* Row = this->RowDataTable.GetRow<FMonsterData>(TEXT("ASevarog"));
+	
+	float MaxHealth = Row->Health;
+	float CurrentHealth = Health;;
+	
+	JASSERT_RETURN(!FMath::IsNearlyZero(MaxHealth)
+		, -1.0f
+		, "Max Health is zero");
+
+	return CurrentHealth / MaxHealth;
+}
+
+void AEnemyCharacter::Heal(float HealAmount)
+{
+	float MaxHealth = RowDataTable.GetRow<FMonsterData>("AEnemyCharacter")->Health;
+	JASSERT(!FMath::IsNearlyZero(MaxHealth)
+		, "Can not divde by zero");
+	
+	Health += HealAmount;
+	if (Health > MaxHealth)
+		Health = MaxHealth;
 }
 
 EAttackAnimationState AEnemyCharacter::GetAttackAnimationeState()

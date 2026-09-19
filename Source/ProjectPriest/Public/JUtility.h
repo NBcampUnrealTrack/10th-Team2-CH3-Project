@@ -4,25 +4,42 @@
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BehaviorTreeTypes.h"
 
+//TODO: %hs __FUNCTION__ 을 추가해서 함수 이름도 출력 되도록 하자. 찾기가 더 쉬워진다.
 #define JLog(Format, ...) \
-UE_LOG(LogTemp, Log, TEXT(Format), ##__VA_ARGS__); \
-if(GEngine) \
-{ \
-    GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::White, FString::Printf(TEXT(Format), ##__VA_ARGS__)); \
+{\
+    FString MethodName = FString::Printf(TEXT("[%hs]: "), __FUNCTION__); \
+    FString FormatString = FString::Printf(TEXT(Format), ##__VA_ARGS__); \
+    FString CombinedString = FString::Printf(TEXT("%s: %s"), *MethodName, *FormatString); \
+    UE_LOG(LogTemp, Log, TEXT("%s"),*CombinedString); \
+    if(GEngine) \
+    { \
+        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::White, *CombinedString); \
+    } \
 }
 
 #define JWarning(Format, ...) \
-UE_LOG(LogTemp, Log, TEXT(Format), ##__VA_ARGS__); \
-if(GEngine) \
-{ \
-    GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT(Format), ##__VA_ARGS__)); \
+{\
+    FString MethodName = FString::Printf(TEXT("[%hs]: "), __FUNCTION__); \
+    FString FormatString = FString::Printf(TEXT(Format), ##__VA_ARGS__); \
+    FString CombinedString = FString::Printf(TEXT("%s: %s"), *MethodName, *FormatString); \
+    UE_LOG(LogTemp, Warning, TEXT("%s"),*CombinedString); \
+    if(GEngine) \
+    { \
+        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, *CombinedString); \
+    } \
 }
 
 #define JError(Format, ...) \
-UE_LOG(LogTemp, Log, TEXT(Format), ##__VA_ARGS__); \
-if(GEngine) \
-{ \
-    GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, FString::Printf(TEXT(Format), ##__VA_ARGS__)); \
+UE_LOG(LogTemp, Error, TEXT(Format), ##__VA_ARGS__); \
+{\
+    FString MethodName = FString::Printf(TEXT("[%hs]: "), __FUNCTION__); \
+    FString FormatString = FString::Printf(TEXT(Format), ##__VA_ARGS__); \
+    FString CombinedString = FString::Printf(TEXT("%s: %s"), *MethodName, *FormatString); \
+    UE_LOG(LogTemp, Error, TEXT("%s"),*CombinedString); \
+    if(GEngine) \
+    { \
+        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, *CombinedString); \
+    } \
 }
  
 #define JASSERT(Condition, Format, ...) \
@@ -53,6 +70,13 @@ if(!Condition) \
     return nullptr;\
 }
 
+#define JASSERT_TASK(Condition, Format, ...) \
+if(!Condition) \
+{ \
+    JError(Format, ##__VA_ARGS__); \
+    return EBTNodeResult::Failed;\
+}
+
 #define JASSERT_RETURN(Condition, Return, Format, ...) \
 if(!Condition) \
 { \
@@ -60,5 +84,8 @@ if(!Condition) \
     return  Return;\
 }
 
-#define GET_ENUM_STRING(EnumType, EnumVariable) \
+#define GET_ENUM_NAME_STRING(EnumType, EnumVariable) \
 StaticEnum<EnumType>()->GetNameStringByValue((int64)EnumVariable)
+
+#define GET_ENUM_DISPLAY_STRING(EnumType, EnumVariable) \
+StaticEnum<EnumType>()->GetDisplayNameTextByValue((int64)EnumVariable).ToString()
