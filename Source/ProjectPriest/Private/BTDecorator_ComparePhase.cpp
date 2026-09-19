@@ -1,8 +1,24 @@
 ﻿#include "BTDecorator_ComparePhase.h"
 #include "AIController.h"
+#include "EditorMetadataOverrides.h"
 #include "JUtility.h"
 #include "Sevarog.h"
 #include "GameFramework/Pawn.h"
+
+UBTDecorator_ComparePhase::UBTDecorator_ComparePhase()
+{
+	NodeName = TEXT("ComparePhase");
+}
+
+FString UBTDecorator_ComparePhase::GetStaticDescription() const
+{
+	Super::GetStaticDescription();
+	
+	return FString::Printf(TEXT("Phase %s %d")\
+		, *GET_ENUM_DISPLAY_STRING(ECompareOperatorType, CompareOperator)
+		, ExpectValue
+	);
+}
 
 bool UBTDecorator_ComparePhase::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {

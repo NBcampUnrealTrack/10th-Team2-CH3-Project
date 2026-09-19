@@ -12,10 +12,11 @@ class PROJECTPRIEST_API UBTDecorator_ComparePhase : public UBTDecorator
 	
 public:
 	UBTDecorator_ComparePhase();
-	/** calculates raw, core value of decorator's condition. Should not include calling IsInversed */
-	virtual bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp
-		, uint8* NodeMemory) const override;
 	
+	virtual FString GetStaticDescription() const override;
+	
+	virtual bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp
+		, uint8* NodeMemory) const override;	
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="=== IncreasePhase ===")
