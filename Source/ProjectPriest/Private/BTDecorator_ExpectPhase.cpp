@@ -13,13 +13,13 @@ bool UBTDecorator_ExpectPhase::CalculateRawConditionValue(UBehaviorTreeComponent
 	Super::CalculateRawConditionValue(OwnerComp, NodeMemory);
 	
 	AAIController* AiController = OwnerComp.GetAIOwner();
-	JASSERT_BOOL(IsValid(AiController), "%hs AiController cannot be null", __FUNCTION__);
+	JASSERT_BOOL(IsValid(AiController), "AiController cannot be null", __FUNCTION__);
 	
 	APawn* Pawn = AiController->GetPawn();
-	JASSERT_BOOL(Pawn, "%hs Pawn cannot be null", __FUNCTION__);
+	JASSERT_BOOL(Pawn, "Pawn cannot be null", __FUNCTION__);
 	
 	ASevarog* Sevarog = Cast<ASevarog>( Pawn);
-	JASSERT_BOOL(IsValid(Sevarog), "%hs Severerty cannot be null", __FUNCTION__);
+	JASSERT_BOOL(IsValid(Sevarog), "Severerty cannot be null", __FUNCTION__);
 	
 	return Sevarog->GetPhase() == ExpectedPhase;	
 }
