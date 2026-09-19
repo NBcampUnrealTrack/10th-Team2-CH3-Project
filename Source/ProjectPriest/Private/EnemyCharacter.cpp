@@ -176,8 +176,7 @@ float AEnemyCharacter::GetHealthRate() const
 	
 	JASSERT_RETURN(!FMath::IsNearlyZero(MaxHealth)
 		, -1.0f
-		, "%hs Max Health is zero"
-		, __FUNCTION__);
+		, "Max Health is zero");
 
 	return CurrentHealth / MaxHealth;
 }
