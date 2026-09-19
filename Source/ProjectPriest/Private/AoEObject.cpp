@@ -83,7 +83,7 @@ void AAoEObject::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent,
     const FHitResult& SweepResult)
 {
     APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
-    JASSERT(IsValid(PlayerCharacter), "%s is not playercharacter", __FUNCTION__, *OtherActor->GetName());
+    JASSERT(IsValid(PlayerCharacter), "%s is not playercharacter", *OtherActor->GetName());
 
     TargetActor = PlayerCharacter;
 }

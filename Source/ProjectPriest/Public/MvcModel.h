@@ -42,5 +42,6 @@ class PROJECTPRIEST_API IMvcModel
 public: 
     virtual FDelegateHandle AddListener(UMvcControl* Control) = 0;
     virtual void RemoveListener(FDelegateHandle Handle) = 0;
+    //TODO: uint8 대신 <T>를 통해서 enum 을 받는 것도 좋은 방법이겠다.
     virtual void InvokePropertyChanged(uint8 PropertyName) = 0;
 };
