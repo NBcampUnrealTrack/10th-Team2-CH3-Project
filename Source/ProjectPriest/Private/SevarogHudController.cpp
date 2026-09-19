@@ -12,8 +12,8 @@ void USevarogHudController::HandleViewEvent(IMvcView* InView, EViewEventType Eve
 void USevarogHudController::HandleModelChanged(IMvcModel* InModel, uint8 PropertyName)
 {
 	ASevarog* Sevarog = Cast<ASevarog>(InModel);
-	JASSERT(IsValid(Sevarog), "%hs %s is not Sevarog"
-		, __FUNCTION__
+	JASSERT(IsValid(Sevarog)
+		, "%s is not Sevarog"
 		, *Sevarog->GetName());
 	
 	ESevarogPropertyName CastedPropertyName = StaticCast<ESevarogPropertyName>(PropertyName);
@@ -30,8 +30,7 @@ void USevarogHudController::HandleModelChanged(IMvcModel* InModel, uint8 Propert
 		}
 		
 		default:
-			JError("%hs %s not supported yet" 
-				, __FUNCTION__
+			JError("%s not supported yet" 
 				, *PropertyText.ToString());
 		break;		
 	}

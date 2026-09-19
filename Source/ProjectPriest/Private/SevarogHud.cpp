@@ -5,7 +5,7 @@
 
 void USevarogHud::SetHealthRate(float Rate)
 {
-	JASSERT(IsValid(HealthProgressBar),"%hs is not a valid HealthProgressBar", __FUNCTION__);
+	JASSERT(IsValid(HealthProgressBar),"is not a valid HealthProgressBar");
 	
 	HealthProgressBar->SetPercent(Rate);
 }
