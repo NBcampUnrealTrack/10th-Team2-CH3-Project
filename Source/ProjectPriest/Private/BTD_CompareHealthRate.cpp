@@ -11,20 +11,20 @@ bool UBTD_CompareHealthRate::CalculateRawConditionValue(UBehaviorTreeComponent& 
 	AAIController* OwnerController = OwnerComp.GetAIOwner();
 	JASSERT_RETURN(IsValid(OwnerController)
 		, EBTNodeResult::Type::Failed
-		, "%hs OwnerController is invalid"
-		, __FUNCTION__);
+		, "OwnerController is invalid"
+		);
 	
 	APawn* Pawn = OwnerController->GetPawn();
 	JASSERT_RETURN(IsValid(Pawn)
 		, EBTNodeResult::Type::Failed
-		, "%hs Pawn is invalid"
-		, __FUNCTION__);
+		, "Pawn is invalid" 
+		);
 	
 	ASevarog* EnemyCharacter = Cast<ASevarog>(Pawn);
 	JASSERT_RETURN(IsValid(EnemyCharacter)
 		, EBTNodeResult::Type::Failed
-		, "%hs Pawn is not Sevarog"
-		, __FUNCTION__);
+		, "Pawn is not Sevarog"
+		);
 	
 	float HealthRate = EnemyCharacter->GetHealthRate();
 	
@@ -37,8 +37,7 @@ bool UBTD_CompareHealthRate::CalculateRawConditionValue(UBehaviorTreeComponent& 
 	case ECompareOperatorType::Less:				return HealthRate < Rate;		
 	case ECompareOperatorType::LessOrEqual:			return HealthRate <= Rate;		
 	default:
-		JError("%hs, %s is not supported yet"
-			, __FUNCTION__
+		JError("%s is not supported yet"
 			, *GET_ENUM_NAME_STRING(ECompareOperatorType, CompareType)
 		);
 		
