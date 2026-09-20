@@ -3,6 +3,7 @@
 #include "PriestInventorySettings.h"
 #include "Engine/DataTable.h"
 #include "UObject/UObjectGlobals.h"
+#include "RecipeData.h"
 #include "JUtility.h"
 
 bool UPriestInventorySubsystem::AddItem(FName ItemId, int32 Quantity)
@@ -58,6 +59,55 @@ int32 UPriestInventorySubsystem::GetQuantity(FName ItemId) const
     }
 
     return TotalQuantity;
+}
+
+bool UPriestInventorySubsystem::CraftItem(FName RecipeID)
+{
+    JASSERT_BOOL(
+        IsValid(RecipeDataTable),
+        "%hs: RecipeDataTable이 준비되지 않았습니다.",
+        __FUNCTION__
+    );
+
+    const FRecipeData* Recipe = RecipeDataTable->FindRow<FRecipeData>(
+        RecipeID,
+        TEXT("UPriestInventorySubsystem::CraftItem"),
+        false
+    );
+
+    JASSERT_BOOL(
+        (Recipe != nullptr),
+        "%hs: Recipe를 찾을 수 없습니다. RecipeID=%s",
+        __FUNCTION__,
+        *RecipeID.ToString()
+    );
+
+    FPriestItemData ResultItemData;
+
+    if (!TryGetItemData(Recipe->ResultItemID, ResultItemData))
+    {
+        return false;
+    }
+
+    for (const FRecipeIngredient& Ingredient : Recipe->Ingredients)
+    {
+        if (Ingredient.ItemID.IsNone()
+            || Ingredient.Quantity <= 0
+            || GetQuantity(Ingredient.ItemID) < Ingredient.Quantity)
+        {
+            return false;
+        }
+    }
+
+    for (const FRecipeIngredient& Ingredient : Recipe->Ingredients)
+    {
+        if (!RemoveItem(Ingredient.ItemID, Ingredient.Quantity))
+        {
+            return false;
+        }
+    }
+
+    return AddItem(Recipe->ResultItemID, Recipe->ResultQuantity);
 }
 
 bool UPriestInventorySubsystem::RemoveItem(FName ItemId, int32 Quantity)
@@ -172,6 +222,7 @@ void UPriestInventorySubsystem::Initialize(
     const UPriestInventorySettings* Settings =
         GetDefault<UPriestInventorySettings>();
 
+    //회복 포션 데이터테이블
     HealthPotionDataTable = Settings->HealthPotionDataTable.LoadSynchronous();
 
     JASSERT(
@@ -188,6 +239,7 @@ void UPriestInventorySubsystem::Initialize(
         __FUNCTION__
     );
 
+    //공격속도 증가 포션 데이터테이블
     AttackSpeedUpPotionDataTable = Settings->AttackSpeedUpPotionDataTable.LoadSynchronous();
 
     JASSERT(
@@ -206,6 +258,7 @@ void UPriestInventorySubsystem::Initialize(
 
     ItemDataTables.Reset();
 
+    //무기 데이터테이블
     UDataTable* WeaponTable = Settings->WeaponDataTable.LoadSynchronous();
 
     JASSERT(
@@ -222,6 +275,7 @@ void UPriestInventorySubsystem::Initialize(
 
     ItemDataTables.Add(EItemCategory::Weapon, WeaponTable);
 
+    //탄약 데이터테이블(현재 탄약을 별도의 아이템으로 두지 않고 있으니 파츠 데이터테이블로 사용해도 좋을것같음)
     UDataTable* AmmoTable = Settings->AmmoDataTable.LoadSynchronous();
 
     JASSERT(
@@ -238,6 +292,7 @@ void UPriestInventorySubsystem::Initialize(
 
     ItemDataTables.Add(EItemCategory::Ammo, AmmoTable);
 
+    //소모품 데이터테이블
     UDataTable* ConsumableTable = Settings->ConsumableDataTable.LoadSynchronous();
 
     JASSERT(
@@ -254,6 +309,7 @@ void UPriestInventorySubsystem::Initialize(
 
     ItemDataTables.Add(EItemCategory::Consumable, ConsumableTable);
 
+    //재료 데이터테이블
     UDataTable* MaterialTable = Settings->MaterialDataTable.LoadSynchronous();
 
     JASSERT(
@@ -269,6 +325,21 @@ void UPriestInventorySubsystem::Initialize(
     );
 
     ItemDataTables.Add(EItemCategory::Material, MaterialTable);
+
+    //레시피 데이터테이블
+    RecipeDataTable = Settings->RecipeDataTable.LoadSynchronous();
+
+    JASSERT(
+        IsValid(RecipeDataTable),
+        "%hs: RecipeDataTable 로드 실패. 프로젝트 설정을 확인하세요.",
+        __FUNCTION__
+    );
+
+    JASSERT(
+        RecipeDataTable->GetRowStruct() == FRecipeData::StaticStruct(),
+        "%hs: RecipeDataTable의 Row Structure가 RecipeData가 아닙니다.",
+        __FUNCTION__
+    );
 }
 
 bool UPriestInventorySubsystem::TryGetHealthPotionData(

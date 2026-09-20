@@ -40,6 +40,9 @@ public:
     UFUNCTION(BlueprintPure, Category="Priest|Inventory")
     int32 GetQuantity(FName ItemId) const;
 
+    UFUNCTION(BlueprintCallable, Category = "Priest|Inventory|Crafting")
+    bool CraftItem(FName RecipeID);
+
     UFUNCTION(BlueprintCallable, Category="Priest|Inventory")
     bool RemoveItem(FName ItemId, int32 Quantity);
 
@@ -104,6 +107,9 @@ private:
 
     UPROPERTY(Transient)
     TObjectPtr<UDataTable> AttackSpeedUpPotionDataTable;
+
+    UPROPERTY(Transient)
+    TObjectPtr<UDataTable> RecipeDataTable;
 
     UPROPERTY(Transient)
     TMap<EItemCategory, TObjectPtr<UDataTable>> ItemDataTables;

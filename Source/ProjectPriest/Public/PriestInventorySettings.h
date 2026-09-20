@@ -34,4 +34,7 @@ public:
 
     UPROPERTY(Config, EditAnywhere, Category = "Effect Tables")
     TSoftObjectPtr<UDataTable> AttackSpeedUpPotionDataTable;
+
+    UPROPERTY(Config, EditAnywhere, Category = "Crafting")
+    TSoftObjectPtr<UDataTable> RecipeDataTable;
 };
