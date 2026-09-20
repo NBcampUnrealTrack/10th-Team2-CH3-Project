@@ -70,10 +70,13 @@ public:
     UFUNCTION(BlueprintPure)
     virtual bool HitThisFrame();
   
-    float GetDamage();
-
+	UFUNCTION(BlueprintCallable)
     void SetAttackTarget(ACharacter* Target);
-
+	
+	float GetHealthRate() const;
+	virtual void Heal(float HealAmount);
+		
+    float GetDamage();
     virtual EAttackAnimationState GetAttackAnimationeState();
 
 protected:
