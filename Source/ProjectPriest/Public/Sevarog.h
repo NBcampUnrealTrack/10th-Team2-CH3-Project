@@ -9,7 +9,8 @@
 UENUM(BlueprintType)
 enum class ESevarogPropertyName : uint8
 {
-	Health UMETA(DisplayName = "Health"),
+	Health				UMETA(DisplayName = "Health"),
+	NovaCastingStarted	UMETA(DisplayName = "NovaCastingStarted"),
 };
 
 UCLASS()
@@ -32,6 +33,13 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	int GetPhase();
+	
+	UFUNCTION(BlueprintCallable)
+	bool GetNovaCastingStarted();
+	
+	UFUNCTION(BlueprintCallable)
+	void SetNovaCastingStarted(bool bIsStarted);
+	
 	
 	virtual FDelegateHandle AddListener(UMvcControl* Control) override;
 	virtual void RemoveListener(FDelegateHandle Handle) override;
@@ -60,4 +68,6 @@ protected:
 	int Phase;
 	
 	FModelChangedDelegate Delegate;
+	
+	bool bNovaCastingStarted;
 };

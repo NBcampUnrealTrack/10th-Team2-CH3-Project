@@ -65,6 +65,18 @@ int ASevarog::GetPhase()
 	return Phase;
 }
 
+bool ASevarog::GetNovaCastingStarted()
+{
+	return bNovaCastingStarted;
+}
+
+void ASevarog::SetNovaCastingStarted(bool bIsStarted)
+{
+	bNovaCastingStarted = bIsStarted;
+	
+	InvokePropertyChanged(StaticCast<uint8>(ESevarogPropertyName::NovaCastingStarted));	
+}
+
 FDelegateHandle ASevarog::AddListener(UMvcControl* Control)
 {
 	return Delegate.AddUObject(Control, &UMvcControl::HandleModelChanged);
