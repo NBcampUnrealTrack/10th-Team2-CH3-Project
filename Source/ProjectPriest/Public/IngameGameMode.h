@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
@@ -21,7 +21,7 @@ public:
     void OnOpenBossRoomDoor(APlayerCharacter* Player);
     void OnMonsterSpawned();
 	void OnMonsterDead();
-
+    void OnBossDead();
 protected:
     TSoftObjectPtr<UWorld> LobbyLevel;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== IngameGameMode ===")

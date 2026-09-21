@@ -9,6 +9,7 @@
 #include "GlobalConst.h"
 #include "PlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include <IngameGameMode.h>
 
 // Sets default values
 ASevarog::ASevarog()
@@ -123,6 +124,17 @@ float ASevarog::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
 
 	InvokePropertyChanged(StaticCast<uint8>(ESevarogPropertyName::Health));
 	
+    AGameModeBase* GameMode = GetWorld()->GetAuthGameMode();
+    AIngameGameMode* IngameGameMode = Cast<AIngameGameMode>(GameMode);
+    JASSERT_RETURN(IsValid(IngameGameMode), -1.0f, "IngameGameMode is not valid");
+
+    bool bIsDead = Health <= 0.0f;
+    bool bIsThirdPhase = Phase == THIRD_PHASE;
+    if (bIsDead && bIsThirdPhase)
+    {
+        IngameGameMode->OnBossDead();
+    }
+    
 	return ActualDamage;
 }
 

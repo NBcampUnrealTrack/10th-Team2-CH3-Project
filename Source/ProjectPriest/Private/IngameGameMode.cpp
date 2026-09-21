@@ -54,7 +54,6 @@ void AIngameGameMode::OnOpenBossRoomDoor(APlayerCharacter* Player)
     
     JLog("Try to load boss map")
     UGameplayStatics::OpenLevelBySoftObjectPtr(GetWorld(), BossLevel);
-    //IngameState->TryCompleteStage(GetWorld()->GetTimeSeconds() - IngameState->GetStartTime());
 }
 
 void AIngameGameMode::OnMonsterSpawned()
@@ -78,4 +77,11 @@ void AIngameGameMode::OnMonsterDead()
     {
         IngameState->SetDoorVisibility(true);
     }
+}
+
+void AIngameGameMode::OnBossDead()
+{
+    JLog("Boss Dead, Try to complete stage");
+
+    IngameState->TryCompleteStage(GetWorld()->GetTimeSeconds() - IngameState->GetStartTime());
 }
