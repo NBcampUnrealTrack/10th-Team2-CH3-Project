@@ -24,5 +24,8 @@ public:
 
 protected:
     TSoftObjectPtr<UWorld> LobbyLevel;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== IngameGameMode ===")
+	TSoftObjectPtr<UWorld> BossLevel;
+	
     TObjectPtr< AIngameGameState> IngameState;
 };
