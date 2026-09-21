@@ -30,6 +30,15 @@ public:
         FSubsystemCollectionBase& Collection
     ) override;
 
+    UFUNCTION(
+        BlueprintPure,
+        Category = "Priest|Inventory",
+        meta = (WorldContext = "WorldContextObject")
+    )
+    static UPriestInventorySubsystem* Get(
+        const UObject* WorldContextObject
+    );
+
     UFUNCTION(BlueprintPure, Category="Priest|Inventory")
     TArray<FPriestOwnedItem> GetOwnedItems() const { return OwnedItems; }
 

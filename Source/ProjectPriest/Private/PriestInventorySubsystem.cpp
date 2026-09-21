@@ -4,6 +4,8 @@
 #include "Engine/DataTable.h"
 #include "UObject/UObjectGlobals.h"
 #include "RecipeData.h"
+#include "Engine/World.h"
+#include "Engine/GameInstance.h"
 #include "JUtility.h"
 
 bool UPriestInventorySubsystem::AddItem(FName ItemId, int32 Quantity)
@@ -155,6 +157,8 @@ void UPriestInventorySubsystem::GrantPreviewItemsOnce()
     bPreviewItemsGranted = true;
     AddItem(TEXT("HealthPotion"), 5);
     AddItem(TEXT("AttackSpeedUpPotion"), 2);
+    AddItem(TEXT("WhisperDropItemA"), 3);
+    AddItem(TEXT("WhisperDropItemB"), 2);
 }
 
 FName UPriestInventorySubsystem::GetQuickSlotItemId(
@@ -341,6 +345,31 @@ void UPriestInventorySubsystem::Initialize(
         "%hs: RecipeDataTable의 Row Structure가 RecipeData가 아닙니다.",
         __FUNCTION__
     );
+}
+
+UPriestInventorySubsystem*
+UPriestInventorySubsystem::Get(
+    const UObject* WorldContextObject
+)
+{
+    if (!IsValid(WorldContextObject))
+    {
+        return nullptr;
+    }
+
+    UWorld* World = WorldContextObject->GetWorld();
+    if (!IsValid(World))
+    {
+        return nullptr;
+    }
+
+    UGameInstance* GameInstance = World->GetGameInstance();
+    if (!IsValid(GameInstance))
+    {
+        return nullptr;
+    }
+
+    return GameInstance->GetSubsystem<UPriestInventorySubsystem>();
 }
 
 bool UPriestInventorySubsystem::TryGetHealthPotionData(

@@ -1,4 +1,4 @@
-#include "PriestMenuMvc.h"
+﻿#include "PriestMenuMvc.h"
 #include "JUtility.h"
 #include "Engine/Engine.h"
 #include "PriestMainMenuPlayerController.h"
@@ -53,21 +53,73 @@ void UPriestMenuController::HandleViewEvent(IMvcView* InView, EViewEventType Eve
     Request->bAccepted = true;
     switch (Request->Action)
     {
-    case EPriestMenuAction::Title: Model->SetState(EPriestMenuPage::Title, EPriestLobbyTab::Region); break;
-    case EPriestMenuAction::Regions: Model->SetState(EPriestMenuPage::Lobby, EPriestLobbyTab::Region); break;
-    case EPriestMenuAction::Equipment: Model->SetState(EPriestMenuPage::Lobby, EPriestLobbyTab::Equipment); break;
-    case EPriestMenuAction::Credits: Model->SetState(EPriestMenuPage::Credits, Model->GetTab()); break;
-    case EPriestMenuAction::SwitchTab:
-        Request->bAccepted = Model->GetPage() == EPriestMenuPage::Lobby;
-        if (Request->bAccepted)
-        {
-            Model->SetState(EPriestMenuPage::Lobby, Model->GetTab() == EPriestLobbyTab::Region ? EPriestLobbyTab::Equipment : EPriestLobbyTab::Region);
-        }
+    case EPriestMenuAction::Title:
+    {
+        Model->SetState(EPriestMenuPage::Title, EPriestLobbyTab::Region);
         break;
+    }
+
+    case EPriestMenuAction::Regions:
+    {
+        Model->SetState(EPriestMenuPage::Lobby, EPriestLobbyTab::Region);
+        break;
+    }
+
+    case EPriestMenuAction::Equipment:
+    {
+        Model->SetState(EPriestMenuPage::Lobby, EPriestLobbyTab::Equipment);
+        break;
+    }
+
+    case EPriestMenuAction::Crafting:
+    {
+        Model->SetState(EPriestMenuPage::Lobby, EPriestLobbyTab::Crafting);
+        break;
+    }
+
+    case EPriestMenuAction::Credits:
+    {
+        Model->SetState(EPriestMenuPage::Credits, Model->GetTab());
+        break;
+    }
+    
+    case EPriestMenuAction::SwitchTab:
+    {
+        Request->bAccepted = Model->GetPage() == EPriestMenuPage::Lobby && Request->TabDirection != 0;
+
+        if (!Request->bAccepted)
+        {
+            break;
+        }
+
+        constexpr int32 TabCount = 3;
+
+        const int32 CurrentIndex = static_cast<int32>(Model->GetTab());
+
+        const int32 Direction = Request->TabDirection > 0 ? 1 : -1;
+
+        const int32 NextIndex = (CurrentIndex + Direction + TabCount) % TabCount;
+
+        Model->SetState(EPriestMenuPage::Lobby, static_cast<EPriestLobbyTab>(NextIndex));
+        break;
+    }
+
     case EPriestMenuAction::StartStage:
+    {
         Request->bAccepted = Model->GetPage() == EPriestMenuPage::Lobby && Model->GetTab() == EPriestLobbyTab::Region && Owner->StartStageOne();
         break;
-    case EPriestMenuAction::Quit: Owner->RequestQuitGame(); break;
-    default: Request->bAccepted = false; break;
+    }
+
+    case EPriestMenuAction::Quit:
+    {
+        Owner->RequestQuitGame();
+        break;
+    }
+
+    default:
+    {
+        Request->bAccepted = false;
+        break;
+    }
     }
 }

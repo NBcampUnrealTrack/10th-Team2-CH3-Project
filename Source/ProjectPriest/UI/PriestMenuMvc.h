@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "CoreMinimal.h"
 #include "MvcModel.h"
 #include "MvcControl.h"
@@ -11,6 +11,7 @@ enum class EPriestMenuAction : uint8
     Title,
     Regions,
     Equipment,
+    Crafting,
     Credits,
     SwitchTab,
     StartStage,
@@ -28,6 +29,7 @@ public:
     }
     EPriestMenuAction Action = EPriestMenuAction::Title;
     bool bAccepted = false;
+    int32 TabDirection = 0;
 };
 
 UCLASS()

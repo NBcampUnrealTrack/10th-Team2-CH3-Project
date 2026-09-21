@@ -27,7 +27,8 @@ UENUM(BlueprintType)
 enum class EPriestLobbyTab : uint8
 {
 	Region,
-	Equipment
+	Equipment,
+	Crafting
 };
 
 // 배치, 버튼 스타일, 문구는 WBP Designer에서 구성한다.
@@ -57,11 +58,14 @@ public:
 	void ShowEquipment();
 
 	UFUNCTION(BlueprintCallable, Category = "Priest|Menu")
+	void ShowCrafting();
+
+	UFUNCTION(BlueprintCallable, Category = "Priest|Menu")
 	void ShowCredits();
 
 	// 현재 구현된 두 탭 사이를 순환한다. 좌우 화살표에서 호출한다.
 	UFUNCTION(BlueprintCallable, Category = "Priest|Menu")
-	void SwitchLobbyTab();
+	void SwitchLobbyTab(int32 Direction);
 
 	UFUNCTION(BlueprintCallable, Category = "Priest|Menu")
 	bool StartStageOne();
@@ -83,7 +87,7 @@ protected:
     void OnMenuStateChanged(EPriestMenuPage Page, EPriestLobbyTab Tab);
 
 private:
-    bool SendRequest(EPriestMenuAction Action);
+    bool SendRequest(EPriestMenuAction Action, int32 Direction = 0);
     void RefreshPage();
 	void RefreshInventoryDisplay();
 

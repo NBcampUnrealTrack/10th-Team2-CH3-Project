@@ -20,7 +20,7 @@ bool UPriestMainMenuWidget::Initialize()
     JASSERT_BOOL((IsValid(MenuSwitcher)), "%hs: Missing required MenuSwitcher binding", __FUNCTION__);
     JASSERT_BOOL((IsValid(LobbySwitcher)), "%hs: Missing required LobbySwitcher binding", __FUNCTION__);
     JASSERT_BOOL((MenuSwitcher->GetNumWidgets() == 3), "MenuSwitcher requires Title, Lobby and Credits pages");
-    JASSERT_BOOL((LobbySwitcher->GetNumWidgets() == 2), "LobbySwitcher requires Region and Equipment pages");
+    JASSERT_BOOL((LobbySwitcher->GetNumWidgets() == 3), "LobbySwitcher requires Region, Equipment and Crafting pages");
     bBindingsReady = true;
     return true;
 }
@@ -125,13 +125,17 @@ void UPriestMainMenuWidget::ShowEquipment()
 {
     SendRequest(EPriestMenuAction::Equipment);
 }
+void UPriestMainMenuWidget::ShowCrafting()
+{
+    SendRequest(EPriestMenuAction::Crafting);
+}
 void UPriestMainMenuWidget::ShowCredits()
 {
     SendRequest(EPriestMenuAction::Credits);
 }
-void UPriestMainMenuWidget::SwitchLobbyTab()
+void UPriestMainMenuWidget::SwitchLobbyTab(int32 Direction)
 {
-    SendRequest(EPriestMenuAction::SwitchTab);
+    SendRequest(EPriestMenuAction::SwitchTab, Direction);
 }
 void UPriestMainMenuWidget::ApplyMenuState(EPriestMenuPage Page, EPriestLobbyTab Tab)
 {
@@ -155,10 +159,11 @@ void UPriestMainMenuWidget::QuitGame()
 {
     SendRequest(EPriestMenuAction::Quit);
 }
-bool UPriestMainMenuWidget::SendRequest(EPriestMenuAction Action)
+bool UPriestMainMenuWidget::SendRequest(EPriestMenuAction Action, int32 TabDirection)
 {
     TStrongObjectPtr<UPriestMenuRequest> Request(NewObject<UPriestMenuRequest>());
     Request->Action = Action;
+    Request->TabDirection = TabDirection;
     InvokeViewEvent(EViewEventType::ButtonClicked, Request.Get());
     return Request->bAccepted;
 }
