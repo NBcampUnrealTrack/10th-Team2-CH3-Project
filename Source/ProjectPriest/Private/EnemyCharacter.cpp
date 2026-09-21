@@ -1,7 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "EnemyCharacter.h"
+﻿#include "EnemyCharacter.h"
 #include "IngamePlayerController.h"
 #include "PlayerCharacter.h"
 #include "MonsterAIController.h"
@@ -39,7 +36,7 @@ void AEnemyCharacter::Attack(ACharacter* PlayerCharacter)
 
 float AEnemyCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
-    if (!FMath::IsFinite(DamageAmount) || DamageAmount <= 0.0f || Health <= 0.0f || bIsDead || IsActorBeingDestroyed())
+    if (!FMath::IsFinite(DamageAmount) || DamageAmount <= 0.0f || Health <= 0.0f || IsActorBeingDestroyed())
     {
         return 0.0f;
     }
