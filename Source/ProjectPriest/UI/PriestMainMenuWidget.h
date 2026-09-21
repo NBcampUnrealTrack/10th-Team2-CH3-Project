@@ -50,7 +50,7 @@ public:
 	void SwitchLobbyTab(int32 Direction);
 
 	UFUNCTION(BlueprintCallable, Category = "Priest|Menu")
-	bool StartStageOne();
+	void StartStageOne();
 
 	UFUNCTION(BlueprintCallable, Category = "Priest|Menu")
 	void QuitGame();
@@ -69,7 +69,7 @@ protected:
     void OnMenuStateChanged(EPriestMenuPage Page, EPriestLobbyTab Tab);
 
 private:
-    bool SendRequest(EPriestMenuAction Action, int32 Direction = 0);
+    void SendRequest(EPriestMenuAction Action, int32 Direction = 0);
     void RefreshPage();
 	void RefreshInventoryDisplay();
 

@@ -17,6 +17,5 @@ public:
 	}
 
 	EPriestMenuAction Action = EPriestMenuAction::Title;
-	bool bAccepted = false;
 	int32 TabDirection = 0;
 };

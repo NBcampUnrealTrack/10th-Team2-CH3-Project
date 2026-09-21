@@ -38,7 +38,6 @@ void UPriestMenuController::HandleViewEvent(IMvcView* InView, EViewEventType Eve
 	{
 		return;
 	}
-	Request->bAccepted = true;
 	switch (Request->Action)
 	{
 	case EPriestMenuAction::Title:
@@ -73,9 +72,9 @@ void UPriestMenuController::HandleViewEvent(IMvcView* InView, EViewEventType Eve
 
 	case EPriestMenuAction::SwitchTab:
 	{
-		Request->bAccepted = Model->GetPage() == EPriestMenuPage::Lobby && Request->TabDirection != 0;
+		const bool bCanSwitchTab = Model->GetPage() == EPriestMenuPage::Lobby && Request->TabDirection != 0;
 
-		if (!Request->bAccepted)
+		if (!bCanSwitchTab)
 		{
 			break;
 		}
@@ -90,11 +89,17 @@ void UPriestMenuController::HandleViewEvent(IMvcView* InView, EViewEventType Eve
 
 	case EPriestMenuAction::StartStage:
 	{
-		bool bIsLobbyPage = Model->GetPage() == EPriestMenuPage::Lobby;
-		bool bIsLegionTab = Model->GetTab() == EPriestLobbyTab::Region;
-		bool bStageStarted = Owner->StartStageOne();
+		const bool bIsLobbyPage = Model->GetPage() == EPriestMenuPage::Lobby;
+		const bool bIsRegionTab = Model->GetTab() == EPriestLobbyTab::Region;
 
-		Request->bAccepted = bIsLobbyPage && bIsLegionTab && bStageStarted;
+		const bool bCanStartStage = bIsLobbyPage && bIsRegionTab;
+
+		if (!bCanStartStage)
+		{
+			break;
+		}
+
+		Owner->StartStageOne();
 		break;
 	}
 
@@ -106,7 +111,6 @@ void UPriestMenuController::HandleViewEvent(IMvcView* InView, EViewEventType Eve
 
 	default:
 	{
-		Request->bAccepted = false;
 		break;
 	}
 	}

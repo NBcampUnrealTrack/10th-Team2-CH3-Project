@@ -111,11 +111,11 @@ void APriestMainMenuPlayerController::BeginPlay()
 	}
 }
 
-bool APriestMainMenuPlayerController::StartStageOne()
+void APriestMainMenuPlayerController::StartStageOne()
 {
 	if (!IsLocalController() || !MainMenu || bTravelRequested)
 	{
-		return false;
+		return;
 	}
 
 	const FString MapPackage = StageOneMap.ToSoftObjectPath().GetLongPackageName();
@@ -123,13 +123,12 @@ bool APriestMainMenuPlayerController::StartStageOne()
 	{
 		JError("Priest Menu: StageOneMap does not exist: %s", *MapPackage);
 		MainMenu->ShowStatusMessage(NSLOCTEXT("PriestMenu", "MissingStage", "게임플레이 맵을 찾을 수 없습니다."));
-		return false;
+		return;
 	}
 
 	bTravelRequested = true;
 	MainMenu->SetIsEnabled(false);
 	UGameplayStatics::OpenLevelBySoftObjectPtr(this, StageOneMap);
-	return true;
 }
 
 void APriestMainMenuPlayerController::HandleTravelFailure(UWorld* World, ETravelFailure::Type FailureType, const FString& ErrorString)
