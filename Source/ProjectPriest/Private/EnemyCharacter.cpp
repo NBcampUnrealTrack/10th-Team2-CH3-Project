@@ -36,7 +36,7 @@ void AEnemyCharacter::Attack(ACharacter* PlayerCharacter)
 
 float AEnemyCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
-    if (!FMath::IsFinite(DamageAmount) || DamageAmount <= 0.0f || Health <= 0.0f || IsActorBeingDestroyed())
+    if (!FMath::IsFinite(DamageAmount) || DamageAmount <= 0.0f || Health <= 0.0f || bIsDead || IsActorBeingDestroyed())
     {
         return 0.0f;
     }
