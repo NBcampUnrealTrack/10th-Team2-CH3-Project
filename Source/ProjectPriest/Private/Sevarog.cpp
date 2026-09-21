@@ -128,9 +128,11 @@ float ASevarog::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
     AIngameGameMode* IngameGameMode = Cast<AIngameGameMode>(GameMode);
     JASSERT_RETURN(IsValid(IngameGameMode), -1.0f, "IngameGameMode is not valid");
 
-    bool bIsDead = Health <= 0.0f;
+    bool bIsEmptyHealth = Health <= 0.0f;
     bool bIsThirdPhase = Phase == THIRD_PHASE;
-    if (bIsDead && bIsThirdPhase)
+
+    //realy dead!
+    if (bIsEmptyHealth && bIsThirdPhase)
     {
         IngameGameMode->OnBossDead();
     }
