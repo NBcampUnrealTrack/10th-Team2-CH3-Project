@@ -7,6 +7,8 @@
 #include "MvcModel.h"
 #include "MonsterData.h"
 #include "GlobalConst.h"
+#include "PlayerCharacter.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ASevarog::ASevarog()
@@ -19,12 +21,22 @@ ASevarog::ASevarog()
 void ASevarog::BeginPlay()
 {
 	Super::BeginPlay();
-    JASSERT(IsValid(HudClass), "%hs HudClass is not valid", __FUNCTION__);
+    JASSERT(IsValid(HudClass), "HudClass is not valid");
 
     USevarogHud* HudInstance = CreateWidget<USevarogHud>(GetWorld(), HudClass, TEXT("Sevarog Hud"));
-    JASSERT(IsValid(HudInstance), "%hs HudInstance is not valid", __FUNCTION__);
+    JASSERT(IsValid(HudInstance), "HudInstance is not valid");
 
 	HudInstance->AddToViewport(FGlobalConst::FUiZOrder::SEVAROG_HUD_ZORDER);
+	
+	//Find Player
+	AActor* FindActor =  UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
+	JASSERT(IsValid(FindActor), "FindActor is not valid");
+	
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(FindActor);
+	JASSERT(IsValid(PlayerCharacter), "PlayerCharacter is not valid");
+	
+	SetAttackTarget(PlayerCharacter);
+	
 	
 	Phase = 0;
 	InvokePropertyChanged(StaticCast<uint8>(ESevarogPropertyName::Health));	
