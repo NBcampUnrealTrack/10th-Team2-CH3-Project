@@ -30,11 +30,19 @@ void AWeaponItem::Attack()
 
 	bCanFire = false;
 
+	const APlayerCharacter* Player = Cast<APlayerCharacter>(GetOwner());
+
+	JASSERT(IsValid(Player), "WeaponItem의 owner가 플레이어 캐릭터가 아닙니다");
+
+	const float Multiplier = Player->GetAttackSpeedMultiplier();
+
+	const float EffectiveFireInterval = FMath::Max(FireInterval / Multiplier, 0.01f);
+
 	GetWorldTimerManager().SetTimer(
 		FireTimerHandle,
 		this,
 		&AWeaponItem::ResetFire,
-		FireInterval,
+		EffectiveFireInterval,
 		false
 	);
 
