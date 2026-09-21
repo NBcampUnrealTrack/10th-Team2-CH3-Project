@@ -5,31 +5,13 @@
 #include "MvcView.h"
 #include "PriestItemTypes.h"
 #include "PriestInventoryViewData.h"
+#include "PriestMenuTypes.h"
 #include "PriestMainMenuWidget.generated.h"
 
-enum class EPriestMenuAction : uint8;
 class UTextBlock;
 class UWidgetSwitcher;
 class UUniformGridPanel;
 class UPriestInventorySlotWidget;
-
-// 값은 WBP의 MenuSwitcher 자식 순서와 일치해야 한다.
-UENUM(BlueprintType)
-enum class EPriestMenuPage : uint8
-{
-	Title,
-	Lobby,
-	Credits
-};
-
-// 값은 WBP의 LobbySwitcher 자식 순서와 일치해야 한다.
-UENUM(BlueprintType)
-enum class EPriestLobbyTab : uint8
-{
-	Region,
-	Equipment,
-	Crafting
-};
 
 // 배치, 버튼 스타일, 문구는 WBP Designer에서 구성한다.
 UCLASS(Abstract)

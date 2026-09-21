@@ -30,16 +30,11 @@ void AWeaponItem::Attack()
 
 	bCanFire = false;
 
-	float Multiplier = 1.0f;
+	const APlayerCharacter* Player = Cast<APlayerCharacter>(GetOwner());
 
-	if (const APlayerCharacter* Player = Cast<APlayerCharacter>(GetOwner()))
-	{
-		const float PlayerMultiplier = Player->GetAttackSpeedMultiplier();
-		if (FMath::IsFinite(PlayerMultiplier) && PlayerMultiplier > 0.0f)
-		{
-			Multiplier = PlayerMultiplier;
-		}
-	}
+	JASSERT(IsValid(Player), "WeaponItem의 owner가 플레이어 캐릭터가 아닙니다");
+
+	const float Multiplier = Player->GetAttackSpeedMultiplier();
 
 	const float EffectiveFireInterval = FMath::Max(FireInterval / Multiplier, 0.01f);
 

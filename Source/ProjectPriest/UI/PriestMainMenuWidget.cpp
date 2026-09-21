@@ -1,14 +1,18 @@
 ﻿#include "PriestMainMenuWidget.h"
 #include "JUtility.h"
+#include "MvcControl.h"
 #include "Engine/Engine.h"
 #include "PriestMainMenuPlayerController.h"
 #include "Components/TextBlock.h"
 #include "Components/WidgetSwitcher.h"
-#include "PriestMenuMvc.h"
+#include "PriestMenuRequest.h"
 #include "UObject/StrongObjectPtr.h"
 #include "PriestInventorySlotWidget.h"
 #include "Components/UniformGridPanel.h"
 #include "PriestInventoryEventParameter.h"
+
+#define REQUIRED_MENU_COUNT 3
+#define REQUIRED_LOBBY_COUNT 3
 
 bool UPriestMainMenuWidget::Initialize()
 {
@@ -16,11 +20,11 @@ bool UPriestMainMenuWidget::Initialize()
     {
         return true;
     }
-    JASSERT_BOOL((Super::Initialize()), "%hs: Base widget initialization failed", __FUNCTION__);
-    JASSERT_BOOL((IsValid(MenuSwitcher)), "%hs: Missing required MenuSwitcher binding", __FUNCTION__);
-    JASSERT_BOOL((IsValid(LobbySwitcher)), "%hs: Missing required LobbySwitcher binding", __FUNCTION__);
-    JASSERT_BOOL((MenuSwitcher->GetNumWidgets() == 3), "MenuSwitcher requires Title, Lobby and Credits pages");
-    JASSERT_BOOL((LobbySwitcher->GetNumWidgets() == 3), "LobbySwitcher requires Region, Equipment and Crafting pages");
+    JASSERT_BOOL((Super::Initialize()), "Base widget initialization failed");
+    JASSERT_BOOL((IsValid(MenuSwitcher)), "Missing required MenuSwitcher binding");
+    JASSERT_BOOL((IsValid(LobbySwitcher)), "Missing required LobbySwitcher binding");
+    JASSERT_BOOL((MenuSwitcher->GetNumWidgets() == REQUIRED_MENU_COUNT), "MenuSwitcher requires Title, Lobby and Credits pages");
+    JASSERT_BOOL((LobbySwitcher->GetNumWidgets() == REQUIRED_LOBBY_COUNT), "LobbySwitcher requires Region, Equipment and Crafting pages");
     bBindingsReady = true;
     return true;
 }

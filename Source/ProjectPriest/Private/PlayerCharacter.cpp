@@ -538,12 +538,12 @@ EPotionUseResult APlayerCharacter::TryUsePotion(FName ItemId)
 
     UGameInstance* GameInstance = GetGameInstance();
 
-    JASSERT_RETURN((IsValid(GameInstance)), EPotionUseResult::Unavailable, "%hs [%s]: GameInstance가 없습니다.", __FUNCTION__, *GetNameSafe(this));
+    JASSERT_RETURN((IsValid(GameInstance)), EPotionUseResult::Unavailable, "GameInstance가 없습니다.");
 
     UPriestInventorySubsystem* Inventory =
         GameInstance->GetSubsystem<UPriestInventorySubsystem>();
 
-    JASSERT_RETURN((IsValid(Inventory)), EPotionUseResult::Unavailable, "%hs [%s]: InventorySubsystem이 없습니다.", __FUNCTION__, *GetNameSafe(this));
+    JASSERT_RETURN((IsValid(Inventory)), EPotionUseResult::Unavailable, "InventorySubsystem이 없습니다.");
 
     FHealthPotionData HealthData;
     if (Inventory->TryGetHealthPotionData(ItemId, HealthData))
@@ -552,7 +552,7 @@ EPotionUseResult APlayerCharacter::TryUsePotion(FName ItemId)
             || !FMath::IsFinite(MaxHealth)
             || MaxHealth <= 0.0f)
         {
-            JError("%hs [%s]: 잘못된 체력 설정. CurrentHealth=%f, MaxHealth=%f", __FUNCTION__, *GetNameSafe(this), CurrentHealth, MaxHealth);
+            JError("잘못된 체력 설정. CurrentHealth=%f, MaxHealth=%f", CurrentHealth, MaxHealth);
             return EPotionUseResult::Unavailable;
         }
 
@@ -636,12 +636,12 @@ EPotionUseResult APlayerCharacter::TryUseQuickSlot(
 {
     UGameInstance* GameInstance = GetGameInstance();
 
-    JASSERT_RETURN((IsValid(GameInstance)), EPotionUseResult::Unavailable, "%hs [%s]: GameInstance가 없습니다.", __FUNCTION__, *GetNameSafe(this));
+    JASSERT_RETURN((IsValid(GameInstance)), EPotionUseResult::Unavailable, "GameInstance가 없습니다.");
 
     UPriestInventorySubsystem* Inventory =
         GameInstance->GetSubsystem<UPriestInventorySubsystem>();
 
-    JASSERT_RETURN((IsValid(Inventory)), EPotionUseResult::Unavailable, "%hs [%s]: InventorySubsystem이 없습니다.", __FUNCTION__, *GetNameSafe(this));
+    JASSERT_RETURN((IsValid(Inventory)), EPotionUseResult::Unavailable, "InventorySubsystem이 없습니다.");
 
     const FName ItemId =
         Inventory->GetQuickSlotItemId(SlotIndex);
