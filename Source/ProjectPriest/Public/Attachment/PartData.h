@@ -8,6 +8,7 @@
 UENUM(BlueprintType)
 enum class EPartSlot : uint8
 {
+	None,
 	Barrel,
 	Magazine
 };
@@ -21,7 +22,7 @@ struct FPartData : public FTableRowBase
 	FName Name;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EPartSlot SlotType;
+	EPartSlot SlotType = EPartSlot::None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Damage = -1.0f;
