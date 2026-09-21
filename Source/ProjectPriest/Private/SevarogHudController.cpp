@@ -30,8 +30,6 @@ void USevarogHudController::HandleModelChanged(IMvcModel* InModel, uint8 Propert
 		}
 		
 		default:
-			JError("%s not supported yet" 
-				, *PropertyText.ToString());
 		break;		
 	}
 	
