@@ -22,3 +22,4 @@ Saved/
 # Visual Studio cache
 .vs/
 *.ipch
+/ProjectPriest.sln.DotSettings.user
