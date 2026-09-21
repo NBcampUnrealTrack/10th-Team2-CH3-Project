@@ -3,6 +3,7 @@
 #include "PlayerCharacter.h"
 #include "BossRoomOpenInteractor.h"
 #include "JUtility.h"
+#include "Kismet/GameplayStatics.h"
 
 void AIngameGameMode::BeginPlay()
 {
@@ -37,6 +38,7 @@ void AIngameGameMode::OnPlayerDead()
 
 void AIngameGameMode::OnOpenBossRoomDoor(APlayerCharacter* Player)
 {
+    //TODO: 좀 더 보기 편한 구조로 바꾸자.
     if (!IsValid(IngameState) || !IsValid(Player) || Player->GetWorld() != GetWorld()
         || !FMath::IsFinite(Player->GetCurrentHealth()) || Player->GetCurrentHealth() <= 0.0f
         || !IngameState->IsExitAvailable() || IngameState->GetMonsterCount() != 0)
@@ -49,7 +51,9 @@ void AIngameGameMode::OnOpenBossRoomDoor(APlayerCharacter* Player)
     {
         return;
     }
-    IngameState->TryCompleteStage(GetWorld()->GetTimeSeconds() - IngameState->GetStartTime());
+    
+    JLog("Try to load boss map")
+    UGameplayStatics::OpenLevelBySoftObjectPtr(GetWorld(), BossLevel);
 }
 
 void AIngameGameMode::OnMonsterSpawned()
@@ -73,4 +77,11 @@ void AIngameGameMode::OnMonsterDead()
     {
         IngameState->SetDoorVisibility(true);
     }
+}
+
+void AIngameGameMode::OnBossDead()
+{
+    JLog("Boss Dead, Try to complete stage");
+
+    IngameState->TryCompleteStage(GetWorld()->GetTimeSeconds() - IngameState->GetStartTime());
 }

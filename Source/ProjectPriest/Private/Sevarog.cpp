@@ -7,6 +7,9 @@
 #include "MvcModel.h"
 #include "MonsterData.h"
 #include "GlobalConst.h"
+#include "PlayerCharacter.h"
+#include "Kismet/GameplayStatics.h"
+#include <IngameGameMode.h>
 
 // Sets default values
 ASevarog::ASevarog()
@@ -19,12 +22,22 @@ ASevarog::ASevarog()
 void ASevarog::BeginPlay()
 {
 	Super::BeginPlay();
-    JASSERT(IsValid(HudClass), "%hs HudClass is not valid", __FUNCTION__);
+    JASSERT(IsValid(HudClass), "HudClass is not valid");
 
     USevarogHud* HudInstance = CreateWidget<USevarogHud>(GetWorld(), HudClass, TEXT("Sevarog Hud"));
-    JASSERT(IsValid(HudInstance), "%hs HudInstance is not valid", __FUNCTION__);
+    JASSERT(IsValid(HudInstance), "HudInstance is not valid");
 
 	HudInstance->AddToViewport(FGlobalConst::FUiZOrder::SEVAROG_HUD_ZORDER);
+	
+	//Find Player
+	AActor* FindActor =  UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
+	JASSERT(IsValid(FindActor), "FindActor is not valid");
+	
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(FindActor);
+	JASSERT(IsValid(PlayerCharacter), "PlayerCharacter is not valid");
+	
+	SetAttackTarget(PlayerCharacter);
+	
 	
 	Phase = 0;
 	InvokePropertyChanged(StaticCast<uint8>(ESevarogPropertyName::Health));	
@@ -111,6 +124,17 @@ float ASevarog::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
 
 	InvokePropertyChanged(StaticCast<uint8>(ESevarogPropertyName::Health));
 	
+    AGameModeBase* GameMode = GetWorld()->GetAuthGameMode();
+    AIngameGameMode* IngameGameMode = Cast<AIngameGameMode>(GameMode);
+    JASSERT_RETURN(IsValid(IngameGameMode), -1.0f, "IngameGameMode is not valid");
+
+    bool bIsDead = Health <= 0.0f;
+    bool bIsThirdPhase = Phase == THIRD_PHASE;
+    if (bIsDead && bIsThirdPhase)
+    {
+        IngameGameMode->OnBossDead();
+    }
+    
 	return ActualDamage;
 }
 
