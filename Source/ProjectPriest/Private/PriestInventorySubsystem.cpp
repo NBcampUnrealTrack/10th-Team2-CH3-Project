@@ -84,10 +84,11 @@ bool UPriestInventorySubsystem::CraftItem(FName RecipeID)
 
     FPriestItemData ResultItemData;
 
-    if (!TryGetItemData(Recipe->ResultItemID, ResultItemData))
-    {
-        return false;
-    }
+    JASSERT_BOOL(
+        TryGetItemData(Recipe->ResultItemID, ResultItemData),
+        "%hs: 레시피 데이터의 ResultItemID이 올바르지 않습니다.",
+        __FUNCTION__
+    );
 
     for (const FRecipeIngredient& Ingredient : Recipe->Ingredients)
     {
