@@ -9,7 +9,7 @@
 class UPartInstance;
 class UPartManager;
 
-UCLASS()
+UCLASS(BlueprintType)
 class PROJECTPRIEST_API UPriestGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
@@ -17,6 +17,7 @@ class PROJECTPRIEST_API UPriestGameInstance : public UGameInstance
 public:
 	UPriestGameInstance();
 
+	UFUNCTION(BlueprintCallable)
 	UPartInstance* GetOrCreatePartInstance(FName ItemType);
 
 

@@ -64,6 +64,7 @@ public:
 
     float GetMaxHealth() const;
 
+    UFUNCTION(BlueprintCallable)
     AWeaponItem* GetEquippedWeapon() const;
 
     const FVector GetMuzzleLocation();

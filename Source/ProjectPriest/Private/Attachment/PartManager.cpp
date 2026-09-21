@@ -64,3 +64,14 @@ void UPartManager::ApplyPartsToWeapon(AWeaponItem* Weapon)
 	Weapon->SetDamage(BaseDamage * ValuDamage);
 	Weapon->SetMagazineSize(BaseMagazineSize * ValueMagazineSize);
 }
+
+FPartData UPartManager::GetPartSlot(EPartSlot SlotType) const
+{
+
+	if (FPartData* Fats = PartInstance->PartSlots.Find(SlotType))
+	{
+		return *Fats;
+	}
+	
+	return FPartData();
+}

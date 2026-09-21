@@ -9,7 +9,7 @@
 
 class UPartManager;
 
-UCLASS()
+UCLASS(BlueprintType)
 class PROJECTPRIEST_API UPartInstance : public UObject
 {
 	GENERATED_BODY()
@@ -17,6 +17,7 @@ class PROJECTPRIEST_API UPartInstance : public UObject
 public:
 	UPartInstance();
 
+	UFUNCTION(BlueprintCallable)
 	UPartManager* GetPartManager() { return PartManager; }
 
 	void Initialize();
