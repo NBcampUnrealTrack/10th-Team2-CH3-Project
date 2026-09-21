@@ -6,6 +6,10 @@
 
 APartItem::APartItem()
 {
+}
+
+void APartItem::BeginPlay() 
+{
 	const FPartData* Data = PartData.GetRow<FPartData>(TEXT("PartItem"));
 	ItemType = Data->Name;
 }

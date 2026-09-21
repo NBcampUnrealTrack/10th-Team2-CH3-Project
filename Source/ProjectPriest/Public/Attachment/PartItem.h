@@ -20,4 +20,6 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Part")
 	FDataTableRowHandle PartData;
+
+	void virtual BeginPlay() override;
 };
