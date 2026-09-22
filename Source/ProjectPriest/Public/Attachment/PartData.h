@@ -30,3 +30,30 @@ struct FPartData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MagazineSize = -1.0f;
 };
+
+USTRUCT(BlueprintType)
+struct FPartSlotViewData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	EPartSlot SlotType = EPartSlot::None;
+
+	UPROPERTY(BlueprintReadOnly)
+	FName Name;
+
+	UPROPERTY(BlueprintReadOnly)
+	FText StatName;
+
+	UPROPERTY(BlueprintReadOnly)
+	FText StatValue;
+};
+
+USTRUCT(BlueprintType)
+struct FPartViewData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FPartSlotViewData> Parts;
+};
