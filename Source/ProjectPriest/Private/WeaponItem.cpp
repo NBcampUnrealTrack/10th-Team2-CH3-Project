@@ -345,6 +345,8 @@ void AWeaponItem::ApplyPartsToWeapon()
 	UPartSubsystem* PartSubsystem =
 		GetGameInstance()->GetSubsystem<UPartSubsystem>();
 
+	PartSubsystem->GetOrCreatePartInstance(FName(WeaponName.ToString()));
+
 	//if (BaseDamage < 0)
 	//{
 	//	BaseDamage = Weapon->GetDamage();
