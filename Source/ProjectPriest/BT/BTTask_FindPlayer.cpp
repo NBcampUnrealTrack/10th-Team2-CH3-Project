@@ -7,6 +7,7 @@
 #include "AIController.h"
 #include "NavigationSystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "JUtility.h"
 
 UBTTask_FindPlayer::UBTTask_FindPlayer()
 {
@@ -23,9 +24,9 @@ EBTNodeResult::Type UBTTask_FindPlayer::ExecuteTask(UBehaviorTreeComponent& Owne
 		return EBTNodeResult::Failed;
 	}
 
-	APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);//불러올 곳, 불러올 플레이어의 번호
+	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);//불러올 곳, 불러올 플레이어의 번호
 
-	if (!playerPawn)
+	if (!PlayerPawn)
 	{
 		return EBTNodeResult::Failed;
 	}
@@ -40,7 +41,7 @@ EBTNodeResult::Type UBTTask_FindPlayer::ExecuteTask(UBehaviorTreeComponent& Owne
 	FNavLocation ProjectedLocation;
 
 	bool bFoundNavigationLocation = NavSystem->ProjectPointToNavigation(
-		playerPawn->GetActorLocation(),
+		PlayerPawn->GetActorLocation(),
 		ProjectedLocation,
 		FVector(200, 200, 500)
 	);
@@ -53,7 +54,7 @@ EBTNodeResult::Type UBTTask_FindPlayer::ExecuteTask(UBehaviorTreeComponent& Owne
 	BlackboardComp->SetValueAsVector(TEXT("PlayerVector"), ProjectedLocation.Location);
 
     //TODO REMOVE BY Joo jung yeol
-    BlackboardComp->SetValueAsObject(TEXT("Player"), playerPawn);
+    BlackboardComp->SetValueAsObject(TEXT("Player"), PlayerPawn);
 
 	return EBTNodeResult::Succeeded;	
 }
