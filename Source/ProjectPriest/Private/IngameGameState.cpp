@@ -118,11 +118,11 @@ void AIngameGameState::InvokePropertyChanged(uint8 PropertyName)
 
 bool AIngameGameState::TryCompleteStage(float ClearSeconds)
 {
-    if (bStageCleared || MonsterCount != 0 || !DoorVisibility
-        || !FMath::IsFinite(ClearSeconds) || ClearSeconds < 0.0f)
+    if (bStageCleared || !FMath::IsFinite(ClearSeconds) || ClearSeconds < 0.0f)
     {
         return false;
     }
+
     ElapsedTime = ClearSeconds;
     bStageCleared = true;
     DoorVisibility = false;
