@@ -7,6 +7,8 @@
 
 class USphereComponent;
 
+//TODO: 클래스를의 멤버들을 선언할때 public Method(Interface)를 가장 처음에 기술합니다.
+//이는 독자로 하여금 클래스의 기능을 가장 먼저 이해할 수 있도록 하기 위함입니다.
 UCLASS()
 class PROJECTPRIEST_API ABaseItem : public AActor, public IItemInterface
 {
@@ -30,6 +32,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Item===|Properties")
 	FName ItemType = TEXT("BaseItem");
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Item===|Properties")
+	TObjectPtr<USoundWave> PickupSound;
 protected:
 	// Internal Functions
 	UFUNCTION()
