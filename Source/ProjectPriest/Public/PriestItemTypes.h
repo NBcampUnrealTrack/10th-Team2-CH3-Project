@@ -11,7 +11,7 @@ enum class EItemCategory : uint8
 {
     None        UMETA(DisplayName = "미지정"),
     Weapon      UMETA(DisplayName = "무기"),
-    Ammo        UMETA(DisplayName = "탄약"),
+    Part        UMETA(DisplayName = "파츠"),
     Consumable  UMETA(DisplayName = "소모품"),
     Material    UMETA(DisplayName = "재료")
 };

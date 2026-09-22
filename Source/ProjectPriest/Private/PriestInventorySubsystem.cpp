@@ -159,6 +159,7 @@ void UPriestInventorySubsystem::GrantPreviewItemsOnce()
     AddItem(TEXT("AttackSpeedUpPotion"), 2);
     AddItem(TEXT("WhisperDropItemA"), 3);
     AddItem(TEXT("WhisperDropItemB"), 2);
+    AddItem(TEXT("Barrel"), 1);
 }
 
 FName UPriestInventorySubsystem::GetQuickSlotItemId(
@@ -280,22 +281,22 @@ void UPriestInventorySubsystem::Initialize(
 
     ItemDataTables.Add(EItemCategory::Weapon, WeaponTable);
 
-    //탄약 데이터테이블(현재 탄약을 별도의 아이템으로 두지 않고 있으니 파츠 데이터테이블로 사용해도 좋을것같음)
-    UDataTable* AmmoTable = Settings->AmmoDataTable.LoadSynchronous();
+    //파츠 데이터테이블
+    UDataTable* PartTable = Settings->PartDataTable.LoadSynchronous();
 
     JASSERT(
-        IsValid(AmmoTable),
-        "%hs: 탄약 테이블 로드 실패. 프로젝트 설정을 확인하세요.",
+        IsValid(PartTable),
+        "%hs: 파츠 테이블 로드 실패. 프로젝트 설정을 확인하세요.",
         __FUNCTION__
     );
 
     JASSERT(
-        AmmoTable->GetRowStruct() == FPriestItemData::StaticStruct(),
-        "%hs: 탄약 테이블의 Row Structure가 PriestItemData가 아닙니다.",
+        PartTable->GetRowStruct() == FPriestItemData::StaticStruct(),
+        "%hs: 파츠 테이블의 Row Structure가 PriestItemData가 아닙니다.",
         __FUNCTION__
     );
 
-    ItemDataTables.Add(EItemCategory::Ammo, AmmoTable);
+    ItemDataTables.Add(EItemCategory::Part, PartTable);
 
     //소모품 데이터테이블
     UDataTable* ConsumableTable = Settings->ConsumableDataTable.LoadSynchronous();

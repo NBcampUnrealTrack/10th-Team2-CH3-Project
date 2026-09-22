@@ -21,7 +21,7 @@ public:
     TSoftObjectPtr<UDataTable> WeaponDataTable;
 
     UPROPERTY(Config, EditAnywhere, Category = "Item Tables")
-    TSoftObjectPtr<UDataTable> AmmoDataTable;
+    TSoftObjectPtr<UDataTable> PartDataTable;
 
     UPROPERTY(Config, EditAnywhere, Category = "Item Tables")
     TSoftObjectPtr<UDataTable> ConsumableDataTable;

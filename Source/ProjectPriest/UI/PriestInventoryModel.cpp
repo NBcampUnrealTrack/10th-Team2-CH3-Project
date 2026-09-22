@@ -43,7 +43,7 @@ bool UPriestInventoryModel::SetCategory(EItemCategory InCategory)
     switch (InCategory)
     {
         case EItemCategory::Weapon:
-        case EItemCategory::Ammo:
+        case EItemCategory::Part:
         case EItemCategory::Consumable:
         case EItemCategory::Material:
             break;
