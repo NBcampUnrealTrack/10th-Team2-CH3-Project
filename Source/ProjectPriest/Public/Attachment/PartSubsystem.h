@@ -19,6 +19,20 @@ struct FWeaponPartSlots
 	TMap<EPartSlot, FPartData> PartSlots;
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPartsChanged);
+
+//USTRUCT(BlueprintType)
+//struct PROJECTPRIEST_API FPriestOwnedItem
+//{
+//	GENERATED_BODY()
+//
+//	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName ItemId;
+//	UPROPERTY(EditAnywhere, BlueprintReadWrite) FText DisplayName;
+//	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1")) int32 Quantity = 1;
+//};
+
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPriestQuickSlotsChanged);
+
 UCLASS()
 class PROJECTPRIEST_API UPartSubsystem : public UGameInstanceSubsystem
 {
@@ -49,6 +63,10 @@ public:
 	//WeaponSlots -> 찾을 슬롯
 	//SlotType -> 찾을 타입 
 	FPartData GetEquippedPart(FWeaponPartSlots* WeaponSlots, EPartSlot SlotType);
+
+public:
+	UPROPERTY(BlueprintAssignable, Category = "Priest|Inventory")
+	FPartsChanged OnPartsChanged;
 
 private:
 	//FName -> FText -> WeponName
