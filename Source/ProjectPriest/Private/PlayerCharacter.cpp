@@ -66,7 +66,8 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::ChangeWalkingMode(EWalkingMode WalkingMode)
 {
-    //
+    JLog("Try to change walking mode: %s", *GET_ENUM_DISPLAY_STRING(EWalkingMode, WalkingMode));
+    
     FSpeedConfig* Config = MovementConfigMap.Find(WalkingMode);
     if (nullptr == Config)
     {
@@ -132,6 +133,13 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     EnhancedInput->BindAction(
         PlayerController->GetMoveAction(),
         ETriggerEvent::Triggered,
+        this,
+        &APlayerCharacter::OnMoveInputted
+    );
+    
+    EnhancedInput->BindAction(
+        PlayerController->GetMoveAction(),
+        ETriggerEvent::Completed,
         this,
         &APlayerCharacter::OnMoveInputted
     );
@@ -270,13 +278,20 @@ void APlayerCharacter::OnMoveInputted(const FInputActionInstance& InputValue)
     //GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("APlayerCharacter::Move"));
 
     FVector2D Input = InputValue.GetValue().Get<FVector2D>();
+    
     //TODO: Camera의 Forward로 할지 Actor의 FOrawrd로 할지 테스트해보고 정해야함
     FVector Forward = GetActorForwardVector();
     FVector Right = GetActorRightVector();
     FVector Direction = (Forward * Input.Y) + (Right * Input.X);
     Direction.Normalize();
-
+    
     GetCharacterMovement()->AddInputVector(Direction);
+    
+    if (FMath::IsNearlyZero(Input.X) && FMath::IsNearlyZero(Input.Y))
+    {
+        // 이동 입력이 없을 때
+        ChangeWalkingMode(EWalkingMode::Normal);
+    }
 }
 
 void APlayerCharacter::OnLookInputted(const FInputActionInstance& InputValue)
