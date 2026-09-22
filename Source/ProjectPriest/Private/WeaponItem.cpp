@@ -3,14 +3,12 @@
 #include "Kismet/GameplayStatics.h"
 #include "Camera/PlayerCameraManager.h"
 #include "PlayerCharacter.h"
-#include "Attachment/PartManager.h"
-#include "PriestGameInstance.h"
+#include "Attachment/PartSubsystem.h"
 #include "JUtility.h"
 
 AWeaponItem::AWeaponItem()
 {
 	ItemType = TEXT("Weapon");
-	//PartManager = NewObject<UPartManager>(this);
 }
 
 bool AWeaponItem::IsReloading() const
@@ -342,21 +340,48 @@ void AWeaponItem::PerformTraceTPS(
 	}
 }
 
+void AWeaponItem::ApplyPartsToWeapon()
+{
+	UPartSubsystem* PartSubsystem =
+		GetGameInstance()->GetSubsystem<UPartSubsystem>();
+
+	//if (BaseDamage < 0)
+	//{
+	//	BaseDamage = Weapon->GetDamage();
+	//}
+	//if (BaseMagazineSize < 0)
+	//{
+	//	BaseMagazineSize = Weapon->GetMagazineSize();
+	//}
+
+	float ValuDamage = 1.0f;
+	float ValueMagazineSize = 1.0f;
+
+	for (const auto& Part :	PartSubsystem->GetEquippedParts(FName(WeaponName.ToString())).PartSlots)
+	{
+		if (Part.Value.Damage > 0.0f)
+		{
+			ValuDamage *= Part.Value.Damage;
+		}
+		if (Part.Value.MagazineSize > 0.0f)
+		{
+			ValueMagazineSize *= Part.Value.MagazineSize;
+		}
+	}
+
+	Damage = Damage * ValuDamage;
+	MagazineSize = MagazineSize * ValueMagazineSize;
+}
+
 void AWeaponItem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UPriestGameInstance* GameInstance =
-		Cast<UPriestGameInstance>(GetGameInstance());
-
-	UPartInstance* Instance = GameInstance->GetOrCreatePartInstance(ItemType);
-
-	UPartManager* Manager = Instance->GetPartManager();
 
 	JLog("Weapon Damage : %f", GetDamage());
 	JLog("Magazine Size : %d", GetMagazineSize());
 
-	Manager->ApplyPartsToWeapon(this);
+	ApplyPartsToWeapon();
 
 	JLog("After Damage : %f", GetDamage());
 	JLog("After Magazine : %d", GetMagazineSize());
