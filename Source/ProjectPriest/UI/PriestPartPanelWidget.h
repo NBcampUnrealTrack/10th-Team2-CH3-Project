@@ -4,21 +4,18 @@
 #include "Blueprint/UserWidget.h"
 #include "MvcView.h"
 #include "Attachment/PartData.h"
-#include "PriestPartPanelWidget.generated.h"
 #include "MvcUtility.h"
-
-IMPLEMENT_VIEW_DEFAULT_ADDLISTENER(UPriestPartPanelWidget)
-IMPLEMENT_VIEW_DEFAULT_REMOVELISTENER(UPriestPartPanelWidget)
-IMPLEMENT_VIEW_DEFAULT_INVOKE_VIEW_EVENT(UPriestPartPanelWidget)
+#include "PriestPartPanelWidget.generated.h"
 
 class UDataTable;
 class UPriestPartPanelModel;
-class UPriestPartPanelController;
 
 UCLASS(Abstract, Blueprintable)
 class PROJECTPRIEST_API UPriestPartPanelWidget: public UUserWidget, public IMvcView
 {
     GENERATED_BODY()
+
+    DECLARE_VIEW_DEFAULT_INTERFACES()
 
 public:
     UFUNCTION(BlueprintCallable, Category = "Priest|Part")
@@ -43,9 +40,4 @@ protected:
 private:
     UPROPERTY(Transient)
     TObjectPtr<UPriestPartPanelModel> Model;
-
-    UPROPERTY(Transient)
-    TObjectPtr<UPriestPartPanelController> Controller;
-
-    FViewEventRaisedDelegate ViewEventListeners;
 };

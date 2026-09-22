@@ -17,16 +17,21 @@ IMPLEMENT_VIEW_DEFAULT_ADDLISTENER(UPriestPartPanelWidget)
 IMPLEMENT_VIEW_DEFAULT_REMOVELISTENER(UPriestPartPanelWidget)
 IMPLEMENT_VIEW_DEFAULT_INVOKE_VIEW_EVENT(UPriestPartPanelWidget)
 
+void UPriestPartPanelWidget::NativeOnInitialized()
+{
+    Super::NativeOnInitialized();
+
+    Model = NewObject<UPriestPartPanelModel>(this);
+    MvcControl = NewObject<UPriestPartPanelController>(this);
+}
+
 void UPriestPartPanelWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
-    if (IsValid(Controller))
-    {
-        Controller->Disconnect();
-    }
-    Controller = nullptr;
-    Model = nullptr;
+    JASSERT(IsValid(Model), "모델이 없습니다.");
+    JASSERT(IsValid(MvcControl), "컨트롤러가 없습니다.");
+    MvcControl->Disconnect();
 
     UGameInstance* GameInstance = GetGameInstance();
     JASSERT(IsValid(GameInstance), "GameInstance가 없습니다.");
@@ -38,21 +43,19 @@ void UPriestPartPanelWidget::NativeConstruct()
     JASSERT(IsValid(Parts), "PartSubsystem이 없습니다.");
     JASSERT(IsValid(Inventory), "InventorySubsystem이 없습니다.");
 
-    Model = NewObject<UPriestPartPanelModel>(this);
-    Controller = NewObject<UPriestPartPanelController>(this);
     Model->Initialize(Parts, Inventory, PartDefinitionTable, WeaponId);
-    Controller->SetModel(Model);
-    Controller->SetView(this);
-    Controller->HandleModelChanged(Model, 0);
+    MvcControl->SetModel(Model);
+    MvcControl->SetView(this);
+    MvcControl->HandleModelChanged(Model, 0);
 }
 
 void UPriestPartPanelWidget::NativeDestruct()
 {
-    if (IsValid(Controller))
+    if (IsValid(MvcControl))
     {
-        Controller->Disconnect();
+        MvcControl->Disconnect();
     }
-    Controller = nullptr;
+    MvcControl = nullptr;
     Model = nullptr;
 
     Super::NativeDestruct();
