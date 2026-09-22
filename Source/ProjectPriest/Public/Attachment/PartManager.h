@@ -11,7 +11,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType)
 class PROJECTPRIEST_API UPartManager : public UObject
 {
 	GENERATED_BODY()
@@ -33,8 +33,11 @@ public:
 	//무가에 적용 시켜줄 함수
 	void ApplyPartsToWeapon(class AWeaponItem* Weapon);
 
+	UFUNCTION(BlueprintCallable)
+	FPartData GetPartSlot(EPartSlot SlotType) const;
+
 private:
-	//인스턴스에서 정보 관리
+	//PartManager를 소유한 인스턴스
 	UPROPERTY()
 	TObjectPtr<UPartInstance> PartInstance;
 
