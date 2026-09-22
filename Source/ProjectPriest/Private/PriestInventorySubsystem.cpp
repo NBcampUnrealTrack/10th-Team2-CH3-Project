@@ -12,8 +12,8 @@ bool UPriestInventorySubsystem::AddItem(FName ItemId, int32 Quantity)
 {
     FPriestItemData Data;
 
-    JASSERT_BOOL((!ItemId.IsNone() && Quantity > 0), "%hs: 잘못된 추가 요청", __FUNCTION__)
-    JASSERT_BOOL((TryGetItemData(ItemId, Data) && Data.MaxStack > 0), "%hs: 아이템 정의 또는 MaxStack을 확인하세요.", __FUNCTION__);
+    JASSERT_BOOL((!ItemId.IsNone() && Quantity > 0), "잘못된 추가 요청")
+    JASSERT_BOOL((TryGetItemData(ItemId, Data) && Data.MaxStack > 0), "아이템 정의 또는 MaxStack을 확인하세요.");
 
     for (FPriestOwnedItem& Item : OwnedItems)
     {
@@ -67,8 +67,7 @@ bool UPriestInventorySubsystem::CraftItem(FName RecipeID)
 {
     JASSERT_BOOL(
         IsValid(RecipeDataTable),
-        "%hs: RecipeDataTable이 준비되지 않았습니다.",
-        __FUNCTION__
+        "RecipeDataTable이 준비되지 않았습니다."
     );
 
     const FRecipeData* Recipe = RecipeDataTable->FindRow<FRecipeData>(
@@ -79,8 +78,7 @@ bool UPriestInventorySubsystem::CraftItem(FName RecipeID)
 
     JASSERT_BOOL(
         (Recipe != nullptr),
-        "%hs: Recipe를 찾을 수 없습니다. RecipeID=%s",
-        __FUNCTION__,
+        "Recipe를 찾을 수 없습니다. RecipeID=%s",
         *RecipeID.ToString()
     );
 
@@ -88,8 +86,7 @@ bool UPriestInventorySubsystem::CraftItem(FName RecipeID)
 
     JASSERT_BOOL(
         TryGetItemData(Recipe->ResultItemID, ResultItemData),
-        "%hs: 레시피 데이터의 ResultItemID이 올바르지 않습니다.",
-        __FUNCTION__
+        "레시피 데이터의 ResultItemID이 올바르지 않습니다."
     );
 
     for (const FRecipeIngredient& Ingredient : Recipe->Ingredients)
@@ -115,7 +112,7 @@ bool UPriestInventorySubsystem::CraftItem(FName RecipeID)
 
 bool UPriestInventorySubsystem::RemoveItem(FName ItemId, int32 Quantity)
 {
-    JASSERT_BOOL((!ItemId.IsNone() && Quantity > 0), "%hs: 잘못된 차감 요청. ItemId=%s, Quantity=%d", __FUNCTION__, *ItemId.ToString(), Quantity);
+    JASSERT_BOOL((!ItemId.IsNone() && Quantity > 0), "잘못된 차감 요청. ItemId=%s, Quantity=%d", *ItemId.ToString(), Quantity);
 
     if (GetQuantity(ItemId) < Quantity)
     {
@@ -159,6 +156,8 @@ void UPriestInventorySubsystem::GrantPreviewItemsOnce()
     AddItem(TEXT("AttackSpeedUpPotion"), 2);
     AddItem(TEXT("WhisperDropItemA"), 3);
     AddItem(TEXT("WhisperDropItemB"), 2);
+    AddItem(TEXT("Barrel"), 1);
+    AddItem(TEXT("Magazine"), 1);
 }
 
 FName UPriestInventorySubsystem::GetQuickSlotItemId(
@@ -167,7 +166,7 @@ FName UPriestInventorySubsystem::GetQuickSlotItemId(
 {
     if (!QuickSlotItemIds.IsValidIndex(SlotIndex))
     {
-        JError("%hs: 잘못된 퀵 슬롯 인덱스 %d. 슬롯 수=%d", __FUNCTION__, SlotIndex, QuickSlotItemIds.Num());
+        JError("잘못된 퀵 슬롯 인덱스 %d. 슬롯 수=%d", SlotIndex, QuickSlotItemIds.Num());
         return NAME_None;
     }
 
@@ -181,8 +180,7 @@ bool UPriestInventorySubsystem::AssignQuickSlot(
 {
     JASSERT_BOOL(
         (QuickSlotItemIds.IsValidIndex(SlotIndex)),
-        "%hs: 잘못된 퀵 슬롯 인덱스 %d. 슬롯 수=%d",
-        __FUNCTION__,
+        "잘못된 퀵 슬롯 인덱스 %d. 슬롯 수=%d",
         SlotIndex,
         QuickSlotItemIds.Num()
     );
@@ -205,7 +203,7 @@ bool UPriestInventorySubsystem::AssignQuickSlot(
 
 bool UPriestInventorySubsystem::ClearQuickSlot(int32 SlotIndex)
 {
-    JASSERT_BOOL((QuickSlotItemIds.IsValidIndex(SlotIndex)), "%hs: 잘못된 퀵 슬롯 인덱스 %d. 슬롯 수=%d", __FUNCTION__, SlotIndex, QuickSlotItemIds.Num());
+    JASSERT_BOOL((QuickSlotItemIds.IsValidIndex(SlotIndex)), "잘못된 퀵 슬롯 인덱스 %d. 슬롯 수=%d", SlotIndex, QuickSlotItemIds.Num());
 
     if (QuickSlotItemIds[SlotIndex].IsNone())
     {
@@ -232,16 +230,14 @@ void UPriestInventorySubsystem::Initialize(
 
     JASSERT(
         IsValid(HealthPotionDataTable),
-        "%hs: PotionDataTable 로드 실패. 프로젝트 설정의 Inventory Settings를 확인하세요.",
-        __FUNCTION__
+        "PotionDataTable 로드 실패. 프로젝트 설정의 Inventory Settings를 확인하세요."
     );
 
     JASSERT(
         HealthPotionDataTable->GetRowStruct()
         == FHealthPotionData::StaticStruct(),
-        "%hs: 포션 DataTable의 Row Structure가 "
-        "PotionData가 아닙니다.",
-        __FUNCTION__
+        "포션 DataTable의 Row Structure가 "
+        "PotionData가 아닙니다."
     );
 
     //공격속도 증가 포션 데이터테이블
@@ -249,16 +245,14 @@ void UPriestInventorySubsystem::Initialize(
 
     JASSERT(
         IsValid(AttackSpeedUpPotionDataTable),
-        "%hs: PotionDataTable 로드 실패. 프로젝트 설정의 Inventory Settings를 확인하세요.",
-        __FUNCTION__
+        "PotionDataTable 로드 실패. 프로젝트 설정의 Inventory Settings를 확인하세요."
     );
 
     JASSERT(
         AttackSpeedUpPotionDataTable->GetRowStruct()
         == FAttackSpeedUpPotionData::StaticStruct(),
-        "%hs: 포션 DataTable의 Row Structure가 "
-        "PotionData가 아닙니다.",
-        __FUNCTION__
+        "포션 DataTable의 Row Structure가 "
+        "PotionData가 아닙니다."
     );
 
     ItemDataTables.Reset();
@@ -268,48 +262,42 @@ void UPriestInventorySubsystem::Initialize(
 
     JASSERT(
         IsValid(WeaponTable),
-        "%hs: 무기 테이블 로드 실패. 프로젝트 설정을 확인하세요.",
-        __FUNCTION__
+        "무기 테이블 로드 실패. 프로젝트 설정을 확인하세요."
     );
 
     JASSERT(
         WeaponTable->GetRowStruct() == FPriestItemData::StaticStruct(),
-        "%hs: 무기 테이블의 Row Structure가 PriestItemData가 아닙니다.",
-        __FUNCTION__
+        "무기 테이블의 Row Structure가 PriestItemData가 아닙니다."
     );
 
     ItemDataTables.Add(EItemCategory::Weapon, WeaponTable);
 
-    //탄약 데이터테이블(현재 탄약을 별도의 아이템으로 두지 않고 있으니 파츠 데이터테이블로 사용해도 좋을것같음)
-    UDataTable* AmmoTable = Settings->AmmoDataTable.LoadSynchronous();
+    //파츠 데이터테이블
+    UDataTable* PartTable = Settings->PartDataTable.LoadSynchronous();
 
     JASSERT(
-        IsValid(AmmoTable),
-        "%hs: 탄약 테이블 로드 실패. 프로젝트 설정을 확인하세요.",
-        __FUNCTION__
+        IsValid(PartTable),
+        "파츠 테이블 로드 실패. 프로젝트 설정을 확인하세요."
     );
 
     JASSERT(
-        AmmoTable->GetRowStruct() == FPriestItemData::StaticStruct(),
-        "%hs: 탄약 테이블의 Row Structure가 PriestItemData가 아닙니다.",
-        __FUNCTION__
+        PartTable->GetRowStruct() == FPriestItemData::StaticStruct(),
+        "파츠 테이블의 Row Structure가 PriestItemData가 아닙니다."
     );
 
-    ItemDataTables.Add(EItemCategory::Ammo, AmmoTable);
+    ItemDataTables.Add(EItemCategory::Part, PartTable);
 
     //소모품 데이터테이블
     UDataTable* ConsumableTable = Settings->ConsumableDataTable.LoadSynchronous();
 
     JASSERT(
         IsValid(ConsumableTable),
-        "%hs: 소모품 테이블 로드 실패. 프로젝트 설정을 확인하세요.",
-        __FUNCTION__
+        "소모품 테이블 로드 실패. 프로젝트 설정을 확인하세요."
     );
 
     JASSERT(
         ConsumableTable->GetRowStruct() == FPriestItemData::StaticStruct(),
-        "%hs: 소모품 테이블의 Row Structure가 PriestItemData가 아닙니다.",
-        __FUNCTION__
+        "소모품 테이블의 Row Structure가 PriestItemData가 아닙니다."
     );
 
     ItemDataTables.Add(EItemCategory::Consumable, ConsumableTable);
@@ -319,14 +307,12 @@ void UPriestInventorySubsystem::Initialize(
 
     JASSERT(
         IsValid(MaterialTable),
-        "%hs: 재료 테이블 로드 실패. 프로젝트 설정을 확인하세요.",
-        __FUNCTION__
+        "재료 테이블 로드 실패. 프로젝트 설정을 확인하세요."
     );
 
     JASSERT(
         MaterialTable->GetRowStruct() == FPriestItemData::StaticStruct(),
-        "%hs: 재료 테이블의 Row Structure가 PriestItemData가 아닙니다.",
-        __FUNCTION__
+        "재료 테이블의 Row Structure가 PriestItemData가 아닙니다."
     );
 
     ItemDataTables.Add(EItemCategory::Material, MaterialTable);
@@ -336,14 +322,12 @@ void UPriestInventorySubsystem::Initialize(
 
     JASSERT(
         IsValid(RecipeDataTable),
-        "%hs: RecipeDataTable 로드 실패. 프로젝트 설정을 확인하세요.",
-        __FUNCTION__
+        "RecipeDataTable 로드 실패. 프로젝트 설정을 확인하세요."
     );
 
     JASSERT(
         RecipeDataTable->GetRowStruct() == FRecipeData::StaticStruct(),
-        "%hs: RecipeDataTable의 Row Structure가 RecipeData가 아닙니다.",
-        __FUNCTION__
+        "RecipeDataTable의 Row Structure가 RecipeData가 아닙니다."
     );
 }
 
@@ -386,8 +370,7 @@ bool UPriestInventorySubsystem::TryGetHealthPotionData(
 
     JASSERT_BOOL(
         (IsValid(HealthPotionDataTable)),
-        "%hs: 회복포션 DataTable이 준비되지 않았습니다.",
-        __FUNCTION__
+        "회복포션 DataTable이 준비되지 않았습니다."
     );
 
     const FHealthPotionData* Data =
@@ -405,9 +388,8 @@ bool UPriestInventorySubsystem::TryGetHealthPotionData(
     JASSERT_BOOL(
         (FMath::IsFinite(Data->HealAmount)
             && Data->HealAmount > 0.0f),
-        "%hs: 포션 회복량이 잘못되었습니다. "
+        "포션 회복량이 잘못되었습니다. "
         "ItemId=%s, HealAmount=%f",
-        __FUNCTION__,
         *ItemId.ToString(),
         Data->HealAmount
     );
@@ -429,8 +411,7 @@ bool UPriestInventorySubsystem::TryGetAttackSpeedUpPotionData(
 
     JASSERT_BOOL(
         (IsValid(AttackSpeedUpPotionDataTable)),
-        "%hs: 공격속도 증가포션 DataTable이 준비되지 않았습니다.",
-        __FUNCTION__
+        "공격속도 증가포션 DataTable이 준비되지 않았습니다."
     );
 
     const FAttackSpeedUpPotionData* Data =
@@ -449,16 +430,14 @@ bool UPriestInventorySubsystem::TryGetAttackSpeedUpPotionData(
     JASSERT_BOOL(
         (FMath::IsFinite(Data->AttackSpeedMultiplier)
             && Data->AttackSpeedMultiplier > 1.0f),
-        "%hs: 공격속도 배율이 잘못되었습니다. ItemId=%s",
-        __FUNCTION__,
+        "공격속도 배율이 잘못되었습니다. ItemId=%s",
         *ItemId.ToString()
     );
 
     JASSERT_BOOL(
         (FMath::IsFinite(Data->Duration)
             && Data->Duration > 0.0f),
-        "%hs: 지속시간이 잘못되었습니다. ItemId=%s",
-        __FUNCTION__,
+        "지속시간이 잘못되었습니다. ItemId=%s",
         *ItemId.ToString()
     );
 
@@ -476,8 +455,7 @@ bool UPriestInventorySubsystem::IsPotion(FName ItemId) const
 
     JASSERT_BOOL(
         (IsValid(HealthPotionDataTable)),
-        "%hs: 회복포션 DataTable이 준비되지 않았습니다.",
-        __FUNCTION__
+        "회복포션 DataTable이 준비되지 않았습니다."
     );
 
     if (HealthPotionDataTable->FindRow<FHealthPotionData>(
@@ -490,8 +468,7 @@ bool UPriestInventorySubsystem::IsPotion(FName ItemId) const
 
     JASSERT_BOOL(
         (IsValid(AttackSpeedUpPotionDataTable)),
-        "%hs: 공격속도 증가포션 DataTable이 준비되지 않았습니다.",
-        __FUNCTION__
+        "공격속도 증가포션 DataTable이 준비되지 않았습니다."
     );
 
     if (AttackSpeedUpPotionDataTable->FindRow<FAttackSpeedUpPotionData>(
@@ -541,9 +518,8 @@ bool UPriestInventorySubsystem::TryGetItemData(
 
         JASSERT_BOOL(
             (IsValid(Table)),
-            "%hs: 유효하지 않은 아이템 테이블입니다. Category=%d",
-            __FUNCTION__,
-            static_cast<int32>(Entry.Key)
+            "유효하지 않은 아이템 테이블입니다. Category=%d",
+            StaticCast<int32>(Entry.Key)
         );
 
         const FPriestItemData* Row =
@@ -560,8 +536,7 @@ bool UPriestInventorySubsystem::TryGetItemData(
 
         JASSERT_BOOL(
             (!bFound),
-            "%hs: 카테고리 테이블 간 ItemId가 중복됩니다. ItemId=%s",
-            __FUNCTION__,
+            "카테고리 테이블 간 ItemId가 중복됩니다. ItemId=%s",
             *ItemId.ToString()
         );
 
@@ -596,9 +571,8 @@ UPriestInventorySubsystem::GetItemsByCategory(
     JASSERT_RETURN(
         (FoundTable != nullptr && IsValid(FoundTable->Get())),
         Result,
-        "%hs: 카테고리의 데이터 테이블이 없습니다. Category=%d",
-        __FUNCTION__,
-        static_cast<int32>(Category)
+        "카테고리의 데이터 테이블이 없습니다. Category=%d",
+        StaticCast<int32>(Category)
     );
 
     const UDataTable* Table = FoundTable->Get();
