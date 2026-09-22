@@ -24,7 +24,7 @@ public:
 
     const FPriestInventoryViewData& GetData() const;
 
-    void SetSelectedWeaponId(FName InWeaponId);
+    bool EquipWeapon(FName ItemId);
 
     virtual FDelegateHandle AddListener(UMvcControl* Control) override;
 
@@ -48,8 +48,6 @@ private:
 
     UPROPERTY(Transient)
     TObjectPtr<UPartSubsystem> Parts;
-
-    FName SelectedWeaponId = NAME_None;
 
     FModelChangedDelegate Changed;
 };

@@ -47,6 +47,10 @@ void UPriestInventoryController::HandleViewEvent(IMvcView* InView, EViewEventTyp
         Request->bAccepted = Model->SetCategory(Request->Category);
         break;
 
+    case EPriestInventoryAction::EquipWeapon:
+        Request->bAccepted = Model->EquipWeapon(Request->ItemId);
+        break;
+
     default:
         Request->bAccepted = false;
         break;

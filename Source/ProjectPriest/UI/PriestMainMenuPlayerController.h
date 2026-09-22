@@ -17,9 +17,6 @@ class PROJECTPRIEST_API APriestMainMenuPlayerController : public APlayerControll
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "Priest|Inventory")
-	void SetInventoryWeaponId(FName InWeaponId);
-
 	APriestMainMenuPlayerController();
 	void StartStageOne();
     bool CanProcessMenuRequest() const
@@ -57,5 +54,4 @@ private:
 
 	FDelegateHandle TravelFailureHandle;
 	bool bTravelRequested = false;
-	FName InventoryWeaponId = NAME_None;
 };

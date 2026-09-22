@@ -10,8 +10,7 @@
 void UPriestPartPanelModel::Initialize(
     UPartSubsystem* InParts,
     UPriestInventorySubsystem* InInventory,
-    UDataTable* InPartTable,
-    FName InWeaponId
+    UDataTable* InPartTable
 )
 {
     JASSERT(IsValid(InParts), "PartSubsystem이 없습니다.");
@@ -23,13 +22,32 @@ void UPriestPartPanelModel::Initialize(
     Parts = InParts;
     Inventory = InInventory;
     PartTable = InPartTable;
-    WeaponId = InWeaponId;
+    WeaponId = Inventory->GetEquippedWeaponId();
+
+    Inventory->OnEquippedWeaponChanged.AddUniqueDynamic(
+        this, &UPriestPartPanelModel::HandleEquippedWeaponChanged
+    );
 }
 
-void UPriestPartPanelModel::SetWeaponId(FName InWeaponId)
+void UPriestPartPanelModel::Disconnect()
 {
-    WeaponId = InWeaponId;
-    InvokePropertyChanged(0);
+    if (IsValid(Inventory))
+    {
+        Inventory->OnEquippedWeaponChanged.RemoveDynamic(
+            this, &UPriestPartPanelModel::HandleEquippedWeaponChanged
+        );
+    }
+
+    Parts = nullptr;
+    Inventory = nullptr;
+    PartTable = nullptr;
+    WeaponId = NAME_None;
+}
+
+void UPriestPartPanelModel::BeginDestroy()
+{
+    Disconnect();
+    Super::BeginDestroy();
 }
 
 bool UPriestPartPanelModel::EquipPart(FName ItemId, EPartSlot SlotType)
@@ -86,6 +104,14 @@ FPartData UPriestPartPanelModel::GetPart(EPartSlot SlotType) const
     }
 
     return Parts->GetEquippedPart(WeaponId, SlotType);
+}
+
+void UPriestPartPanelModel::HandleEquippedWeaponChanged()
+{
+    JASSERT(IsValid(Inventory), "InventorySubsystem이 없습니다.");
+
+    WeaponId = Inventory->GetEquippedWeaponId();
+    InvokePropertyChanged(0);
 }
 
 FDelegateHandle UPriestPartPanelModel::AddListener(UMvcControl* Control)
