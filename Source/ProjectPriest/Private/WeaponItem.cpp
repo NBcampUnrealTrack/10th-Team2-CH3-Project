@@ -340,28 +340,48 @@ void AWeaponItem::PerformTraceTPS(
 	}
 }
 
-void AWeaponItem::BeginPlay()
+void AWeaponItem::ApplyPartsToWeapon()
 {
-	Super::BeginPlay();
-
 	UPartSubsystem* PartSubsystem =
 		GetGameInstance()->GetSubsystem<UPartSubsystem>();
 
-	if (!IsValid(PartSubsystem))
+	//if (BaseDamage < 0)
+	//{
+	//	BaseDamage = Weapon->GetDamage();
+	//}
+	//if (BaseMagazineSize < 0)
+	//{
+	//	BaseMagazineSize = Weapon->GetMagazineSize();
+	//}
+
+	float ValuDamage = 1.0f;
+	float ValueMagazineSize = 1.0f;
+
+	for (const auto& Part :	PartSubsystem->GetEquippedParts(FName(WeaponName.ToString())).PartSlots)
 	{
-		JASSERT(IsValid(PartSubsystem), "PartSubsystem이 유효하지 않습니다.");
-		return;
+		if (Part.Value.Damage > 0.0f)
+		{
+			ValuDamage *= Part.Value.Damage;
+		}
+		if (Part.Value.MagazineSize > 0.0f)
+		{
+			ValueMagazineSize *= Part.Value.MagazineSize;
+		}
 	}
+
+	Damage = Damage * ValuDamage;
+	MagazineSize = MagazineSize * ValueMagazineSize;
+}
+
+void AWeaponItem::BeginPlay()
+{
+	Super::BeginPlay();
 
 
 	JLog("Weapon Damage : %f", GetDamage());
 	JLog("Magazine Size : %d", GetMagazineSize());
 
-	FPartData BarrelPart =
-		PartSubsystem->GetEquippedPart(ItemType, EPartSlot::Barrel);
-
-	FPartData MagazinePart =
-		PartSubsystem->GetEquippedPart(ItemType, EPartSlot::Magazine);
+	ApplyPartsToWeapon();
 
 	JLog("After Damage : %f", GetDamage());
 	JLog("After Magazine : %d", GetMagazineSize());

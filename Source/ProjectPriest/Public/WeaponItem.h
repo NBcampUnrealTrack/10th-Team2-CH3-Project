@@ -100,6 +100,8 @@ protected:
 	// TPS
 	void PerformTraceTPS(AIngamePlayerController* PlayerController, AActor* OwnerActor);
 
+	void ApplyPartsToWeapon();
+
 	virtual void BeginPlay() override;
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;

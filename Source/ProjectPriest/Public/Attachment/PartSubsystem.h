@@ -40,7 +40,6 @@ class PROJECTPRIEST_API UPartSubsystem : public UGameInstanceSubsystem
 public:
 	//FName -> FText -> WeponName
 	FWeaponPartSlots* GetOrCreatePartInstance(FName WeaponName);
-	//개임 시작시 map에 데이터가 없다 -> 어차피 보유 파츠도 없구나 데이터가 없으면 UI표시는 어떤식으로 하지
 
 	//WeaponName으로 호출
 	//WeaponName
@@ -63,6 +62,8 @@ public:
 	//WeaponSlots -> 찾을 슬롯
 	//SlotType -> 찾을 타입 
 	FPartData GetEquippedPart(FWeaponPartSlots* WeaponSlots, EPartSlot SlotType);
+
+	FWeaponPartSlots GetEquippedParts(FName WeaponName);
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Priest|Inventory")

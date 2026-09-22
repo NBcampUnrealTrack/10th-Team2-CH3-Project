@@ -98,3 +98,8 @@ FPartData UPartSubsystem::GetEquippedPart(FWeaponPartSlots* WeaponSlots, EPartSl
     JLog("nullptr ExPart");
     return FPartData();
 }
+
+FWeaponPartSlots UPartSubsystem::GetEquippedParts(FName WeaponName)
+{
+    return WeaponPartSlots[WeaponName];
+};
