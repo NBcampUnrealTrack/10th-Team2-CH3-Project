@@ -3,6 +3,8 @@
 
 #include "MonsterAIController.h"
 //#include "TimerManager.h"
+#include "EnemyCharacter.h"
+#include "JUtility.h"
 #include "NavigationSystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Perception/AIPerceptionComponent.h"
@@ -48,7 +50,33 @@ void AMonsterAIController::StartBehaviorTree()
 	}
 }
 
- 
+void AMonsterAIController::SetDetactedPlayer(AActor* Actor)
+{
+	AEnemyCharacter* EnemyCharacter = Cast<AEnemyCharacter>(GetPawn());
+	JASSERT(IsValid(EnemyCharacter), "EnemyCharacter is not valid");
+	
+	DetectedPlayer = Actor;
+	
+	if (nullptr == DetectedPlayer)
+	{
+		DetectedPlayerLocation = FVector::ZeroVector;
+		Blackboard->SetValueAsObject(TARGET_KEY, DetectedPlayer);
+		Blackboard->SetValueAsVector(TARGET_LOCATION_KEY, DetectedPlayerLocation);
+	}
+	else
+	{
+		DetectedPlayerLocation = DetectedPlayer->GetActorLocation();	
+		Blackboard->SetValueAsObject(TARGET_KEY, DetectedPlayer);
+		Blackboard->SetValueAsVector(TARGET_LOCATION_KEY, DetectedPlayerLocation);
+	}
+	
+	ACharacter* TargetCharacter = Cast<ACharacter>(Actor);
+	JASSERT(IsValid(TargetCharacter), "TargetCharacter is not valid");
+	
+	EnemyCharacter->SetAttackTarget(TargetCharacter);
+}
+
+
 void AMonsterAIController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -63,29 +91,43 @@ void AMonsterAIController::BeginPlay()
 			&AMonsterAIController::OnPerceptionUpdated
 		);
 	}
-}	
+	
+	PrimaryActorTick.bCanEverTick = true;
+	
+}
+
+void AMonsterAIController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	
+	if (nullptr == DetectedPlayer)
+	{
+		DetectedPlayerLocation = FVector::ZeroVector;
+		return;
+	}
+	
+	DetectedPlayerLocation = DetectedPlayer->GetActorLocation();
+}
 
 void AMonsterAIController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
 	if (Stimulus.WasSuccessfullySensed())
 	{
 		//감지된 정보 저장
-		DetectedPlayer = Actor;
-		//DetectedPlayerLocation = Stimulus.StimulusLocation;
+		SetDetactedPlayer(Actor);
 	}
 	else
 	{
-		DetectedPlayer = nullptr;
-		//DetectedPlayerLocation = FVector::ZeroVector;
+		SetDetactedPlayer(nullptr);
 	}
 }
 
-AActor* AMonsterAIController::GetDetectedPlayer()
+AActor* AMonsterAIController::GetDetectedPlayer() const
 {
 	return DetectedPlayer;
 }
 
-//FVector AMonsterAIController::GetDetectedPlayerLocation()
-//{
-//	return DetectedPlayerLocation;
-//}
+FVector AMonsterAIController::GetDetectedPlayerLocation() const
+{
+	return DetectedPlayerLocation;
+}

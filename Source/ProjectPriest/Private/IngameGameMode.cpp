@@ -79,7 +79,7 @@ void AIngameGameMode::OnMonsterDead()
     }
 }
 
-void AIngameGameMode::OnBossDead()
+void AIngameGameMode::OnCrossBowPickuped()
 {
     JLog("Boss Dead, Try to complete stage");
 

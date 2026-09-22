@@ -4,16 +4,18 @@
 #include "Blueprint/UserWidget.h"
 #include "MvcView.h"
 #include "Attachment/PartData.h"
+#include "MvcUtility.h"
 #include "PriestPartPanelWidget.generated.h"
 
 class UDataTable;
 class UPriestPartPanelModel;
-class UPriestPartPanelController;
 
 UCLASS(Abstract, Blueprintable)
 class PROJECTPRIEST_API UPriestPartPanelWidget: public UUserWidget, public IMvcView
 {
     GENERATED_BODY()
+
+    DECLARE_VIEW_DEFAULT_INTERFACES()
 
 public:
     UFUNCTION(BlueprintCallable, Category = "Priest|Part")
@@ -24,12 +26,6 @@ public:
 
     UFUNCTION(BlueprintImplementableEvent, Category = "Priest|Part")
     void UpdatePartSlots(const FPartData& BarrelPart, const FPartData& MagazinePart);
-
-    virtual FDelegateHandle AddListener(UMvcControl* Control) override;
-
-    virtual void RemoveListener(FDelegateHandle Handle) override;
-
-    virtual void InvokeViewEvent(EViewEventType EventType, UEventParameterBase* Parameter) override;
 
 protected:
     virtual void NativeConstruct() override;
@@ -44,9 +40,4 @@ protected:
 private:
     UPROPERTY(Transient)
     TObjectPtr<UPriestPartPanelModel> Model;
-
-    UPROPERTY(Transient)
-    TObjectPtr<UPriestPartPanelController> Controller;
-
-    FViewEventRaisedDelegate ViewEventListeners;
 };

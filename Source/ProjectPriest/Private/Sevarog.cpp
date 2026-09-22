@@ -9,7 +9,8 @@
 #include "GlobalConst.h"
 #include "PlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
-#include <IngameGameMode.h>
+#include "IngameGameMode.h"
+#include "BaseItem.h"
 
 // Sets default values
 ASevarog::ASevarog()
@@ -23,20 +24,20 @@ void ASevarog::BeginPlay()
 {
 	Super::BeginPlay();
     JASSERT(IsValid(HudClass), "HudClass is not valid");
-
+ 
     USevarogHud* HudInstance = CreateWidget<USevarogHud>(GetWorld(), HudClass, TEXT("Sevarog Hud"));
     JASSERT(IsValid(HudInstance), "HudInstance is not valid");
-
+ 
 	HudInstance->AddToViewport(FGlobalConst::FUiZOrder::SEVAROG_HUD_ZORDER);
-	
-	//Find Player
-	AActor* FindActor =  UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-	JASSERT(IsValid(FindActor), "FindActor is not valid");
-	
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(FindActor);
-	JASSERT(IsValid(PlayerCharacter), "PlayerCharacter is not valid");
-	
-	SetAttackTarget(PlayerCharacter);
+	//
+	// //Find Player
+	// AActor* FindActor =  UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
+	// JASSERT(IsValid(FindActor), "FindActor is not valid");
+	//
+	// APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(FindActor);
+	// JASSERT(IsValid(PlayerCharacter), "PlayerCharacter is not valid");
+	//
+	// SetAttackTarget(PlayerCharacter);
 	
 	
 	Phase = 0;
@@ -134,7 +135,7 @@ float ASevarog::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
     //realy dead!
     if (bIsEmptyHealth && bIsThirdPhase)
     {
-        IngameGameMode->OnBossDead();
+        Die();
     }
     
 	return ActualDamage;
@@ -147,4 +148,24 @@ void ASevarog::Heal(float HealAmount)
 	InvokePropertyChanged(StaticCast<uint8>(ESevarogPropertyName::Health));
 }
 
+void ASevarog::DropItem()
+{
+	//보스 몬스터는 하나만 가져온다.
+	
+	const FMonsterData* MonsterData =
+			RowDataTable.GetRow<FMonsterData>(
+				TEXT("AEnemyCharacter::DropItem")
+			);
 
+	JASSERT(MonsterData, "MonsterData가 없습니다.");
+
+	TSubclassOf<ABaseItem> SelectedItemClass = MonsterData->DropItem.MaterialItemClasses[0];
+	
+	JASSERT(IsValid(SelectedItemClass), "재료 아이템 혹은 총알 아이템이 선택되지 않았습니다.");
+
+	GetWorld()->SpawnActor<ABaseItem>(
+		SelectedItemClass,
+		GetActorLocation(),
+		FRotator::ZeroRotator
+	);
+}

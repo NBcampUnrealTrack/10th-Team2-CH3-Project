@@ -7,6 +7,8 @@
 #include "Perception/AIPerceptionTypes.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "MonsterAIController.generated.h"
+#define TARGET_KEY			TEXT("Player")
+#define TARGET_LOCATION_KEY TEXT("PlayerLocation")
 
 class UAIPerceptionComponent;
 class UAISenseConfig_Sight;
@@ -15,6 +17,8 @@ UCLASS()
 class PROJECTPRIEST_API AMonsterAIController : public AAIController
 {
 	GENERATED_BODY()
+public:
+	
 	
 public:
 	AMonsterAIController();
@@ -25,11 +29,14 @@ public:
 	//BT를 시작하는 함수
 	void StartBehaviorTree();
 
-	AActor* GetDetectedPlayer();
+	void SetDetactedPlayer(AActor* Actor);
+	
+	AActor* GetDetectedPlayer() const;
+	FVector GetDetectedPlayerLocation() const;
 
-	//FVector GetDetectedPlayerLocation();
-
-
+	virtual void BeginPlay() override;
+	virtual void Tick( float DeltaTime ) override;
+	
 protected:
 	//AI 감지 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
@@ -44,16 +51,11 @@ protected:
 	AActor* DetectedPlayer = nullptr;
 
 	//감지된 위치
-	//UPROPERTY()
-	//FVector DetectedPlayerLocation = FVector::ZeroVector;
+	UPROPERTY()
+	FVector DetectedPlayerLocation = FVector::ZeroVector;
 
 
 	//BT 포인터
 	UPROPERTY(EditAnywhere, Category = "AI")
 	class UBehaviorTree* BehaviorTree;
-
-	virtual void BeginPlay() override;
-
-private:
-
 };
