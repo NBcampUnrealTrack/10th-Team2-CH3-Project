@@ -5,6 +5,11 @@
 #include "MvcView.h"
 #include "Attachment/PartData.h"
 #include "PriestPartPanelWidget.generated.h"
+#include "MvcUtility.h"
+
+IMPLEMENT_VIEW_DEFAULT_ADDLISTENER(UPriestPartPanelWidget)
+IMPLEMENT_VIEW_DEFAULT_REMOVELISTENER(UPriestPartPanelWidget)
+IMPLEMENT_VIEW_DEFAULT_INVOKE_VIEW_EVENT(UPriestPartPanelWidget)
 
 class UDataTable;
 class UPriestPartPanelModel;
@@ -24,12 +29,6 @@ public:
 
     UFUNCTION(BlueprintImplementableEvent, Category = "Priest|Part")
     void UpdatePartSlots(const FPartData& BarrelPart, const FPartData& MagazinePart);
-
-    virtual FDelegateHandle AddListener(UMvcControl* Control) override;
-
-    virtual void RemoveListener(FDelegateHandle Handle) override;
-
-    virtual void InvokeViewEvent(EViewEventType EventType, UEventParameterBase* Parameter) override;
 
 protected:
     virtual void NativeConstruct() override;

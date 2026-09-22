@@ -76,11 +76,7 @@ void UPriestMainMenuWidget::RefreshInventoryDisplay()
     const TArray<FPriestInventorySlotData>& Items =
         InventoryData.Items;
 
-    JASSERT(IsValid(InventoryGrid),
-        "%hs [%s]: InventoryGrid 바인딩이 없습니다. WBP의 WrapBox 이름을 확인하세요.",
-        __FUNCTION__,
-        *GetNameSafe(this)
-    );
+    JASSERT(IsValid(InventoryGrid), "InventoryGrid 바인딩이 없습니다. WBP의 WrapBox 이름을 확인하세요.");
 
     InventoryGrid->ClearChildren();
 
@@ -101,7 +97,7 @@ void UPriestMainMenuWidget::RefreshInventoryDisplay()
 
         if (!IsValid(SlotWidget))
         {
-            JError("%hs: 슬롯 생성 실패. ItemId=%s", __FUNCTION__, *Items[Index].ItemId.ToString());
+            JError("슬롯 생성 실패.");
             continue;
         }
 

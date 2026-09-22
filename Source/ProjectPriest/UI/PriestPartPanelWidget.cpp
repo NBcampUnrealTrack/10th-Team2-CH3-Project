@@ -61,10 +61,7 @@ void UPriestPartPanelWidget::NativeDestruct()
 void UPriestPartPanelWidget::SetWeaponId(FName InWeaponId)
 {
     WeaponId = InWeaponId;
-    if (IsValid(Model))
-    {
-        Model->SetWeaponId(InWeaponId);
-    }
+    Model->SetWeaponId(InWeaponId);
 }
 
 void UPriestPartPanelWidget::RequestEquipPart(FName ItemId, EPartSlot SlotType)
