@@ -87,6 +87,7 @@ void APriestMainMenuPlayerController::BeginPlay()
 	JASSERT(IsValid(InventoryController), "%hs: InventoryController 생성 실패", __FUNCTION__);
 
 	InventoryModel->Initialize(Inventory);
+	InventoryModel->SetSelectedWeaponId(InventoryWeaponId);
 
 	MenuController->SetModel(MenuModel);
 	MenuController->SetView(MainMenu);
@@ -145,6 +146,15 @@ void APriestMainMenuPlayerController::HandleTravelFailure(UWorld* World, ETravel
 		MainMenu->SetIsEnabled(true);
 		MainMenu->ShowStatusMessage(NSLOCTEXT("PriestMenu", "TravelFailed", "맵 이동에 실패했습니다. 다시 시도해 주세요."));
 	}
+}
+
+void APriestMainMenuPlayerController::SetInventoryWeaponId(FName InWeaponId)
+{
+	InventoryWeaponId = InWeaponId;
+
+	JASSERT(IsValid(InventoryModel), "인벤토리 모델이 유효하지 않습니다");
+
+	InventoryModel->SetSelectedWeaponId(InWeaponId);
 }
 
 void APriestMainMenuPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)

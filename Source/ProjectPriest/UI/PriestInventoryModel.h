@@ -8,6 +8,7 @@
 
 class UPriestInventorySubsystem;
 class UMvcControl;
+class UPartSubsystem;
 
 UCLASS()
 class PROJECTPRIEST_API UPriestInventoryModel: public UObject , public IMvcModel
@@ -21,10 +22,9 @@ public:
 
     bool SetCategory(EItemCategory InCategory);
 
-    const FPriestInventoryViewData& GetData() const
-    {
-        return Data;
-    }
+    const FPriestInventoryViewData& GetData() const;
+
+    void SetSelectedWeaponId(FName InWeaponId);
 
     virtual FDelegateHandle AddListener(UMvcControl* Control) override;
 
@@ -45,6 +45,11 @@ private:
 
     UPROPERTY(Transient)
     FPriestInventoryViewData Data;
+
+    UPROPERTY(Transient)
+    TObjectPtr<UPartSubsystem> Parts;
+
+    FName SelectedWeaponId = NAME_None;
 
     FModelChangedDelegate Changed;
 };
