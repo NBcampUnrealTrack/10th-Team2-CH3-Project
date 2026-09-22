@@ -44,7 +44,8 @@ FReply UPriestInventorySlotWidget::NativeOnMouseButtonDown(
     if (InMouseEvent.GetEffectingButton()
         == EKeys::LeftMouseButton
         && !Item.ItemId.IsNone()
-        && Item.Quantity > 0)
+        && Item.Quantity > 0
+        && (Item.bQuickSlotCompatible || Item.Category == EItemCategory::Part))
     {
         return UWidgetBlueprintLibrary::DetectDragIfPressed(
             InMouseEvent,
@@ -76,7 +77,7 @@ void UPriestInventorySlotWidget::NativeOnDragDetected(
         return;
     }
 
-    if (!Item.bQuickSlotCompatible)
+    if (!Item.bQuickSlotCompatible && Item.Category != EItemCategory::Part)
     {
         return;
     }
