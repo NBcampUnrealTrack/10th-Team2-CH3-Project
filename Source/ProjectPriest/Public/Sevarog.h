@@ -55,7 +55,7 @@ public:
 		, AActor* DamageCauser) override;
 	
 	virtual void Heal(float HealAmount) override;
-
+	virtual void DropItem() override;
 	
 protected:
 	// Called when the game starts or when spawned

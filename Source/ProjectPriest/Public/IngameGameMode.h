@@ -21,7 +21,7 @@ public:
     void OnOpenBossRoomDoor(APlayerCharacter* Player);
     void OnMonsterSpawned();
 	void OnMonsterDead();
-    void OnBossDead();
+    void OnCrossBowPickuped();
 protected:
     TSoftObjectPtr<UWorld> LobbyLevel;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== IngameGameMode ===")
