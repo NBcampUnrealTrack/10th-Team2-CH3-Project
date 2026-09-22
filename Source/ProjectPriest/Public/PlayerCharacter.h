@@ -117,6 +117,8 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Items|QuickSlot")
     EPotionUseResult TryUseQuickSlot(int32 SlotIndex);
 
+    float GetAttackSpeedMultiplier() const;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -126,6 +128,9 @@ protected:
     void ResetThrowCoolTime();
 
     void OnDeath();
+
+private:
+    void EndAttackSpeedPotionEffect();
 
 public:
     FPlayerCombatChanged OnCombatChanged;
@@ -198,4 +203,6 @@ protected:
 
 private:
     bool bIsUsingPotion = false;
+    float AttackSpeedMultiplier = 1.0f;
+    FTimerHandle AttackSpeedPotionTimerHandle;
 };

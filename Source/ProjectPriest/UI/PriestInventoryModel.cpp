@@ -43,7 +43,7 @@ bool UPriestInventoryModel::SetCategory(EItemCategory InCategory)
     switch (InCategory)
     {
         case EItemCategory::Weapon:
-        case EItemCategory::Ammo:
+        case EItemCategory::Part:
         case EItemCategory::Consumable:
         case EItemCategory::Material:
             break;
@@ -81,13 +81,8 @@ void UPriestInventoryModel::Refresh()
 
         SlotData.Category = Data.SelectedCategory;
 
-        FPotionData PotionData;
-
         SlotData.bQuickSlotCompatible =
-            Inventory->TryGetPotionData(
-                Item.ItemId,
-                PotionData
-            );
+            Inventory->IsPotion(Item.ItemId);
 
         Data.Items.Add(MoveTemp(SlotData));
     }

@@ -30,15 +30,27 @@ public:
         FSubsystemCollectionBase& Collection
     ) override;
 
+    UFUNCTION(
+        BlueprintPure,
+        Category = "Priest|Inventory",
+        meta = (WorldContext = "WorldContextObject")
+    )
+    static UPriestInventorySubsystem* Get(
+        const UObject* WorldContextObject
+    );
+
     UFUNCTION(BlueprintPure, Category="Priest|Inventory")
     TArray<FPriestOwnedItem> GetOwnedItems() const { return OwnedItems; }
 
     // ItemId is the stacking key; names are presentation only.
     UFUNCTION(BlueprintCallable, Category="Priest|Inventory")
-    bool AddItem(FName ItemId, FText DisplayName, int32 Quantity);
+    bool AddItem(FName ItemId, int32 Quantity);
 
     UFUNCTION(BlueprintPure, Category="Priest|Inventory")
     int32 GetQuantity(FName ItemId) const;
+
+    UFUNCTION(BlueprintCallable, Category = "Priest|Inventory|Crafting")
+    bool CraftItem(FName RecipeID);
 
     UFUNCTION(BlueprintCallable, Category="Priest|Inventory")
     bool RemoveItem(FName ItemId, int32 Quantity);
@@ -56,10 +68,17 @@ public:
     bool ClearQuickSlot(int32 SlotIndex);
 
     UFUNCTION(BlueprintPure, Category = "Priest|Inventory|Potion")
-    bool TryGetPotionData(
+    bool TryGetHealthPotionData(
         FName ItemId,
-        FPotionData& OutData
+        FHealthPotionData& OutData
     ) const;
+
+    bool TryGetAttackSpeedUpPotionData(
+        FName ItemId,
+        FAttackSpeedUpPotionData& OutData
+    ) const;
+
+    bool IsPotion(FName ItemId) const;
 
     UFUNCTION(BlueprintPure, Category = "Priest|Inventory|QuickSlot")
     bool CanAssignQuickSlot(
@@ -93,8 +112,14 @@ private:
     TArray<FName> QuickSlotItemIds = { NAME_None, NAME_None };
 
     UPROPERTY(Transient)
-    TObjectPtr<UDataTable> PotionDataTable;
+    TObjectPtr<UDataTable> HealthPotionDataTable;
 
     UPROPERTY(Transient)
-    TObjectPtr<UDataTable> ItemDataTable;
+    TObjectPtr<UDataTable> AttackSpeedUpPotionDataTable;
+
+    UPROPERTY(Transient)
+    TObjectPtr<UDataTable> RecipeDataTable;
+
+    UPROPERTY(Transient)
+    TMap<EItemCategory, TObjectPtr<UDataTable>> ItemDataTables;
 };

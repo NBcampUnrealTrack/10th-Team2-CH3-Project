@@ -18,7 +18,7 @@ class PROJECTPRIEST_API APriestMainMenuPlayerController : public APlayerControll
 
 public:
 	APriestMainMenuPlayerController();
-	bool StartStageOne();
+	void StartStageOne();
     bool CanProcessMenuRequest() const
     {
         return IsLocalController() && !bTravelRequested;

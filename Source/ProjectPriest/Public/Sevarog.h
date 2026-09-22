@@ -6,6 +6,10 @@
 #include "SevarogHud.h"
 #include "Sevarog.generated.h"
 
+#define FIRST_PHASE     0
+#define SECOND_PHASE    1
+#define THIRD_PHASE     2
+
 UENUM(BlueprintType)
 enum class ESevarogPropertyName : uint8
 {
