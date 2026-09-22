@@ -10,7 +10,7 @@
 
 class UTextBlock;
 class UWidgetSwitcher;
-class UUniformGridPanel;
+class UWrapBox;
 class UPriestInventorySlotWidget;
 
 // 배치, 버튼 스타일, 문구는 WBP Designer에서 구성한다.
@@ -77,9 +77,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Priest|Inventory")
 	TSubclassOf<UPriestInventorySlotWidget> InventorySlotClass;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Priest|Inventory", meta = (ClampMin = "1"))
-	int32 InventoryColumns = 5;
-
 	UPROPERTY(BlueprintReadOnly, Category = "Priest|Menu")
 	EPriestMenuPage CurrentPage = EPriestMenuPage::Title;
 
@@ -88,7 +85,7 @@ protected:
 
 private:
 	UPROPERTY(Transient) FPriestInventoryViewData InventoryData;
-    UPROPERTY(meta = (BindWidget)) TObjectPtr<UUniformGridPanel> InventoryGrid;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UWrapBox> InventoryGrid;
     bool bBindingsReady = false;
     bool bHasInventoryData = false;
     FViewEventRaisedDelegate Listener;

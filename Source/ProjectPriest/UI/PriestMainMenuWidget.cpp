@@ -8,7 +8,7 @@
 #include "PriestMenuRequest.h"
 #include "UObject/StrongObjectPtr.h"
 #include "PriestInventorySlotWidget.h"
-#include "Components/UniformGridPanel.h"
+#include "Components/WrapBox.h"
 #include "PriestInventoryEventParameter.h"
 
 #define REQUIRED_MENU_COUNT 3
@@ -77,7 +77,7 @@ void UPriestMainMenuWidget::RefreshInventoryDisplay()
         InventoryData.Items;
 
     JASSERT(IsValid(InventoryGrid),
-        "%hs [%s]: InventoryGrid 바인딩이 없습니다. WBP의 Uniform Grid Panel 이름을 확인하세요.",
+        "%hs [%s]: InventoryGrid 바인딩이 없습니다. WBP의 WrapBox 이름을 확인하세요.",
         __FUNCTION__,
         *GetNameSafe(this)
     );
@@ -90,8 +90,6 @@ void UPriestMainMenuWidget::RefreshInventoryDisplay()
         JWarning("Main menu: Set InventorySlotClass " "to WBP_InventorySlot in Class Defaults.");
         return;
     }
-
-    const int32 Columns = FMath::Max(1, InventoryColumns);
 
     for (int32 Index = 0; Index < Items.Num(); ++Index)
     {
@@ -109,11 +107,7 @@ void UPriestMainMenuWidget::RefreshInventoryDisplay()
 
         SlotWidget->SetItem(Items[Index]);
 
-        InventoryGrid->AddChildToUniformGrid(
-            SlotWidget,
-            Index / Columns,
-            Index % Columns
-        );
+        InventoryGrid->AddChildToWrapBox(SlotWidget);
     }
 }
 
