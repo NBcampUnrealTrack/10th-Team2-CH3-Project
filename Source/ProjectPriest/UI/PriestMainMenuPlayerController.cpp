@@ -16,7 +16,7 @@
 
 APriestMainMenuPlayerController::APriestMainMenuPlayerController()
 {
-	StageOneMap = TSoftObjectPtr<UWorld>(FSoftObjectPath(TEXT("/Game/ElderboomVillage/Maps/L_ElderboomVillage.L_ElderboomVillage")));
+	
 }
 
 void APriestMainMenuPlayerController::BeginPlay()
