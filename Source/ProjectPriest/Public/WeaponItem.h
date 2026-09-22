@@ -7,7 +7,6 @@
 DECLARE_MULTICAST_DELEGATE(FWeaponAmmoChanged);
 
 class AIngamePlayerController;
-class UPartManager;
 
 UCLASS()
 class PROJECTPRIEST_API AWeaponItem : public ABaseItem
@@ -47,9 +46,6 @@ public:
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="===Weapon===|Properties")
     FText WeaponName = NSLOCTEXT("PriestHUD", "DefaultWeapon", "Weapon");
-
-	UPROPERTY()
-	TObjectPtr<UPartManager> PartManager;
 
 	// Properties
 	// 데미지
