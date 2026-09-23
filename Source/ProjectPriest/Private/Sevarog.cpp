@@ -135,7 +135,7 @@ float ASevarog::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
     //realy dead!
     if (bIsEmptyHealth && bIsThirdPhase)
     {
-        Die();
+        //Die();
     }
     
 	return ActualDamage;
