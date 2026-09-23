@@ -3,6 +3,9 @@
 
 #include "RangedEnemyCharacter.h"
 #include "Projectile.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
+#include "Particles/ParticleSystemComponent.h"
 
 ARangedEnemyCharacter::ARangedEnemyCharacter()
 {
@@ -23,6 +26,42 @@ void ARangedEnemyCharacter::Attack(ACharacter* PlayerCharacter)
             , &ARangedEnemyCharacter::OnAttackDelayTimer
             , AttackDelay
             , false);
+}
+
+void ARangedEnemyCharacter::Die()
+{
+    Super::Die();
+
+    OnDeath();
+
+    if (DeathParticle)
+    {
+        UParticleSystemComponent* Particle =
+            UGameplayStatics::SpawnEmitterAtLocation(
+                GetWorld(),
+                DeathParticle,
+                GetActorLocation(),
+                GetActorRotation()
+            );
+
+        if (Particle)
+        {
+            GetWorldTimerManager().SetTimer(
+                DestroyParticle,
+                [Particle]()
+                {
+                    if (IsValid(Particle))
+                    {
+                        Particle->DeactivateSystem();
+                        Particle->DestroyComponent();
+                    }
+                },
+                ParticleTime,
+                false
+            );
+        }
+
+    }
 }
 
 void ARangedEnemyCharacter::SpawnBullet() const
