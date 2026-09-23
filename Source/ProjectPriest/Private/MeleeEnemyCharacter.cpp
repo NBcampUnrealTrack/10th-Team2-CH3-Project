@@ -1,8 +1,10 @@
 ﻿#include "MeleeEnemyCharacter.h"
 #include "JUtility.h"
 #include <system_error>
-#include "Components/SphereComponent.h"
+#include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "PlayerCharacter.h"
+
 
 AMeleeEnemyCharacter::AMeleeEnemyCharacter()
     : SessionNames({
@@ -10,13 +12,19 @@ AMeleeEnemyCharacter::AMeleeEnemyCharacter()
         ,"Attack1"
         ,"Attack2" })
 {
-    LeftHandCollision = CreateDefaultSubobject<USphereComponent>(TEXT("LeftHandCollision"));
-    RightHandCollision = CreateDefaultSubobject<USphereComponent>(TEXT("RightHandCollision"));
+    AttackCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollision"));
+    AttackCollision->SetupAttachment(RootComponent);
+    AttackCollision->OnComponentBeginOverlap.AddDynamic(
+        this,
+        &AMeleeEnemyCharacter::OnAttackRangeBeginOverlap
+    );
 
-    LeftHandCollision->SetupAttachment(GetMesh(), TEXT("hand_l"));
-    RightHandCollision->SetupAttachment(GetMesh(), TEXT("hand_r"));
-
+    AttackCollision->OnComponentEndOverlap.AddDynamic(
+        this,
+        &AMeleeEnemyCharacter::OnAttackRangeEndOverlap
+    );
 }
+
 
 void AMeleeEnemyCharacter::Attack(ACharacter* PlayerCharacter)
 {
@@ -54,34 +62,61 @@ void AMeleeEnemyCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupt
     }
 }
 
+void AMeleeEnemyCharacter::OnAttackRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+    if (OtherActor && OtherActor->ActorHasTag("Player"))
+    {
+        Player = Cast<APlayerCharacter>(OtherActor);
+    }
+}
+
+void AMeleeEnemyCharacter::OnAttackRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+    if (OtherActor && OtherActor == Player)
+    {
+        Player = nullptr;
+    }
+}
+
 void AMeleeEnemyCharacter::OnNotifyApplyDamage()
 {
-    TSet<AActor*> OverlappingActors;
-    LeftHandCollision->GetOverlappingActors(OverlappingActors);
-    RightHandCollision->GetOverlappingActors(OverlappingActors);
-    UE_LOG(
-        LogTemp,
-        Warning,
-        TEXT("=== OnNotifyApplyDamage ===")
-    );
-    for (AActor* Actor : OverlappingActors) {
-        if (Actor && Actor->ActorHasTag("Player"))
-        {
-            UGameplayStatics::ApplyDamage(
-                Actor,
-                Damage,
-                nullptr,
-                this,
-                UDamageType::StaticClass()
-            );
-            UE_LOG(
-                LogTemp,
-                Warning,
-                TEXT("=== APPLY DAMAGE TO %s ==="),
-                *Actor->GetName()
-            );
-        }
+    if (Player)
+    {
+        UGameplayStatics::ApplyDamage(
+            Player,
+            Damage,
+            nullptr,
+            this,
+            UDamageType::StaticClass()
+        );
+        JLog("ApplyDamge To %s", *Player->GetName());
     }
+    //TSet<AActor*> OverlappingActors;
+    //LeftHandCollision->GetOverlappingActors(OverlappingActors);
+    //RightHandCollision->GetOverlappingActors(OverlappingActors);
+    //UE_LOG(
+    //    LogTemp,
+    //    Warning,
+    //    TEXT("=== OnNotifyApplyDamage ===")
+    //);
+    //for (AActor* Actor : OverlappingActors) {
+    //    if (Actor && Actor->ActorHasTag("Player"))
+    //    {
+    //        UGameplayStatics::ApplyDamage(
+    //            Actor,
+    //            Damage,
+    //            nullptr,
+    //            this,
+    //            UDamageType::StaticClass()
+    //        );
+    //        UE_LOG(
+    //            LogTemp,
+    //            Warning,
+    //            TEXT("=== APPLY DAMAGE TO %s ==="),
+    //            *Actor->GetName()
+    //        );
+    //    }
+    //}
 }
 
 const FName& AMeleeEnemyCharacter::GetRandomSessionName()
