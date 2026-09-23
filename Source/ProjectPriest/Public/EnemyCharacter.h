@@ -73,6 +73,7 @@ public:
 	UFUNCTION(BlueprintCallable)
     void SetAttackTarget(ACharacter* Target);
 	
+	UFUNCTION(BlueprintCallable)
 	float GetHealthRate() const;
 	virtual void Heal(float HealAmount);
 		
