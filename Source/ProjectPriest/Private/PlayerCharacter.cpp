@@ -73,7 +73,8 @@ void APlayerCharacter::SpawnSelectedWeapon()
     //JASSERT(!WeaponId.IsNone(), "선택한 무기가 없습니다.");
 
     //게임플레이 맵에서 실행 or 무기 선택 안하고 진입 시 기본 권총 생성
-    if (WeaponId.IsNone()) {
+    if (WeaponId.IsNone()) 
+    {
         WeaponId = TEXT("Pistol");
     }
 
