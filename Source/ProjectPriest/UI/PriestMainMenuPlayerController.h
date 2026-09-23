@@ -18,7 +18,7 @@ class PROJECTPRIEST_API APriestMainMenuPlayerController : public APlayerControll
 
 public:
 	APriestMainMenuPlayerController();
-	void StartStageOne();
+	void StartStage(int32 StageIndex);
     bool CanProcessMenuRequest() const
     {
         return IsLocalController() && !bTravelRequested;
@@ -41,7 +41,7 @@ protected:
 	TSubclassOf<UPriestMainMenuWidget> MainMenuWidgetClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Priest|Menu")
-	TSoftObjectPtr<UWorld> StageOneMap;
+	TArray<TSoftObjectPtr<UWorld>> StageMaps;
 
 private:
     UPROPERTY(Transient) TObjectPtr<UPriestMenuModel> MenuModel;

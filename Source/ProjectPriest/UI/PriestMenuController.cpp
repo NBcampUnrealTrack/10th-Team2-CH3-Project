@@ -99,7 +99,7 @@ void UPriestMenuController::HandleViewEvent(IMvcView* InView, EViewEventType Eve
 			break;
 		}
 
-		Owner->StartStageOne();
+		Owner->StartStage(Request->StageIndex);
 		break;
 	}
 
