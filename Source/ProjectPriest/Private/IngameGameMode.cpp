@@ -52,8 +52,13 @@ void AIngameGameMode::OnOpenBossRoomDoor(APlayerCharacter* Player)
         return;
     }
     
-    JLog("Try to load boss map")
-    UGameplayStatics::OpenLevelBySoftObjectPtr(GetWorld(), BossLevel);
+    //JLog("Try to load boss map")
+    //UGameplayStatics::OpenLevelBySoftObjectPtr(GetWorld(), BossLevel);
+
+    const float ClearSeconds =
+        GetWorld()->GetTimeSeconds() - IngameState->GetStartTime();
+
+    IngameState->TryCompleteStage(ClearSeconds);
 }
 
 void AIngameGameMode::OnMonsterSpawned()

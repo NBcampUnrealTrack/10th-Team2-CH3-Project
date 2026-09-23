@@ -22,6 +22,10 @@ public:
     void OnMonsterSpawned();
 	void OnMonsterDead();
     void OnCrossBowPickuped();
+
+public:
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stage|Reward")
+    FName StageRewardItemId;
 protected:
     TSoftObjectPtr<UWorld> LobbyLevel;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== IngameGameMode ===")
