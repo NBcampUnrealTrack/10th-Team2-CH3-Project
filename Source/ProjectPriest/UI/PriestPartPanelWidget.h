@@ -19,20 +19,17 @@ class PROJECTPRIEST_API UPriestPartPanelWidget: public UUserWidget, public IMvcV
 
 public:
     UFUNCTION(BlueprintCallable, Category = "Priest|Part")
-    void SetWeaponId(FName InWeaponId);
-
-    UFUNCTION(BlueprintCallable, Category = "Priest|Part")
     void RequestEquipPart(FName ItemId, EPartSlot SlotType);
 
     UFUNCTION(BlueprintImplementableEvent, Category = "Priest|Part")
     void UpdatePartSlots(const FPartData& BarrelPart, const FPartData& MagazinePart);
 
 protected:
+    UPROPERTY(Transient)
+    TObjectPtr<UMvcControl> Controller;
+
     virtual void NativeConstruct() override;
     virtual void NativeDestruct() override;
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Priest|Part")
-    FName WeaponId = NAME_None;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Priest|Part")
     TObjectPtr<UDataTable> PartDefinitionTable;

@@ -8,6 +8,8 @@
 class UTextBlock;
 class UDragDropOperation;
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FPriestWeaponSelectionRequested, FName);
+
 // Create WBP_InventorySlot from this parent. All appearance belongs to its Designer.
 UCLASS(Abstract, Blueprintable)
 class PROJECTPRIEST_API UPriestInventorySlotWidget : public UUserWidget
@@ -17,6 +19,8 @@ class PROJECTPRIEST_API UPriestInventorySlotWidget : public UUserWidget
 public:
     UFUNCTION(BlueprintCallable, Category = "Priest|Inventory")
     void SetItem(const FPriestInventorySlotData& InItem);
+
+    FPriestWeaponSelectionRequested OnWeaponSelectionRequested;
 
 protected:
     virtual void NativePreConstruct() override;

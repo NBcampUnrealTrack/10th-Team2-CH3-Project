@@ -23,6 +23,9 @@ struct FPriestInventorySlotData
 
     UPROPERTY(BlueprintReadOnly)
     bool bQuickSlotCompatible = false;
+
+    UPROPERTY(BlueprintReadOnly)
+    bool bRegistered = false;
 };
 
 USTRUCT(BlueprintType)

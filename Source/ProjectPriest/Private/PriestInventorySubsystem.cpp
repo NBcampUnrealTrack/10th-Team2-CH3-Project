@@ -145,6 +145,35 @@ bool UPriestInventorySubsystem::RemoveItem(FName ItemId, int32 Quantity)
     return true;
 }
 
+bool UPriestInventorySubsystem::EquipWeapon(FName ItemId)
+{
+
+    JASSERT_BOOL(!ItemId.IsNone(), "무기 아이템 Id가 없습니다");
+
+    FPriestItemData ItemData;
+    JASSERT_BOOL(TryGetItemData(ItemId, ItemData), "무기 선택 요청의 아이템 정의가 없습니다.");
+
+    if (ItemData.Category != EItemCategory::Weapon || GetQuantity(ItemId) <= 0)
+    {
+        return false;
+    }
+
+    if (EquippedWeaponId == ItemId)
+    {
+        return true;
+    }
+
+    EquippedWeaponId = ItemId;
+    OnEquippedWeaponChanged.Broadcast();
+
+    return true;
+}
+
+FName UPriestInventorySubsystem::GetEquippedWeaponId() const
+{
+    return EquippedWeaponId;
+}
+
 void UPriestInventorySubsystem::GrantPreviewItemsOnce()
 {
     if (bPreviewItemsGranted)
@@ -158,6 +187,8 @@ void UPriestInventorySubsystem::GrantPreviewItemsOnce()
     AddItem(TEXT("WhisperDropItemB"), 2);
     AddItem(TEXT("Barrel"), 1);
     AddItem(TEXT("Magazine"), 1);
+    AddItem(TEXT("Pistol"), 1);
+    AddItem(TEXT("Crossbow"), 1);
 }
 
 FName UPriestInventorySubsystem::GetQuickSlotItemId(

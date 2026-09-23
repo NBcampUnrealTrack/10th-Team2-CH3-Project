@@ -18,21 +18,26 @@ public:
     void Initialize(
         UPartSubsystem* InParts,
         UPriestInventorySubsystem* InInventory,
-        UDataTable* InPartTable,
-        FName InWeaponId
+        UDataTable* InPartTable
     );
 
-    void SetWeaponId(FName InWeaponId);
+    void Disconnect();
 
     bool EquipPart(FName ItemId, EPartSlot SlotType);
 
     FPartData GetPart(EPartSlot SlotType) const;
+
+    virtual void BeginDestroy() override;
 
     virtual FDelegateHandle AddListener(UMvcControl* Control) override;
 
     virtual void RemoveListener(FDelegateHandle Handle) override;
 
     virtual void InvokePropertyChanged(uint8 PropertyName) override;
+
+private:
+    UFUNCTION()
+    void HandleEquippedWeaponChanged();
 
 private:
     UPROPERTY(Transient)
