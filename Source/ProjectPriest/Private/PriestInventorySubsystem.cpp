@@ -187,7 +187,7 @@ void UPriestInventorySubsystem::GrantPreviewItemsOnce()
     AddItem(TEXT("WhisperDropItemB"), 2);
     AddItem(TEXT("Barrel"), 1);
     AddItem(TEXT("Magazine"), 1);
-    AddItem(TEXT("Weapon"), 1);
+    AddItem(TEXT("Pistol"), 1);
     AddItem(TEXT("Crossbow"), 1);
 }
 
