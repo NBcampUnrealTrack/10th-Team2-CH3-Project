@@ -42,6 +42,7 @@ void ASevarog::BeginPlay()
 	
 	Phase = 0;
 	InvokePropertyChanged(StaticCast<uint8>(ESevarogPropertyName::Health));	
+	OnHealthRateChanged.Broadcast(GetHealthRate());
 }
 
 // Called every frame
@@ -91,6 +92,11 @@ void ASevarog::SetNovaCastingStarted(bool bIsStarted)
 	InvokePropertyChanged(StaticCast<uint8>(ESevarogPropertyName::NovaCastingStarted));	
 }
 
+FOnHealthRateChanged& ASevarog::GetHealthRateDeletate()
+{
+	return OnHealthRateChanged;
+}
+
 FDelegateHandle ASevarog::AddListener(UMvcControl* Control)
 {
 	return Delegate.AddUObject(Control, &UMvcControl::HandleModelChanged);
@@ -138,6 +144,11 @@ float ASevarog::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
         //Die();
     }
     
+	//TODO: Heal쪽의 코드와  중복됨
+	FMonsterData* Data = RowDataTable.GetRow<FMonsterData>(TEXT("AEnemyCharacter::TakeDamage"));
+	JASSERT_RETURN((nullptr != Data), 0.0f, "MonsterData가 없습니다.");
+	
+	OnHealthRateChanged.Broadcast(Health / Data->Health);
 	return ActualDamage;
 }
 
@@ -146,6 +157,11 @@ void ASevarog::Heal(float HealAmount)
 	Super::Heal(HealAmount);
 	
 	InvokePropertyChanged(StaticCast<uint8>(ESevarogPropertyName::Health));
+	
+	FMonsterData* Data = RowDataTable.GetRow<FMonsterData>(TEXT("AEnemyCharacter::TakeDamage"));
+	JASSERT((nullptr != Data), "MonsterData가 없습니다.");
+	
+	OnHealthRateChanged.Broadcast(Health / Data->Health);
 }
 
 void ASevarog::DropItem()

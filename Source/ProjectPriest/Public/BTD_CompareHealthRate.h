@@ -11,6 +11,7 @@ class PROJECTPRIEST_API UBTD_CompareHealthRate : public UBTDecorator
 	GENERATED_BODY()
 	
 public:	
+	UBTD_CompareHealthRate();
 	virtual FString GetStaticDescription() const override;
 	
 protected:
@@ -18,6 +19,8 @@ protected:
 		UBehaviorTreeComponent& OwnerComp,
 		uint8* NodeMemory) const override;
 	
+	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
+	virtual bool EvaluateCondition(UBehaviorTreeComponent& OwnerComp) const;
 protected:	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "=== Compare Health Rate ===")
 	ECompareOperatorType CompareType;
