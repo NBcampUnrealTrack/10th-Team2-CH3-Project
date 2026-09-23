@@ -147,9 +147,9 @@ void UPriestMainMenuWidget::RefreshPage()
 	OnMenuStateChanged(CurrentPage, CurrentTab);
 }
 
-void UPriestMainMenuWidget::StartStageOne()
+void UPriestMainMenuWidget::StartStage(int32 StageIndex)
 {
-    SendRequest(EPriestMenuAction::StartStage);
+    SendStageRequest(StageIndex);
 }
 void UPriestMainMenuWidget::QuitGame()
 {
@@ -160,6 +160,15 @@ void UPriestMainMenuWidget::SendRequest(EPriestMenuAction Action, int32 TabDirec
     TStrongObjectPtr<UPriestMenuRequest> Request(NewObject<UPriestMenuRequest>());
     Request->Action = Action;
     Request->TabDirection = TabDirection;
+    InvokeViewEvent(EViewEventType::ButtonClicked, Request.Get());
+}
+void UPriestMainMenuWidget::SendStageRequest(int32 StageIndex)
+{
+    TStrongObjectPtr<UPriestMenuRequest> Request(NewObject<UPriestMenuRequest>());
+
+    Request->Action = EPriestMenuAction::StartStage;
+    Request->StageIndex = StageIndex;
+
     InvokeViewEvent(EViewEventType::ButtonClicked, Request.Get());
 }
 FDelegateHandle UPriestMainMenuWidget::AddListener(UMvcControl* Control)

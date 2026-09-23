@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "MvcEvents.h"
@@ -18,4 +18,5 @@ public:
 
 	EPriestMenuAction Action = EPriestMenuAction::Title;
 	int32 TabDirection = 0;
+	int32 StageIndex = INDEX_NONE;
 };

@@ -50,7 +50,7 @@ public:
 	void SwitchLobbyTab(int32 Direction);
 
 	UFUNCTION(BlueprintCallable, Category = "Priest|Menu")
-	void StartStageOne();
+	void StartStage(int32 StageIndex);
 
 	UFUNCTION(BlueprintCallable, Category = "Priest|Menu")
 	void QuitGame();
@@ -72,6 +72,7 @@ protected:
 
 private:
     void SendRequest(EPriestMenuAction Action, int32 Direction = 0);
+	void SendStageRequest(int32 StageIndex);
     void RefreshPage();
 	void RefreshInventoryDisplay();
 
