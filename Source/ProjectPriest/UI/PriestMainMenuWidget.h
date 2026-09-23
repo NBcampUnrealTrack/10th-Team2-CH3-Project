@@ -60,6 +60,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Priest|Inventory")
 	void SelectInventoryCategory(EItemCategory InCategory);
 
+	void RequestEquipWeapon(FName ItemId);
+
 protected:
     virtual void NativeConstruct() override;
     virtual void NativeDestruct() override;

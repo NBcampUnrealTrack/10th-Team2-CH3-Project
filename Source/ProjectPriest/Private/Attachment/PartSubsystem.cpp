@@ -41,6 +41,8 @@ FPartData UPartSubsystem::SetPart(FWeaponPartSlots* WeaponSlots, FPartData& Part
 
     WeaponSlots->PartSlots.Add(Part.SlotType, Part);
 
+    OnPartsChanged.Broadcast();
+
     return ReplacedPart;
 }
 
@@ -65,6 +67,8 @@ FPartData UPartSubsystem::RemovePart(FWeaponPartSlots* WeaponSlots, EPartSlot Sl
         FPartData RemovedPart = *ExPart;
 
         WeaponSlots->PartSlots.Remove(SlotType);
+
+        OnPartsChanged.Broadcast();
 
         return RemovedPart;
     }

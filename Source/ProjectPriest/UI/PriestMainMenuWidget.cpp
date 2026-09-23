@@ -103,6 +103,8 @@ void UPriestMainMenuWidget::RefreshInventoryDisplay()
 
         SlotWidget->SetItem(Items[Index]);
 
+        SlotWidget->OnWeaponSelectionRequested.AddUObject(this, &UPriestMainMenuWidget::RequestEquipWeapon);
+
         InventoryGrid->AddChildToWrapBox(SlotWidget);
     }
 }
@@ -178,4 +180,16 @@ void UPriestMainMenuWidget::ShowStatusMessage(const FText& Message)
 	{
 		MenuStatusText->SetText(Message);
 	}
+}
+
+void UPriestMainMenuWidget::RequestEquipWeapon(FName ItemId)
+{
+    TStrongObjectPtr<UPriestInventoryEventParameter> Request(
+        NewObject<UPriestInventoryEventParameter>()
+    );
+
+    Request->Action = EPriestInventoryAction::EquipWeapon;
+    Request->ItemId = ItemId;
+
+    InvokeViewEvent(EViewEventType::InventoryRequest, Request.Get());
 }

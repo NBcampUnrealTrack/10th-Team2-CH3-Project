@@ -17,6 +17,9 @@ enum class ESevarogPropertyName : uint8
 	NovaCastingStarted	UMETA(DisplayName = "NovaCastingStarted"),
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthRateChanged, float, HealthRate);
+
+
 UCLASS()
 class PROJECTPRIEST_API ASevarog : public AEnemyCharacter, public IMvcModel
 {
@@ -44,6 +47,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetNovaCastingStarted(bool bIsStarted);
 	
+	FOnHealthRateChanged& GetHealthRateDeletate();	
 	
 	virtual FDelegateHandle AddListener(UMvcControl* Control) override;
 	virtual void RemoveListener(FDelegateHandle Handle) override;
@@ -74,4 +78,7 @@ protected:
 	FModelChangedDelegate Delegate;
 	
 	bool bNovaCastingStarted;
+	
+	UPROPERTY(BlueprintAssignable, Category = "=== Sevarog ===|Delegates")
+	FOnHealthRateChanged OnHealthRateChanged;
 };
