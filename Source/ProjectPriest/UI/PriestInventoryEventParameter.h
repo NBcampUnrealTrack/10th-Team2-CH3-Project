@@ -26,6 +26,4 @@ public:
         EItemCategory::Consumable;
 
     FName ItemId = NAME_None;
-
-    bool bAccepted = false;
 };
