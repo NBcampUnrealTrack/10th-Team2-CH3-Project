@@ -1,10 +1,13 @@
-#include "PriestStageClearController.h"
+﻿#include "PriestStageClearController.h"
 #include "JUtility.h"
 #include "Engine/Engine.h"
 #include "PriestStageClearWidget.h"
 #include "PriestUIManager.h"
 #include "IngameGameState.h"
 #include "IngamePlayerController.h"
+#include "IngameGameMode.h"
+#include "PriestInventorySubsystem.h"
+#include "Engine/World.h"
 
 void UPriestStageClearController::Initialize(AIngameGameState* Model, UPriestUIManager* UI, AIngamePlayerController* InPlayerController)
 {
@@ -61,6 +64,22 @@ void UPriestStageClearController::HandleModelChanged(IMvcModel* InModel, uint8 P
 void UPriestStageClearController::EnterStageClear()
 {
     bStageClearActive = true;
+
+    UWorld* World = PlayerController->GetWorld();
+    JASSERT(World, "World가 유효하지 않습니다");
+    AIngameGameMode* GameMode = World->GetAuthGameMode<AIngameGameMode>();
+    JASSERT(GameMode, "GameMode가 유효하지 않습니다");
+    UPriestInventorySubsystem* Inventory = UPriestInventorySubsystem::Get(PlayerController.Get());
+    JASSERT(Inventory, "Inventory가 유효하지 않습니다");
+
+    const FName RewardItemId = GameMode->StageRewardItemId;
+    JASSERT(!RewardItemId.IsNone(), "보상 아이템 Id가 유효하지 않습니다");
+
+    if (Inventory->GetQuantity(RewardItemId) == 0)
+    {
+        Inventory->AddItem(RewardItemId, 1);
+    }
+
     UPriestStageClearWidget* View = nullptr;
     if (UIManager.IsValid())
     {
