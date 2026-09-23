@@ -65,6 +65,11 @@ bool UPriestPartPanelModel::EquipPart(FName ItemId, EPartSlot SlotType)
         return false;
     }
 
+    if (WeaponId == FName(TEXT("Crossbow")))
+    {
+        return false;
+    }
+
     FPriestItemData ItemData;
     if (!Inventory->TryGetItemData(ItemId, ItemData)
         || ItemData.Category != EItemCategory::Part
