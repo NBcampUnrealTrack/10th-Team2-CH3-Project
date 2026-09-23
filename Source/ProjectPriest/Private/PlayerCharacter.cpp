@@ -51,17 +51,45 @@ void APlayerCharacter::BeginPlay()
     ChangeWalkingMode(EWalkingMode::Normal);
 
     //주의 현재 무기 메시가 캐릭터 모델에 달려있음
-    if (WeaponClass)
-    {
-        WeaponInstance = GetWorld()->SpawnActor<AWeaponItem>(WeaponClass);
-        if (IsValid(WeaponInstance))
-        {
-            WeaponInstance->SetOwner(this);
-        }
-    }
+    //현재 석궁 메시를 플레이어 캐릭터에 달아놓고 선택한 무기가 권총이면
+    //석궁 visiblity 비활성화
+    //선택한 무기가 석궁이면
+    //권총 Hide Mesh 후 석궁 visiblity 활성화
+    SpawnSelectedWeapon();
     OnCombatChanged.Broadcast();
     
     bCanInteract = false;
+}
+
+void APlayerCharacter::SpawnSelectedWeapon()
+{
+    UGameInstance* GameInstance = GetGameInstance();
+    JASSERT(IsValid(GameInstance), "GameInstance가 없습니다.");
+
+    UPriestInventorySubsystem* Inventory = GameInstance->GetSubsystem<UPriestInventorySubsystem>();
+    JASSERT(IsValid(Inventory), "InventorySubsystem이 없습니다.");
+
+    FName WeaponId = Inventory->GetEquippedWeaponId();
+    //JASSERT(!WeaponId.IsNone(), "선택한 무기가 없습니다.");
+
+    //게임플레이 맵에서 실행 or 무기 선택 안하고 진입 시 기본 권총 생성
+    if (WeaponId.IsNone()) 
+    {
+        WeaponId = TEXT("Pistol");
+    }
+
+    const TSubclassOf<AWeaponItem>* SelectedClass = WeaponClasses.Find(WeaponId);
+    JASSERT((SelectedClass != nullptr && SelectedClass->Get() != nullptr), "선택한 무기의 클래스가 설정되지 않았습니다.");
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.Owner = this;
+    SpawnParams.Instigator = this;
+
+    WeaponInstance = GetWorld()->SpawnActor<AWeaponItem>(
+        SelectedClass->Get(), GetActorLocation(), GetActorRotation(), SpawnParams
+    );
+
+    JASSERT(IsValid(WeaponInstance), "선택한 무기 생성에 실패했습니다.");
 }
 
 void APlayerCharacter::ChangeWalkingMode(EWalkingMode WalkingMode)

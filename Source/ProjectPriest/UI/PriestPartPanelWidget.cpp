@@ -22,7 +22,8 @@ void UPriestPartPanelWidget::NativeOnInitialized()
     Super::NativeOnInitialized();
 
     Model = NewObject<UPriestPartPanelModel>(this);
-    MvcControl = NewObject<UPriestPartPanelController>(this);
+    Controller = NewObject<UPriestPartPanelController>(this);
+    MvcControl = Controller;
 }
 
 void UPriestPartPanelWidget::NativeConstruct()
@@ -43,7 +44,7 @@ void UPriestPartPanelWidget::NativeConstruct()
     JASSERT(IsValid(Parts), "PartSubsystem이 없습니다.");
     JASSERT(IsValid(Inventory), "InventorySubsystem이 없습니다.");
 
-    Model->Initialize(Parts, Inventory, PartDefinitionTable, WeaponId);
+    Model->Initialize(Parts, Inventory, PartDefinitionTable);
     MvcControl->SetModel(Model);
     MvcControl->SetView(this);
     MvcControl->HandleModelChanged(Model, 0);
@@ -55,16 +56,13 @@ void UPriestPartPanelWidget::NativeDestruct()
     {
         MvcControl->Disconnect();
     }
-    MvcControl = nullptr;
-    Model = nullptr;
+
+    if (IsValid(Model))
+    {
+        Model->Disconnect();
+    }
 
     Super::NativeDestruct();
-}
-
-void UPriestPartPanelWidget::SetWeaponId(FName InWeaponId)
-{
-    WeaponId = InWeaponId;
-    Model->SetWeaponId(InWeaponId);
 }
 
 void UPriestPartPanelWidget::RequestEquipPart(FName ItemId, EPartSlot SlotType)

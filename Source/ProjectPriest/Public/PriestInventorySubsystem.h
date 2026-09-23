@@ -18,6 +18,7 @@ struct PROJECTPRIEST_API FPriestOwnedItem
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPriestInventoryChanged);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPriestQuickSlotsChanged);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPriestEquippedWeaponChanged);
 
 // Shared by the menu and gameplay worlds. Disk persistence is a separate concern.
 UCLASS()
@@ -97,12 +98,21 @@ public:
         EItemCategory Category
     ) const;
 
+    UFUNCTION(BlueprintCallable, Category = "Priest|Inventory|Weapon")
+    bool EquipWeapon(FName ItemId);
+
+    UFUNCTION(BlueprintPure, Category = "Priest|Inventory|Weapon")
+    FName GetEquippedWeaponId() const;
+
 public:
     UPROPERTY(BlueprintAssignable, Category="Priest|Inventory")
     FPriestInventoryChanged OnInventoryChanged;
 
     UPROPERTY(BlueprintAssignable, Category = "Priest|Inventory|QuickSlot")
     FPriestQuickSlotsChanged OnQuickSlotsChanged;
+
+    UPROPERTY(BlueprintAssignable, Category = "Priest|Inventory|Weapon")
+    FPriestEquippedWeaponChanged OnEquippedWeaponChanged;
 
 private:
     UPROPERTY(Transient) TArray<FPriestOwnedItem> OwnedItems;
@@ -122,4 +132,7 @@ private:
 
     UPROPERTY(Transient)
     TMap<EItemCategory, TObjectPtr<UDataTable>> ItemDataTables;
+
+    UPROPERTY(Transient)
+    FName EquippedWeaponId = NAME_None;
 };

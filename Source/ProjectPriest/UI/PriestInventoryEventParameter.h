@@ -8,7 +8,8 @@
 UENUM()
 enum class EPriestInventoryAction : uint8
 {
-    SelectCategory
+    SelectCategory,
+    EquipWeapon
 };
 
 UCLASS()
@@ -24,5 +25,5 @@ public:
     EItemCategory Category =
         EItemCategory::Consumable;
 
-    bool bAccepted = false;
+    FName ItemId = NAME_None;
 };

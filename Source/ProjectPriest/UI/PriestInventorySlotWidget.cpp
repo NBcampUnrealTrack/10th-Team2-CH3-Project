@@ -41,6 +41,16 @@ FReply UPriestInventorySlotWidget::NativeOnMouseButtonDown(
     const FPointerEvent& InMouseEvent
 )
 {
+    if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton
+        && Item.Category == EItemCategory::Weapon
+        && !Item.ItemId.IsNone()
+        && Item.Quantity > 0)
+    {
+        const FName SelectedItemId = Item.ItemId;
+        OnWeaponSelectionRequested.Broadcast(SelectedItemId);
+        return FReply::Handled();
+    }
+
     if (InMouseEvent.GetEffectingButton()
         == EKeys::LeftMouseButton
         && !Item.ItemId.IsNone()

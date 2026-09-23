@@ -123,6 +123,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+    void SpawnSelectedWeapon();
+
     void ChangeWalkingMode(EWalkingMode WalkingMode);
 
     void ResetThrowCoolTime();
@@ -181,8 +183,8 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Throw")
     float ThrowCoolTime = 5.0f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Weapon")
-    TSubclassOf<AWeaponItem> WeaponClass;
+    UPROPERTY(EditDefaultsOnly, Category = "===PlayerCharacter===|Weapon")
+    TMap<FName, TSubclassOf<AWeaponItem>> WeaponClasses;
 
     //주의 현재 무기 메시가 캐릭터 모델에 달려있음
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===PlayerCharacter===|Weapon")
