@@ -16,6 +16,10 @@ public:
 	AIngameGameState();
 	~AIngameGameState();
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stage|Mission")
+    FText CompletionObjectiveText = NSLOCTEXT(
+        "PriestMission", "DefaultCompletionObjective", "Interact with the church door.");
+
     float GetStartTime();
     float GetElapsedTime();
     bool HasStageCleared() const

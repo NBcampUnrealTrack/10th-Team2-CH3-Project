@@ -262,7 +262,8 @@ bool AIngamePlayerController::ExecuteResultTravel(bool bRestart, FText& OutError
         return false;
     }
     bResultTravelRequested = true;
-    UGameplayStatics::OpenLevel(this, FName(*Package));
+    const FString Options = bRestart ? TEXT("") : TEXT("MenuTab=Equipment");
+    UGameplayStatics::OpenLevel(this, FName(*Package), true, Options);
     return true;
 }
 
