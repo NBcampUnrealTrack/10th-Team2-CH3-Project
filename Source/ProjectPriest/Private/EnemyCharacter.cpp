@@ -7,6 +7,7 @@
 #include "Components/CapsuleComponent.h"
 #include "JUtility.h"
 #include "BaseItem.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
@@ -32,10 +33,13 @@ void AEnemyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void AEnemyCharacter::Attack(ACharacter* PlayerCharacter)
 {
+	PlaySound(AttackSound);
 }
 
 float AEnemyCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
+	PlaySound(HitSound);
+
     if (!FMath::IsFinite(DamageAmount) || DamageAmount <= 0.0f || Health <= 0.0f || bIsDead || IsActorBeingDestroyed())
     {
         return 0.0f;
@@ -70,6 +74,8 @@ void AEnemyCharacter::Die()
 	}
 
 	bIsDead = true;
+
+	PlaySound(DeathSound);
 
 	AMonsterAIController* AiController = Cast<AMonsterAIController>(GetController());
 	if (!AiController)
@@ -252,4 +258,18 @@ FVector AEnemyCharacter::GetPatrolOrigin()
 float AEnemyCharacter::GetPatrolRadius()
 {
 	return PatrolRadius;
+}
+
+void AEnemyCharacter::PlaySound(USoundBase* Sound)
+{
+	if (!Sound)
+	{
+		return;
+	}
+
+	UGameplayStatics::PlaySoundAtLocation(
+		this,
+		Sound,
+		GetActorLocation()
+	);
 }

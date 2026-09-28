@@ -120,6 +120,15 @@ protected:
     //UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Stats")
     float Defense;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+    TObjectPtr<USoundBase> AttackSound;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+    TObjectPtr<USoundBase> HitSound;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+    TObjectPtr<USoundBase> DeathSound;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "=== Enemy Character ===|For anim blueprint")
     bool bHitThisFrame;
     
@@ -141,4 +150,6 @@ protected:
     virtual void DropItem();
 
     void DestroyEnemy();
+
+    void PlaySound(USoundBase* Sound);
 };
