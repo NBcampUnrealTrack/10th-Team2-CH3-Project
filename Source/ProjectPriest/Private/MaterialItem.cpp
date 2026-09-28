@@ -13,6 +13,8 @@ AMaterialItem::AMaterialItem()
 
 void AMaterialItem::ActivateItem(AActor* Activator)
 {
+	Super::ActivateItem(Activator);
+	
 	JASSERT(Activator, "Activator가 없습니다.");
 
 	UGameInstance* Instance = Activator->GetGameInstance();

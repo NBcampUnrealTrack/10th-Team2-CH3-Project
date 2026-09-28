@@ -75,7 +75,9 @@ protected:
 	// 재장전 소모 시간
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Weapon===|Properties")
 	float ReloadTime = 1.5f;
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "===Weapon===|Properties")
+	TObjectPtr<USoundWave> FireSFX;
 	// States
 	// 재장전 상태
 	bool bIsReloading = false;

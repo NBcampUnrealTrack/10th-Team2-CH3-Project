@@ -22,6 +22,8 @@ void AWeaponItem::Attack()
 	{
 		return;
 	}
+	
+	UGameplayStatics::PlaySound2D(this, FireSFX);
 
 	CurrentAmmo--;
     OnAmmoChanged.Broadcast();

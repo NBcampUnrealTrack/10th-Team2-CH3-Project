@@ -1,5 +1,6 @@
 ﻿#include "BaseItem.h"
 #include "Components/SphereComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 ABaseItem::ABaseItem()
 {
@@ -44,6 +45,10 @@ void ABaseItem::OnItemEndOverlap(
 
 void ABaseItem::ActivateItem(AActor* Activator)
 {
+	if (IsValid(PickupSound))
+	{
+		UGameplayStatics::PlaySound2D(this, PickupSound);
+	}
 }
 
 FName ABaseItem::GetItemType() const
