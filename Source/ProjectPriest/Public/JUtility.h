@@ -1,5 +1,5 @@
 ﻿#pragma once
-#define JDEBUG
+//#define JDEBUG
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
