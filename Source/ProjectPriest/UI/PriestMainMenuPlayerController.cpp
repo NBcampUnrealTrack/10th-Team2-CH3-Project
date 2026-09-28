@@ -11,6 +11,7 @@
 #include "Misc/PackageName.h"
 #include "PriestInventorySubsystem.h"
 #include "Engine/GameInstance.h"
+#include "GameFramework/GameModeBase.h"
 #include "PriestInventoryModel.h"
 #include "PriestInventoryController.h"
 
@@ -76,6 +77,12 @@ void APriestMainMenuPlayerController::BeginPlay()
 
 	MenuModel = NewObject<UPriestMenuModel>(this);
 	JASSERT(IsValid(MenuModel), "%hs: MenuModel 생성 실패", __FUNCTION__);
+
+	const AGameModeBase* GameMode = GetWorld()->GetAuthGameMode();
+	if (GameMode && UGameplayStatics::ParseOption(GameMode->OptionsString, TEXT("MenuTab")) == TEXT("Equipment"))
+	{
+		MenuModel->SetState(EPriestMenuPage::Lobby, EPriestLobbyTab::Equipment);
+	}
 
 	MenuController = NewObject<UPriestMenuController>(this);
 	JASSERT(IsValid(MenuController), "%hs: MenuController 생성 실패", __FUNCTION__);
