@@ -1,10 +1,11 @@
 ﻿#pragma once
+//#define JDEBUG
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BehaviorTreeTypes.h"
 
-//TODO: %hs __FUNCTION__ 을 추가해서 함수 이름도 출력 되도록 하자. 찾기가 더 쉬워진다.
+#ifdef JDEBUG
 #define JLog(Format, ...) \
 {\
     FString MethodName = FString::Printf(TEXT("[%hs]: "), __FUNCTION__); \
@@ -26,7 +27,7 @@
     if(GEngine) \
     { \
         GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, *CombinedString); \
-    } \
+    } \    
 }
 
 #define JError(Format, ...) \
@@ -34,7 +35,7 @@ UE_LOG(LogTemp, Error, TEXT(Format), ##__VA_ARGS__); \
 {\
     FString MethodName = FString::Printf(TEXT("[%hs]: "), __FUNCTION__); \
     FString FormatString = FString::Printf(TEXT(Format), ##__VA_ARGS__); \
-    FString CombinedString = FString::Printf(TEXT("%s: %s"), *MethodName, *FormatString); \
+    FString CombinedString = FString::Printf(TEXT("%s: %s"), *MethodName, *FormatString); \    
     UE_LOG(LogTemp, Error, TEXT("%s"),*CombinedString); \
     if(GEngine) \
     { \
@@ -42,6 +43,14 @@ UE_LOG(LogTemp, Error, TEXT(Format), ##__VA_ARGS__); \
     } \
 }
  
+#else
+
+#define JLog(Format, ...) {}
+#define JWarning(Format, ...) {}
+#define JError(Format, ...) {}
+ 
+#endif
+
 #define JASSERT(Condition, Format, ...) \
 if(!(Condition)) \
 { \
@@ -83,6 +92,7 @@ if(!Condition) \
     JError(Format, ##__VA_ARGS__); \
     return  Return;\
 }
+
 
 #define GET_ENUM_NAME_STRING(EnumType, EnumVariable) \
 StaticEnum<EnumType>()->GetNameStringByValue((int64)EnumVariable)
