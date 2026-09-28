@@ -12,7 +12,10 @@ FText UPriestMissionController::GetMissionText() const
     const FText Count = FText::Format(NSLOCTEXT("PriestMission", "Remaining", "Enemies remaining: {0}"), FText::AsNumber(State->GetMonsterCount()));
     if (State->GetMonsterCount() == 0 && State->IsExitAvailable())
     {
-        return FText::Format(NSLOCTEXT("PriestMission", "ExitReady", "{0}\nInteract at the door of church."), Count);
+        return FText::Format(
+            NSLOCTEXT("PriestMission", "CompletionObjective", "{0}\n{1}"),
+            Count,
+            State->CompletionObjectiveText);
     }
     return Count;
 }
