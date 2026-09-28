@@ -53,4 +53,3 @@ void ABossRoomOpenInteractor::OnDoorVisibilityChanged(bool Visibility)
 
 	BP_OnDoorVisibilityChanged(Visibility);
 }
-
