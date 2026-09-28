@@ -27,7 +27,7 @@
     if(GEngine) \
     { \
         GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, *CombinedString); \
-    } \    
+    } \
 }
 
 #define JError(Format, ...) \
@@ -35,7 +35,7 @@ UE_LOG(LogTemp, Error, TEXT(Format), ##__VA_ARGS__); \
 {\
     FString MethodName = FString::Printf(TEXT("[%hs]: "), __FUNCTION__); \
     FString FormatString = FString::Printf(TEXT(Format), ##__VA_ARGS__); \
-    FString CombinedString = FString::Printf(TEXT("%s: %s"), *MethodName, *FormatString); \    
+    FString CombinedString = FString::Printf(TEXT("%s: %s"), *MethodName, *FormatString); \
     UE_LOG(LogTemp, Error, TEXT("%s"),*CombinedString); \
     if(GEngine) \
     { \
