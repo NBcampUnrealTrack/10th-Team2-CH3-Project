@@ -183,10 +183,6 @@ void UPriestInventorySubsystem::GrantPreviewItemsOnce()
     bPreviewItemsGranted = true;
     AddItem(TEXT("HealthPotion"), 5);
     AddItem(TEXT("AttackSpeedUpPotion"), 2);
-    AddItem(TEXT("WhisperDropItemA"), 3);
-    AddItem(TEXT("WhisperDropItemB"), 2);
-    AddItem(TEXT("Pistol"), 1);
-    AddItem(TEXT("Crossbow"), 1);
 }
 
 FName UPriestInventorySubsystem::GetQuickSlotItemId(
@@ -358,6 +354,18 @@ void UPriestInventorySubsystem::Initialize(
         RecipeDataTable->GetRowStruct() == FRecipeData::StaticStruct(),
         "RecipeDataTable의 Row Structure가 RecipeData가 아닙니다."
     );
+
+    const FName DefaultWeaponId(TEXT("Pistol"));
+
+    if (GetQuantity(DefaultWeaponId) == 0)
+    {
+        AddItem(DefaultWeaponId, 1);
+    }
+
+    if (GetEquippedWeaponId().IsNone())
+    {
+        EquipWeapon(DefaultWeaponId);
+    }
 }
 
 UPriestInventorySubsystem*
