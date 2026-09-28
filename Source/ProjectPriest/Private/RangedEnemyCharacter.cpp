@@ -46,6 +46,7 @@ void ARangedEnemyCharacter::Die()
 
         if (Particle)
         {
+            Particle->bAutoDestroy = true;
             GetWorldTimerManager().SetTimer(
                 DestroyParticle,
                 [Particle]()
@@ -53,7 +54,6 @@ void ARangedEnemyCharacter::Die()
                     if (IsValid(Particle))
                     {
                         Particle->DeactivateSystem();
-                        Particle->DestroyComponent();
                     }
                 },
                 ParticleTime,
