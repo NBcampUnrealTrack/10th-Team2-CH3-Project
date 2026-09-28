@@ -1,4 +1,4 @@
-#include "BossRoomOpenInteractor.h"
+﻿#include "BossRoomOpenInteractor.h"
 #include "Components/BoxComponent.h"
 #include "IngameGameMode.h"
 #include "IngameGameState.h"
@@ -50,5 +50,6 @@ void ABossRoomOpenInteractor::OnDoorVisibilityChanged(bool Visibility)
 	{
 		BoxCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	}
-}
 
+	BP_OnDoorVisibilityChanged(Visibility);
+}
